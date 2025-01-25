@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Product</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h2>Admin Panel</h2>
+            <ul class="sidebar-menu">
+                <li><a href="/admin/dashboard">Dashboard</a></li>
+                <li><a href="/admin/products" class="active">Products</a></li>
+                <li><a href="/orders">Orders</a></li>
+                <li><a href="/users">Users</a></li>
+                <li><a href="/categories">Categories</a></li>
+                <li><a href="/offers">Offers</a></li>
+                <li><a href="/settings">Settings</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </aside>
+        <main class="main-content">
+            <header class="topbar">
+                <h1>Edit Product</h1>
+            </header>
+            <section class="edit-product-form">
+                <form id="editProductForm" action="/admin/editproducts/<%= product._id %>" method="POST">
+                    <div class="form-group">
+                        <label for="productName">Product Name</label>
+                        <input type="text" id="productName" name="productName" value="<%= product.name %>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select id="category" name="category" required>
+                            <% categories.forEach(category => { %>
+                                <option value="<%= category._id %>" <%= product.category === category._id ? 'selected' : '' %>>
+                                    <%= category.name %>
+                                </option>
+                            <% }); %>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="price">Price ($)</label>
+                        <input type="number" id="price" name="price" step="0" value="<%= product.price %>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="brand">Brand</label>
+                        <input type="text" id="brand" name="brand" value="<%= product.brand %>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="stock">Stock</label>
+                        <input type="number" id="stock" name="stock" min="0" value="<%= product.stock %>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="color">Color</label>
+                        <input type="text" id="color" name="color" value="<%= product.color %>" placeholder="Comma-separated values (e.g., Red, Blue)" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="material">Material</label>
+                        <input type="text" id="material" name="material" value="<%= product.material %>">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productDescription">Product Description</label>
+                        <textarea id="productDescription" name="productDescription" rows="5" required><%= product.description %></textarea>
+                    </div>
+
+                    <div class="container mx-auto p-6">
+                        <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-6">
+                            <h2 class="text-2xl font-bold mb-6">Edit Product Images</h2>
+                            <div class="grid grid-cols-2 gap-6">
+                                <% product.images.forEach((image, index) => { %>
+                                    <div class="image-upload-section">
+                                        <img src="<%= image %>" alt="Current Image" class="w-full mb-4">
+                                        <input type="file" name="image<%= index %>" accept="image/*" class="mb-4">
+                                        <button type="button" class="delete-button px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Delete</button>
+                                    </div>
+                                <% }); %>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="submit-button">Save Changes</button>
+                        <button type="button" class="cancel-button" onclick="window.history.back()">Cancel</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.16/cropper.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <script>
+        document.querySelectorAll('.delete-button').forEach(button => {
+            button.addEventListener('click', () => {
+                button.closest('.image-upload-section').remove();
+            });
+        });
+    </script>
+</body>
+
+</html>

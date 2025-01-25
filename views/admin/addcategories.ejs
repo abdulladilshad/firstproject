@@ -1,0 +1,133 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Categories</title>
+    <link rel="stylesheet" href="/styles/addcategories.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h2>Admin Panel</h2>
+            <ul class="sidebar-menu">
+                <li><a href="/admin/dashboard">Dashboard</a></li>
+                <li><a href="/admin/products">Products</a></li>
+                <li><a href="/admin/categories" class="active">Categories</a></li>
+                <li><a href="/orders">Orders</a></li>
+                <li><a href="/users">Users</a></li>
+                <li><a href="/offers">Offers</a></li>
+                <li><a href="/settings">Settings</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </aside>
+        <main class="main-content">
+            <header class="topbar">
+                <h1>Add Category</h1>
+            </header>
+            <section class="form-container">
+            <form action="/admin/addcategories" method="post" class="add-category-form">
+                    <div class="form-group">
+                        <label for="name">Category Name:</label>
+                        <input 
+                            type="text" 
+                            id="name" 
+                            name="name" 
+                            placeholder="Enter category name" 
+                            required 
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description:</label>
+                        <textarea 
+                            id="description" 
+                            name="description" 
+                            placeholder="Enter category description" 
+                            rows="4" 
+                            required
+                        ></textarea>
+                    </div>
+                    <button type="submit" class="btn-submit">Add Category</button>
+                </form>
+            </section>
+        </main>
+    </div>
+
+</body>
+</html>
+
+
+
+
+ -->
+
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Categories</title>
+    <link rel="stylesheet" href="/styles/addcategories.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h2>Admin Panel</h2>
+            <ul class="sidebar-menu">
+                <li><a href="/admin/dashboard">Dashboard</a></li>
+                <li><a href="/admin/products">Products</a></li>
+                <li><a href="/admin/categories" class="active">Categories</a></li>
+                <li><a href="/orders">Orders</a></li>
+                <li><a href="/users">Users</a></li>
+                <li><a href="/offers">Offers</a></li>
+                <li><a href="/settings">Settings</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </aside>
+        <main class="main-content">
+            <header class="topbar">
+                <h1>Add Category</h1>
+            </header>
+            <section class="form-container">
+                <% if (error) { %>
+                    <div class="error-message" style="color: red; margin-bottom: 15px;">
+                        <%= error %>
+                    </div>
+                <% } %>
+                <form action="/admin/addcategories" method="post" class="add-category-form">
+                    <div class="form-group">
+                        <label for="name">Category Name:</label>
+                        <input 
+                            type="text" 
+                            id="name" 
+                            name="name" 
+                            placeholder="Enter category name" 
+                            required 
+                            pattern="[A-Za-z ]{1,50}"
+                            title="Category name must be alphabetic and up to 50 characters."
+                            maxlength="50"
+                        />
+                        <small class="error-message">Category name must be alphabetic and up to 50 characters.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description:</label>
+                        <textarea 
+                            id="description" 
+                            name="description" 
+                            placeholder="Enter category description" 
+                            rows="4" 
+                            required
+                            minlength="10"
+                            maxlength="500"
+                            title="Description must be between 10 to 500 characters long."
+                        ></textarea>
+                        <small class="error-message">Description must be between 10 to 500 characters long.</small>
+                    </div>
+                    <button type="submit" class="btn-submit">Add Category</button>
+                </form>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
+                                    

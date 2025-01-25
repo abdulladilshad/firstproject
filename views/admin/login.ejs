@@ -1,0 +1,43 @@
+<link rel="stylesheet" href="/styles/adminlogin.css" />
+<link rel="preconnect" href="https://fonts.gstatic.com" />
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+/>
+<link
+  href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap"
+  rel="stylesheet"
+/>
+
+<div class="background">
+  <div class="shape"></div>
+  <div class="shape"></div>
+</div>
+<form action="/admin/login" method="post">
+  <h3>Login Here</h3>
+  
+  <!-- Display message passed from controller -->
+  <% if (message) { %>
+    <h4 style="color: rgb(173, 14, 14);"><%= message %></h4>
+  <% } %>
+
+  <label for="username">Email</label>
+  <input
+    type="text"
+    name="email"
+    placeholder="Email or Phone"
+    id="username"
+    required
+  />
+
+  <label for="password">Password</label>
+  <input
+    type="password"
+    name="password"
+    placeholder="Password"
+    id="password"
+    required
+  />
+
+  <button>Log In</button>
+</form>

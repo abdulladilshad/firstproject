@@ -1,0 +1,133 @@
+html {
+  height: 100%;
+}
+
+.login-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 400px;
+  padding: 40px;
+  transform: translate(-50%, -50%);
+  background: url('/images/img2.jpg');
+  box-sizing: border-box;
+  box-shadow: 30px 15px 35px rgba(70, 1, 1, 0.6);
+  background-size: cover;
+  background-position: center;
+  border-radius: 15px;
+}
+
+.login-box h2 {
+  margin: 0 0 30px;
+  padding: 0;
+  color: #a47171;
+  text-align: center;
+}
+
+.login-box .user-box {
+  position: relative;
+}
+
+.login-box .user-box input {
+  width: 100%;
+  padding: 10px 0;
+  font-size: 16px;
+  color: #5e5757;
+  margin-bottom: 30px;
+  border: none;
+  border-bottom: 1px solid #ba7474;
+  outline: none;
+  background: transparent;
+}
+.login-box .user-box label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 10px 0;
+  font-size: 16px;
+  color: #000000;
+  pointer-events: none;
+  transition: 0.5s;
+}
+
+.login-box .user-box input:focus ~ label,
+.login-box .user-box input:valid ~ label {
+  top: -20px;
+  left: 0;
+  color: #ffffff;
+  font-size: 12px;
+}
+
+.login-box form a {
+  position: relative;
+  display: inline-block;
+  padding: 10px 20px;
+  color: #03e9f4;
+  font-size: 16px;
+  text-decoration: none;
+  text-transform: uppercase;
+  overflow: hidden;
+  transition: 0.5s;
+  margin-top: 40px;
+  letter-spacing: 4px;
+}
+.submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.submitt {
+  position: relative;
+  left: 50px;
+}
+.submitt:hover {
+  background-color: #000000;
+  color: #fff;
+}
+
+.submit input {
+  height: 30px;
+  width: 100px;
+  color: rgb(125, 97, 97);
+  background-color: rgb(255, 255, 255);
+  border: none;
+}
+
+.dashboard-container {
+  text-align: center;
+  background-color: #fff;
+  padding: 50px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-message h1 {
+  color: #333;
+}
+
+.welcome-message p {
+  color: #6f5858;
+  margin-top: 10px;
+}
+
+.logout-btn {
+  margin-top: 30px;
+  padding: 10px 20px;
+  background-color: #ff4b5c;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.logout-btn:hover {
+  background-color: #ff0000;
+}
+#message {
+  position: relative;
+  left: 70px;
+  color: #ff0000;
+}
