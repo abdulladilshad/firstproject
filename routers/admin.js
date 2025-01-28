@@ -1,36 +1,58 @@
 const router =require('express').Router();
+const Product =require("../models/product")
+
 
 const adminController = require('../controller/admin')
 const adminauth = require('../middleware/admin')
 
 
+//LOGIN
+router.get('/login', adminauth.isLogin, adminController.Loadlogin); 
+router.post('/login', adminController.login);
 
-router.get('/login', adminauth.isLogin, adminController.Loadlogin); // Only for logged-in users trying to access login page
-router.post('/login', adminController.login); // Handle actual login
+//DASHBORD
+router.get('/dashboard', adminauth.cheksession, adminController.Loddashbord);
 
-router.get('/dashboard', adminauth.cheksession, adminController.Loddashbord); // Ensure session is active
+//PRODUCTS
+router.get('/products',adminController.LoadProducts)
+router.post('/addproducts',adminController.addProduct);
+router.get('/addproducts', adminController.renderAddProduct);
+router.get('/editproducts/:id',adminController.editproducts)
+router.post('/editproducttt',adminController.editproducttt)
 
-router.post('/logout',adminauth.cheksession,adminController.logout)
-
-router.get('/products',adminauth.cheksession,adminController.LoadProducts)
-
-router.get('/addproducts',  adminController.renderAddProduct);
-router.post('/addproducts', adminController.addProduct);
-
-router.get('/categories',adminauth.cheksession,adminController.LoadCategory)
-router.post('/categories', adminauth.cheksession);
-
+//CATEGORIES
+router.get('/categories',adminController.LoadCategory)
 router.get('/addcategories',adminController.AddCategory)
+router.post('/categories',adminController.postAddCategory);
+router.get('/categories/edit/:id',adminController.loadEditCategory)
+router.post('/categories/edit/:id',adminController.editCategory)  
 
-router.post('/addcategories', adminController.postAddCategory);
-
+//UNLIST & LIST CATEGORIES
 router.put('/categories/toggle-status/:category_id',adminController.togglecategories)
 
-router.get('/categories/edit/:id', adminauth.cheksession ,adminController.loadEditCategory)
-router.post('/categories/edit/:id',adminController.editCategory)        
+      
+//PRODUCT IMAGE VIEW
+router.get('/getProductById/:id', async (req, res) => {
+    try {
+        const productId = req.params.id;
+        console.log("Fetching product with ID:", productId); 
+        const product = await Product.findById(productId);
 
+        if (!product) {
+            return res.status(404).send({ error: 'Product not found' });
+        }
+        res.json(product);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send({ error: 'Server error while fetching product' });
+    }
+});
 
+//USER 
+router.get('/users',adminController.Loadusers)
 
+//LOGOUT
+router.post('/logout',adminauth.cheksession,adminController.logout)
 
 
 module.exports=router

@@ -3,9 +3,8 @@ const adminSchema = require('../models/adminmodel')
 const bcrypt= require('bcrypt')
 const categoryModel=require('../models/categories')
 const productModel = require('../models/product')
-const path=require('path')
-const fs=require('fs')
-
+const fs = require('fs').promises; // Import the promises version of fs
+const path = require('path');
 
 const Loadlogin = async (req, res) => {
     try {
@@ -93,10 +92,14 @@ const Loddashbord = async (req, res) => {
 }
 
       
-
-const logout = async (req, res) => {
-    req.session.admin = null
-    res.redirect('/admin/login')
+const Loadusers = async (req,res)=>{
+    try {
+        const users = await usermodel.find()
+        res.render('admin/adminUser',{users})
+    } catch (error) {
+        res.status(500).send('server error')
+        
+    }
 }
 
 
@@ -123,6 +126,8 @@ const renderAddProduct = async (req, res) => {
     }
 };
 
+
+
 const addProduct = async (req, res) => {
     const { image1, image2, image3, image4, productName } = req.body;
 
@@ -130,9 +135,8 @@ const addProduct = async (req, res) => {
     const savedImagePaths = [];
 
     console.log('jdfhgujcbhi');
-    
 
-    const saveBase64ToFile = (base64Data, filename) => {
+    const saveBase64ToFile = async (base64Data, filename) => {
         // Extract the base64 data from the string (if it contains header data)
         const matches = base64Data.match(/^data:image\/(png|jpg|jpeg);base64,(.+)$/);
         if (!matches) {
@@ -140,71 +144,79 @@ const addProduct = async (req, res) => {
         }
 
         const imageBuffer = Buffer.from(matches[2], 'base64');
-        
+        const productname = productName.trim().replace(/\s+/g, '');
         // Specify the relative path where images should be saved
-        const filePath = path.join('public', 'images', productName, filename);
+        const filePath = path.join('public', 'images', productname, filename);
+
+        
+
+
 
         // Ensure the directory exists, or create it if not
         const dirPath = path.dirname(filePath);
-        if (!fs.existsSync(dirPath)) {
-            fs.mkdirSync(dirPath, { recursive: true });
+        try {
+            await fs.access(dirPath); // Check if directory exists
+        } catch (error) {
+            await fs.mkdir(dirPath, { recursive: true }); // Create directory if it doesn't exist
         }
 
         // Write the image file to the path
-        fs.writeFileSync(filePath, imageBuffer);
+        await fs.writeFile(filePath, imageBuffer);
 
         // Return the relative file path
-        return filePath;
+        return `images/${productname}/${filename}`;
     };
 
     // Save each image if base64 data is provided and store the path
-    if (image1) {
-        const savedPath = saveBase64ToFile(image1, 'image1.png');
-        if (savedPath) {
-            savedImagePaths.push(savedPath);
-            console.log('image1 saved:', savedPath);
-        }
-    }
-    if (image2) {
-        const savedPath = saveBase64ToFile(image2, 'image2.png');
-        if (savedPath) {
-            savedImagePaths.push(savedPath);
-            console.log('image2 saved:', savedPath);
-        }
-    }
-    if (image3) {
-        const savedPath = saveBase64ToFile(image3, 'image3.png');
-        if (savedPath) {
-            savedImagePaths.push(savedPath);
-            console.log('image3 saved:', savedPath);
-        }
-    }
-    if (image4) {
-        const savedPath = saveBase64ToFile(image4, 'image4.png');
-        if (savedPath) {
-            savedImagePaths.push(savedPath);
-            console.log('image4 saved:', savedPath);
-        }
-    }
-
-    // Remove base64 images from req.body
-    delete req.body.image1;
-    delete req.body.image2;
-    delete req.body.image3;
-    delete req.body.image4;
-
-    // Add the saved image paths array to req.body
-    req.body.imagePaths = savedImagePaths;
-
-    // Log the updated req.body (without base64 data)
-    console.log('Updated req.body:', req.body);
-
     try {
-        // Save the updated body into MongoDB
-        const newProduct = new productModel(req.body);
+        if (image1) {
+            const savedPath = await saveBase64ToFile(image1, 'image1.png');
+            if (savedPath) {
+                savedImagePaths.push(savedPath);
+                console.log('image1 saved:', savedPath);
+            }
+        }
+        if (image2) {
+            const savedPath = await saveBase64ToFile(image2, 'image2.png');
+            if (savedPath) {
+                savedImagePaths.push(savedPath);
+                console.log('image2 saved:', savedPath);
+            }
+        }
+        if (image3) {
+            const savedPath = await saveBase64ToFile(image3, 'image3.png');
+            if (savedPath) {
+                savedImagePaths.push(savedPath);
+                console.log('image3 saved:', savedPath);
+            }
+        }
+        if (image4) {
+            const savedPath = await saveBase64ToFile(image4, 'image4.png');
+            if (savedPath) {
+                savedImagePaths.push(savedPath);
+                console.log('image4 saved:', savedPath);
+            }
+        }
+
+        // Remove base64 images from req.body
+        delete req.body.image1;
+        delete req.body.image2;
+        delete req.body.image3;
+        delete req.body.image4;
+
+        // Add the saved image paths array to req.body
+        req.body.imagePaths = savedImagePaths;
+
+        // Log the updated req.body (without base64 data)
+        console.log('Updated req.body:', req.body);
+
+        if (req.body.color) {
+            req.body.color = req.body.color.split(",").map(c => c.trim());
+        }
+        const  newProduct = new productModel(req.body);
         await newProduct.save();
 
-        res.redirect('/admin/products')
+        res.redirect('/admin/products');
     } catch (error) {
         console.error('Error saving product:', error);
         res.status(500).send('Error saving product');
@@ -223,7 +235,7 @@ const LoadCategory = async (req, res) => {
         res.render('admin/categories', { categories});
     } catch (error) {
         console.error('Error loading categories:', error);
-        res.render('admin/categories', { message: 'Failed to load categories' });
+        res.render('admin/dashbord', { message: 'Failed to load categories' });
     }
 };
 
@@ -317,26 +329,6 @@ const togglecategories= async (req,res)=>{
     }
 }
 
-// const loadEditCategory = async (req, res) => {
-//     console.log('reached reached loadEditCategory')
-//     try {
-//         const categoryId = req.params.id;
-//         const category = await categoryModel.findById(categoryId);
-//         console.log(categoryId, 'categoryIdcategoryIdcategoryId')
-//         console.log(category, 'categoy')
-//         if (!category) {
-//             return res.redirect('/admin/categories');
-//         }
-
-//         res.render('admin/editcategories', { category });
-//     } catch (error) {
-//         console.log('error from the category .....')
-//         console.error('Error loading edit category page:', error);
-//         res.redirect('/admin/categories');
-//     }
-    
-// };
-
 
 const loadEditCategory = async (req, res) => {
     try {
@@ -370,10 +362,129 @@ const loadEditCategory = async (req, res) => {
 
 
 
+const editproducts=async (req,res)=>{
 
+    try{
+        const {id}=req.params
+        const products = await productModel.findOne({_id: id})
+        console.log(id);
+        
+        console.log(products);
+        
+        const categories = await categoryModel.find({})
+        res.render('admin/editproducts',{categories,products})
+    }
+    catch(er){
+        console.log(er);
+        
+    }
+
+}
+
+
+const editproducttt=async(  req,res)=>{
+    const { image1, image2, image3, image4, productName,productId } = req.body
+   
+    const savedImagePaths = []
+
+const saveBase64ToFile = (base64Data, filename) => {
+   
+    const matches = base64Data.match(/^data:image\/(png|jpg|jpeg);base64,(.+)$/);
+    if (!matches) {
+        return false; // Invalid base64 format
+    }
+
+
+    const imageBuffer = Buffer.from(matches[2], 'base64');
+
+    // Specify the relative path where images should be saved
+    const filePath = path.join('public', 'images', productName, filename);
+
+    // Ensure the directory exists, or create it if not
+    const dirPath = path.dirname(filePath);
+    if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+    }
+
+    // Write the image file to the path
+    fs.writeFileSync(filePath, imageBuffer);
+
+    // Return the relative file path
+    return `images\\${productName}\\${filename}`;
+};
+
+// Save each image if base64 data is provided and store the path
+if (image1) {
+    const savedPath = saveBase64ToFile(image1, 'image1.png');
+    if (savedPath) {
+        savedImagePaths.push(savedPath);
+        console.log('image1 saved:', savedPath);
+    }
+}
+if (image2) {
+    const savedPath = saveBase64ToFile(image2, 'image2.png');
+    if (savedPath) {
+        savedImagePaths.push(savedPath);
+        console.log('image2 saved:', savedPath);
+    }
+}
+if (image3) {
+    const savedPath = saveBase64ToFile(image3, 'image3.png');
+    if (savedPath) {
+        savedImagePaths.push(savedPath);
+        console.log('image3 saved:', savedPath);
+    }
+}
+if (image4) {
+    const savedPath = saveBase64ToFile(image4, 'image4.png');
+    if (savedPath) {
+        savedImagePaths.push(savedPath);
+        console.log('image4 saved:', savedPath);
+    }
+}
+
+// Remove base64 images from req.body
+delete req.body.image1;
+delete req.body.image2;
+delete req.body.image3;
+delete req.body.image4;
+
+// Add the saved image paths array to req.body
+req.body.imagePaths = savedImagePaths;
+
+// Log the updated req.body (without base64 data)
+console.log('Updated req.body:', req.body);
+
+try {
+    // Update the existing product document in MongoDB
+    const updatedProduct = await productModel.findByIdAndUpdate(
+        productId, // The ID of the product to update
+        req.body, // The updated fields
+        { new: true, runValidators: true } // Return the updated document and run validators
+    );
+
+    if (!updatedProduct) {
+        return res.status(404).send('Product not found');
+    }
+
+    console.log('Product updated successfully:', updatedProduct);
+    res.redirect('/admin/products');
+} catch (error) {
+    console.error('Error updating product:', error);
+    res.status(500).send('Error updating product');
+}
+
+
+}
+const logout = async (req, res) => {
+    req.session.admin = null
+    res.redirect('/admin/login')
+}
 
 
 module.exports = {
+    editproducttt,
+    editproducts,
     Loadlogin,
     login,
     Loddashbord,
@@ -386,6 +497,7 @@ module.exports = {
     postAddCategory,
     editCategory,
     togglecategories,
-    loadEditCategory
+    loadEditCategory,
+    Loadusers
 }
 

@@ -6,13 +6,13 @@ const auth=require('../middleware/auth')
 
 
 router.get('/register',auth.isLogin,userController.loadregister)
-
+router.get('/home',userController.loadhome)
 router.post('/register',userController.register)
 
 
 router.get('/login',auth.isLogin,userController.Loadlogin)
 router.post('/login',userController.login)
-router.get('/home',userController.Loadhome)
+// router.get('/home',userController.Loadhome)
 router.post('/logout',auth.checkSession,userController.logout)
 
 

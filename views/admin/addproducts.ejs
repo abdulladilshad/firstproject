@@ -34,140 +34,106 @@
                     <!-- Product Name -->
                     <div class="form-group">
                         <label for="productName">Product Name</label>
-                        <input type="text" id="productName" name="productName" value="Sample Product">
+                        <input type="text" id="productName" name="productName">
                         <div class="error-message" id="productNameError" style="display:none; color: red;">Product name is required</div>
                     </div>
-
+                
                     <!-- Category -->
                     <div class="form-group">
                         <label for="category">Category</label>
                         <select id="category" name="category">
                             <% categories.forEach(category => { %>
-                                <option value="<%= category._id %>">
-                                    <%= category?.name %>
-                                </option>
+                                <option value="<%= category._id %>"><%= category?.name %></option>
                             <% }) %>
                         </select>
                         <div class="error-message" id="categoryError" style="display:none; color: red;">Category is required</div>
                     </div>
-
+                
                     <!-- Price -->
                     <div class="form-group">
                         <label for="price">Price ($)</label>
-                        <input type="number" id="price" name="price" value="100">
+                        <input type="number" id="price" name="price">
                         <div class="error-message" id="priceError" style="display:none; color: red;">Price is required</div>
                     </div>
-
+                
                     <!-- Brand -->
                     <div class="form-group">
                         <label for="brand">Brand</label>
-                        <input type="text" id="brand" name="brand" value="BrandName">
+                        <input type="text" id="brand" name="brand">
                         <div class="error-message" id="brandError" style="display:none; color: red;">Brand is required</div>
                     </div>
-
+                
                     <!-- Stock -->
                     <div class="form-group">
                         <label for="stock">Stock</label>
-                        <input type="number" id="stock" name="stock" value="10">
+                        <input type="number" id="stock" name="stock">
                         <div class="error-message" id="stockError" style="display:none; color: red;">Stock is required</div>
                     </div>
-
+                
                     <!-- Color -->
                     <div class="form-group">
                         <label for="color">Color</label>
-                        <input type="text" id="color" name="color" value="Red, Blue">
+                        <input type="text" id="color" name="color">
                         <div class="error-message" id="colorError" style="display:none; color: red;">Color is required</div>
                     </div>
-
+                
                     <!-- Material -->
                     <div class="form-group">
                         <label for="material">Material</label>
-                        <input type="text" id="material" name="material" value="Leather">
+                        <input type="text" id="material" name="material">
                         <div class="error-message" id="materialError" style="display:none; color: red;">Material is required</div>
                     </div>
-
-                    <!-- Product Description -->
+                
+                    <!-- Product Description -->p
                     <div class="form-group">
                         <label for="productDescription">Product Description</label>
-                        <textarea id="productDescription" name="productDescription" rows="5">This is a sample product description.</textarea>
+                        <textarea id="productDescription" name="productDescription" rows="5"></textarea>
                         <div class="error-message" id="productDescriptionError" style="display:none; color: red;">Description is required</div>
                     </div>
-
+                
                     <!-- Product Images -->
                     <div class="container mx-auto p-6">
                         <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-6">
                             <h2 class="text-2xl font-bold mb-6">Product Image Uploader</h2>
-
+                
                             <div class="grid grid-cols-2 gap-6">
                                 <!-- Image Upload Sections (4 sections) -->
-                                <div id="imageUploadSection1" class="image-upload-section">
-                                    <input type="file" id="imageUpload1" accept="image/*" class="mb-4 file-input">
-                                    <div class="image-container" style="max-height: 300px;">
-                                        <button type="button" id="deleteButton1" class="delete-button text-red-500 mt-2" style="display:none;">Delete</button>
-                                        <img id="cropperImage1" class="w-full" src="" style="display:none;">
+                                <% for (let i = 1; i <= 4; i++) { %>
+                                    <div id="imageUploadSection<%= i %>" class="image-upload-section">
+                                        <input type="file" id="imageUpload<%= i %>" accept="image/*" class="mb-4 file-input">
+                                        <div class="image-container" style="max-height: 300px;">
+                                            <button type="button" id="deleteButton<%= i %>" class="delete-button text-red-500 mt-2" style="display:none;">Delete</button>
+                                            <img id="cropperImage<%= i %>" class="w-full" src="" style="display:none;">
+                                        </div>
+                                        <div class="image-preview-container" id="previewContainer<%= i %>" style="display:none;">
+                                            <h3 class="mt-4">Cropped Preview:</h3>
+                                            <img id="croppedPreview<%= i %>" class="w-full" style="max-height: 200px;">
+                                        </div>
+                                        <div class="flex space-x-4 mt-4">
+                                            <button id="cropButton<%= i %>" type="button" class="crop-button px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600" disabled>Crop</button>
+                                            <button id="resetButton<%= i %>" type="button" class="reset-button px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600" disabled>Reset</button>
+                                        </div>
+                                        <div class="error-message" id="imageError<%= i %>" style="display:none; color: red;">Image is required</div>
                                     </div>
-                                    <div class="flex space-x-4 mt-4">
-                                        <button id="cropButton1" type="button" class="crop-button px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600" disabled>Crop</button>
-                                        <button id="resetButton1" type="button" class="reset-button px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600" disabled>Reset</button>
-                                    </div>
-                                    <div class="error-message" id="imageError1" style="display:none; color: red;">Image is required</div>
-                                </div>
-
-                                <!-- Repeat for other sections -->
-                                <div id="imageUploadSection2" class="image-upload-section">
-                                    <input type="file" id="imageUpload2" accept="image/*" class="mb-4 file-input">
-                                    <div class="image-container" style="max-height: 300px;">
-                                        <button type="button" id="deleteButton2" class="delete-button text-red-500 mt-2" style="display:none;">Delete</button>
-                                        <img id="cropperImage2" class="w-full" src="" style="display:none;">
-                                    </div>
-                                    <div class="flex space-x-4 mt-4">
-                                        <button id="cropButton2" type="button" class="crop-button px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600" disabled>Crop</button>
-                                        <button id="resetButton2" type="button" class="reset-button px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600" disabled>Reset</button>
-                                    </div>
-                                    <div class="error-message" id="imageError2" style="display:none; color: red;">Image is required</div>
-                                </div>
-
-                                <div id="imageUploadSection3" class="image-upload-section">
-                                    <input type="file" id="imageUpload3" accept="image/*" class="mb-4 file-input">
-                                    <div class="image-container" style="max-height: 300px;">
-                                        <button type="button" id="deleteButton3" class="delete-button text-red-500 mt-2" style="display:none;">Delete</button>
-                                        <img id="cropperImage3" class="w-full" src="" style="display:none;">
-                                    </div>
-                                    <div class="flex space-x-4 mt-4">
-                                        <button id="cropButton3" type="button" class="crop-button px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600" disabled>Crop</button>
-                                        <button id="resetButton3" type="button" class="reset-button px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600" disabled>Reset</button>
-                                    </div>
-                                    <div class="error-message" id="imageError3" style="display:none; color: red;">Image is required</div>
-                                </div>
-
-                                <div id="imageUploadSection4" class="image-upload-section">
-                                    <input type="file" id="imageUpload4" accept="image/*" class="mb-4 file-input">
-                                    <div class="image-container" style="max-height: 300px;">
-                                        <button type="button" id="deleteButton4" class="delete-button text-red-500 mt-2" style="display:none;">Delete</button>
-                                        <img id="cropperImage4" class="w-full" src="" style="display:none;">
-                                    </div>
-                                    <div class="flex space-x-4 mt-4">
-                                        <button id="cropButton4" type="button" class="crop-button px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600" disabled>Crop</button>
-                                        <button id="resetButton4" type="button" class="reset-button px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600" disabled>Reset</button>
-                                    </div>
-                                    <div class="error-message" id="imageError4" style="display:none; color: red;">Image is required</div>
-                                </div>
+                                <% } %>
                             </div>
                         </div>
                     </div>
-
+                
                     <!-- Hidden Inputs for Base64 Images -->
                     <input type="hidden" id="image1" name="image1">
                     <input type="hidden" id="image2" name="image2">
                     <input type="hidden" id="image3" name="image3">
                     <input type="hidden" id="image4" name="image4">
-
+                
                     <!-- Submit and Cancel Buttons -->
                     <div class="form-actions">
                         <button type="submit" class="submit-button">Add Product</button>
                         <button type="button" class="cancel-button" onclick="window.history.back()">Cancel</button>
                     </div>
                 </form>
+                
+                    
             </section>
         </main>
     </div>
@@ -186,78 +152,92 @@
         ];
 
         imageUploads.forEach((item, index) => {
-            item.upload.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (!file) {
-                    item.error.textContent = "Image is required";
-                    item.error.style.display = 'block';
-                    return;
-                }
-                const reader = new FileReader();
+    item.upload.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) {
+            item.error.textContent = "Image is required";
+            item.error.style.display = 'block';
+            return;
+        }
+        const reader = new FileReader();
 
-                reader.onload = function(event) {
-                    item.image.src = event.target.result;
-                    item.image.style.display = 'block';
+        reader.onload = function(event) {
+            item.image.src = event.target.result;
+            item.image.style.display = 'block';
 
-                    if (croppers[index]) {
-                        croppers[index].destroy();
-                    }
+            if (croppers[index]) {
+                croppers[index].destroy();
+            }
 
-                    croppers[index] = new Cropper(item.image, {
-                        viewMode: 1,
-                        dragMode: 'move',
-                        autoCropArea: 0.8,
-                        restore: true,
-                        guides: true,
-                        center: true,
-                        highlight: true,
-                        cropBoxMovable: true,
-                        cropBoxResizable: true,
-                    });
-
-                    item.cropBtn.disabled = false;
-                    item.resetBtn.disabled = false;
-                    item.error.style.display = 'none';
-                };
-
-                reader.readAsDataURL(file);
+            croppers[index] = new Cropper(item.image, {
+                viewMode: 1,
+                dragMode: 'move',
+                autoCropArea: 0.8,
+                restore: true,
+                guides: true,
+                center: true,
+                highlight: true,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
             });
 
-            item.cropBtn.addEventListener('click', function() {
-                const cropper = croppers[index];
-                if (!cropper) return;
+            item.cropBtn.disabled = false;
+            item.resetBtn.disabled = false;
+            item.error.style.display = 'none';
+        };
 
-                const croppedCanvas = cropper.getCroppedCanvas();
-                if (!croppedCanvas) {
-                    item.error.style.display = 'block';
-                    return;
-                }
+        reader.readAsDataURL(file);
+    });
 
-                const base64Image = croppedCanvas.toDataURL();
-                croppedImages[`image${index + 1}`] = base64Image;
+    item.cropBtn.addEventListener('click', function() {
+        const cropper = croppers[index];
+        if (!cropper) return;
 
-                // Store cropped image in hidden input field
-                document.getElementById(`image${index + 1}`).value = base64Image;
-            });
+        const croppedCanvas = cropper.getCroppedCanvas();
+        if (!croppedCanvas) {
+            item.error.style.display = 'block';
+            return;
+        }
 
-            item.resetBtn.addEventListener('click', function() {
-                croppers[index].reset();
-                item.error.style.display = 'none';
-            });
+        const base64Image = croppedCanvas.toDataURL();
+        croppedImages[`image${index + 1}`] = base64Image;
 
-            item.deleteBtn.addEventListener('click', function() {
-                // Hide the image preview and the delete button
-                item.image.style.display = 'none';
-                item.deleteBtn.style.display = 'none';
+        // Store cropped image in hidden input field
+        document.getElementById(`image${index + 1}`).value = base64Image;
 
-                // Reset the cropper and remove the cropped image
-                croppers[index].reset();
-                item.error.style.display = 'none';
+        // Show the cropped image preview below the crop button
+        const previewContainer = document.getElementById(`previewContainer${index + 1}`);
+        const previewImage = document.getElementById(`croppedPreview${index + 1}`);
+        previewImage.src = base64Image;
+        previewContainer.style.display = 'block';  // Show preview container
+    });
 
-                // Optionally clear the hidden input field for the image
-                document.getElementById(`image${index + 1}`).value = '';
-            });
-        })
+    item.resetBtn.addEventListener('click', function() {
+        croppers[index].reset();
+        item.error.style.display = 'none';
+
+        // Hide preview if reset is clicked
+        const previewContainer = document.getElementById(`previewContainer${index + 1}`);
+        previewContainer.style.display = 'none';
+    });
+
+    item.deleteBtn.addEventListener('click', function() {
+        // Hide the image preview and the delete button
+        item.image.style.display = 'none';
+        item.deleteBtn.style.display = 'none';
+
+        // Reset the cropper and remove the cropped image
+        croppers[index].reset();
+        item.error.style.display = 'none';
+
+        // Optionally clear the hidden input field for the image
+        document.getElementById(`image${index + 1}`).value = '';
+
+        // Hide preview if delete is clicked
+        const previewContainer = document.getElementById(`previewContainer${index + 1}`);
+        previewContainer.style.display = 'none';
+    });
+});
 
         // Form validation logic
         const form = document.getElementById('productForm');

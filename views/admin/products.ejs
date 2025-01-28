@@ -58,14 +58,14 @@
                             <td>$<%= product.price %></td>
                             <td><%= product.stock %></td>
                             <td>
-                                <button onclick="viewProduct(<%= product.id %>)">view</button>
+                                <button onclick="viewProduct('<%= product.id %>')">view</button>
                             </td>
                             <td><%= product.color %></td>
                             <td><%= product.category.name %></td>
                             <td>
                                 <!-- <button onclick="editProduct(<%= product.id %>)">Edit</button> -->
-                                <a href="/admin/editproducts"><button >Edit</button></a>
-                                <button onclick="deleteProduct(<%= product.id %>)">Delete</button>
+                                <a href="/admin/editproducts/<%= product._id %>"><button >Edit</button></a>
+                                <button onclick="deleteProduct('<%= product.id %>')">Delete</button>
                             </td>
                         </tr>
                         <% }); %>
@@ -75,11 +75,11 @@
             
         </main>
     </div>
+<!-- Include SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        function viewProduct(productId) {
-            window.location.href = '/admin/products/view/' + productId;
-        }
+       
 
         function editProduct(productId) {
             window.location.href = '/admin/products/edit/' + productId;
@@ -98,6 +98,36 @@
                     });
             }
         }
+
+        function viewProduct(productId) {
+    console.log('Product ID:', productId);
+    fetch(`getProductById/${productId}`)
+        .then(response => response.json())
+        .then(product => {
+            console.log('Fetched Product:', product);  // Check product data in the console
+            const images = product.imagePaths;  // Assuming imagePaths is the correct field
+            if (images && images.length > 0) {
+                let imageHTML = '';
+                images.forEach(image => {
+                    imageHTML += `<img src=/${image} alt="Product Image" style="width: 100%; max-width: 300px; margin: 5px;">`;
+                });
+
+                Swal.fire({
+                    title: `<strong>${product.productName}</strong>`,  // Product name as title
+                    html: imageHTML,  // Display the images inside SweetAlert
+                    showCloseButton: true,  // Allow closing the modal
+                    width: '600px',  // Customize width
+                });
+            } else {
+                Swal.fire('No Images', 'This product does not have any images.', 'info');
+            }
+        })
+        .catch(err => {
+            console.error('Error fetching product:', err);
+            Swal.fire('Error', 'Could not fetch product images.', 'error');
+        });
+}
+
     </script>
 </body>
 </html>
