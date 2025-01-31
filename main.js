@@ -5,9 +5,11 @@ const Path =require('path')
 const connectDb=require('./ConnectDb/db')
 const user=require('./routers/user')
 const admin=require('./routers/admin')
+const passport = require('./ConnectDb/passport')
 const nocache = require('nocache')
 const session = require('express-session')
 const morgan = require('morgan')
+
 
 
 
@@ -37,9 +39,14 @@ app.use(session({
     }
 }))
 
-app.use('/user',user)
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+
+app.use('/',user)
 app.use('/admin',admin)
 
-app.listen(3002, () => {
-    console.log('Server is running on http://localhost:3002');
+app.listen(process.env.PORT, () => {
+    console.log('PORT connected in http://localhost:3002');
 })

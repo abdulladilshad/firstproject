@@ -7,22 +7,31 @@
   <form action="/user/register" method="post" id="form">
 
     <div class="user-box">
-      <input type="email" name="email" id="email" />
-      <label>Email</label>
+      <input type="email" name="email" id="email" style="color: #ffff;"/>
+      <label >Email</label>
     </div>
     <div class="user-box">
-      <input type="password" name="password" id="password" />
+      <input type="password" name="password" id="password" style="color: #ffff;" />
       <label>Password</label>
     </div>
     <div class="user-box">
-      <input type="password" name="confirmpassword" id="confirmpassword" />
+      <input type="password" name="confirmpassword" id="confirmpassword" style="color: #ffff;" />
       <label>Confirm Password</label>
     </div>
     <div class="submit">
       <button type="submit" >Submit</button>
     </div>
-    <a href="/user/login" class="submitt">Go to Login</a>
-    <a href="/admin/login" class="submitt">admin</a>
+    <a href="/login" class="submitt">Go to Login</a>
+    <div class="gbutton">
+      <a href="/auth/google" target="_blank" class="sing">
+        <button type="button">
+          <img src="/images/Google_Icons-09-512.png" alt="GOOGLE">
+          Sign in with Google
+        </button>
+      </a>
+      
+    </div>
+    
   </form>
 </div>
 

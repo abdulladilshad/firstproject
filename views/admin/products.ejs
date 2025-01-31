@@ -65,7 +65,11 @@
                             <td>
                                 <!-- <button onclick="editProduct(<%= product.id %>)">Edit</button> -->
                                 <a href="/admin/editproducts/<%= product._id %>"><button >Edit</button></a>
-                                <button onclick="deleteProduct('<%= product.id %>')">Delete</button>
+
+                                <button onclick="toggleProductStatus('<%= product._id %>', '<%= product.isDelete %>')">
+                                    <%= product.isDelete ? 'unlist' : 'list' %>
+                                </button>
+                                                           
                             </td>
                         </tr>
                         <% }); %>
@@ -126,6 +130,49 @@
             console.error('Error fetching product:', err);
             Swal.fire('Error', 'Could not fetch product images.', 'error');
         });
+}
+
+function toggleProductStatus(productId, isDelete) {
+    // Define action based on the current listed status
+    const action = isDelete ? "unlist" : "list"; 
+
+    // Confirm the action using SweetAlert
+    Swal.fire({
+        title: `Are you sure?`,
+        text: `Do you want to ${action} this product?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: `Yes, ${action} it!`
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Only call the API after the confirmation
+            fetch(`/admin/products/toggle-status/${productId}`, {
+                method: 'PUT',
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: "Success!",
+                            text: `Product has been ${action}ed.`,
+                            icon: "success",
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.reload(); // Reload to update the UI
+                        });
+                    } else {
+                        Swal.fire("Error!", data.error || "Failed to update product status.", "error");
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    Swal.fire("Error!", "An error occurred while updating the product status.", "error");
+                });
+        }
+    });
 }
 
     </script>

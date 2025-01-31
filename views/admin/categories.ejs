@@ -45,7 +45,7 @@
                                     <td><%= category?.description %></td>
                                     <td>
                                         <button onclick="editCategory('<%= category._id %>')">Edit</button>
-                                        <button onclick="toggleCategoryStatus('<%= category._id %>')">
+                                        <button onclick="toggleCategoryStatus('<%= category._id %>','<%= category.isdelete %>')">
                                             <%= category.isdelete ? 'Unlist' : 'List' %>
                                         </button>
                                         
@@ -62,7 +62,7 @@
             </section>
         </main>
     </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         function addCategory() {
             window.location.href = '/admin/addcategories';
@@ -86,24 +86,50 @@
             }
         }
        
-    function toggleCategoryStatus(categoryId) {
-        fetch(`/admin/categories/toggle-status/${categoryId}`, {
-            method: 'PUT',
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.success) {
-                    alert(data.message);
-                    window.location.reload(); // Reload the page to see updated status
-                } else {
-                    alert(data.error || 'Failed to update status.');
-                }
+        function toggleCategoryStatus(categoryId, isdelete) {
+    console.log(isdelete);
+    
+    const action = isdelete ? "unlist" : "list"; 
+
+    // Confirm the action using SweetAlert
+    Swal.fire({
+        title: `Are you sure?`,
+        text: `Do you want to ${action} this category?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: `Yes, ${action} it!`
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Only call the API after the confirmation
+            fetch(`/admin/categories/toggle-status/${categoryId}`, {
+                method: 'PUT',
             })
-            .catch((error) => {
-                console.error('Error:', error);
-                alert('An error occurred while updating the status.');
-            });
-    }
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: "Success!",
+                            text: `Category has been ${action}ed.`,
+                            icon: "success",
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.reload(); // Reload to update the UI
+                        });
+                    } else {
+                        Swal.fire("Error!", data.error || "Failed to update category status.", "error");
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    Swal.fire("Error!", "An error occurred while updating the category status.", "error");
+                });
+        }
+    });
+}
+
 </script>
 
     </script>

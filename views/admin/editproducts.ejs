@@ -103,7 +103,10 @@
                                 <% products.imagePaths.forEach((imagePath, index) => { %>
                                     
                                 <div id="imageUploadSection<%= index + 1 %>" class="image-upload-section">
-                                    <input type="file" id="imageUpload<%= index + 1 %>" accept="image/*" class="mb-4 file-input">
+                                    <input type="hidden" name="existingImages[]" >
+                                    <input type="file" value="<%= imagePath %>" id="imageUpload<%= index + 1 %>" accept="image/*" class="mb-4 file-input">
+
+
                                     <div class="image-container" style="max-height: 300px;">
                                         <button type="button" id="deleteButton<%= index + 1 %>" class="delete-button text-red-500 mt-2" style="display:none;">Delete</button>
                                         <img id="cropperImage<%= index + 1 %>" class="w-full" src="\<%= imagePath %>" style="display:block; max-height: 300px;">
@@ -121,7 +124,7 @@
                                 <% }) %>
                             </div>
                         </div>
-                    </div>
+                    </div
                 
                     <!-- Hidden Inputs for Base64 Images -->
                     <% products.imagePaths.forEach((imagePath, index) => { %>

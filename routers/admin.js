@@ -20,6 +20,10 @@ router.get('/addproducts', adminController.renderAddProduct);
 router.get('/editproducts/:id',adminController.editproducts)
 router.post('/editproducttt',adminController.editproducttt)
 
+//UNLIST AND LIST PRODUCTS
+router.put('/products/toggle-status/:product_id', adminController.toggleProductStatus);
+
+
 //CATEGORIES
 router.get('/categories',adminController.LoadCategory)
 router.get('/addcategories',adminController.AddCategory)
@@ -50,6 +54,10 @@ router.get('/getProductById/:id', async (req, res) => {
 
 //USER 
 router.get('/users',adminController.Loadusers)
+
+//BLOCK AND UNBLOCK USERS
+router.put('/users/toggle-status/:user_id', adminController.toggleUserStatus);
+
 
 //LOGOUT
 router.post('/logout',adminauth.cheksession,adminController.logout)

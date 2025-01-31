@@ -10,19 +10,19 @@
   <div class="login-box">
     <h2>Login</h2>
     <h4 style="color:rgba(219, 210, 210, 0.982) "><%= message %></h4>
-    <form action="/user/login" method="post">
+    <form action="/login" method="post">
       <div class="user-box">
-        <input type="email" name="email" id="email" />
+        <input type="email" name="email" id="email" style="color: #ffff;"/>
         <label>Email</label>
       </div>
       <div class="user-box">
-        <input type="password" name="password" id="password" />
+        <input type="password" name="password" id="password" style="color: #ffff"/>
         <label>Password</label>
       </div>
       <div class="submit">
         <button type="submit">Submit</button>
       </div>
-      <a href="/user/register" class="submitt">Go to register</a>
+      <a href="/register" class="submitt">Go to register</a>
     </form>
   </div>
 
@@ -32,11 +32,7 @@
     });
 
     const message = "<%= message %>";
-
-    if (message) {
-      alert(message);
-    }
-
+    
     function formvalidate(e) {
       e.preventDefault();
 
