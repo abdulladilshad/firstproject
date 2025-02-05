@@ -11,8 +11,8 @@ body {
 
 .sidebar {
     width: 250px;
-    background-color:#1a253c;
-    color: white;
+    background-color:#fff;
+    color: #333;
     padding: 20px;
 }
 
@@ -31,11 +31,12 @@ body {
 }
 
 .sidebar-menu a {
-    color: white;
+    color: #333;
     text-decoration: none;
     display: block;
     padding: 10px;
     border-radius: 5px;
+    font-size: 18px;
 }
 
 .sidebar-menu a.active,
@@ -172,5 +173,126 @@ button:nth-child(2) {
 .action-buttons {
     display: flex;
     justify-content: space-evenly  ;
+}
+
+.main-content {
+    margin-left: var(--sidebar-width);
+    padding: 30px; /* Increased padding */
+    background-color: #f9f9f9; /* Softer background */
+}
+
+.topbar {
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    border-radius: 8px; /* Rounded corners */
+}
+
+.topbar h1 {
+    font-family: 'Playfair Display', serif; /* Elegant font for title */
+    font-size: 2rem;
+    color: #333;
+}
+
+.topbar-actions {
+    display: flex;
+    align-items: center;
+}
+
+.search-bar {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-right: 15px;
+    width: 250px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    transition: border-color 0.3s; /* Smooth border transition */
+
+}
+.search-bar:focus{
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+.add-button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.add-button:hover {
+    background-color: #0056b3;
+}
+
+
+.product-table {
+    width: 100%;
+    border-collapse: collapse;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    overflow-x: auto;
+    border-radius: 8px; /* Rounded corners for table */
+    background-color: #fff; /* Table background */
+}
+
+.product-table th,
+.product-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.product-table th {
+    background-color: #f5f5f5;
+    font-weight: 600;
+    font-family: 'Times New Roman', serif; /* Classic font for header */
+    color: #333;
+}
+
+.product-table tr:hover {
+    background-color: #f8f8f8;
+}
+
+.product-table img {
+    max-width: 60px;
+    height: auto;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.product-table button {
+    padding: 8px 15px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.product-table button.edit {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.product-table button.unlist {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.product-table button.list {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.product-table button:hover {
+    opacity: 0.9;
 }
 

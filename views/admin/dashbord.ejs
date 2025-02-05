@@ -3,64 +3,318 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="/styles/admindashbord.css">
+    <title>Admin Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --sidebar-width: 250px;
+            --header-height: 70px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f6fa;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #fff;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .sidebar-header h2 {
+            color: var(--primary-color);
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .sidebar-menu {
+            padding: 20px 0;
+            list-style: none;
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 15px 25px;
+            color: #555;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-menu li a i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .sidebar-menu li a:hover,
+        .sidebar-menu li a.active {
+            background: #f0f7ff;
+            color: var(--primary-color);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .search-bar {
+            padding: 10px 20px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            width: 300px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-bar:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 5px rgba(74, 144, 226, 0.3);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-details {
+            text-align: right;
+        }
+
+        .user-details .name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .user-details .role {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .dashboard-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .stat-positive {
+            color: #2ecc71;
+            font-size: 14px;
+        }
+
+        .stat-negative {
+            color: #e74c3c;
+            font-size: 14px;
+        }
+
+        .sales-report {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .sales-report h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .chart {
+            width: 100%;
+            height: 300px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .print-button {
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .print-button:hover {
+            background: #357abd;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .dashboard-overview {
+                grid-template-columns: 1fr;
+            }
+
+            .topbar {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .search-bar {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard-container">
         <aside class="sidebar">
-            <h2>Dashboard</h2>
+            <div class="sidebar-header">
+                <h2>Dashboard</h2>
+            </div>
             <ul class="sidebar-menu">
-                <li><a href="/admin/dashboard" class="active">Dashboard</a></li>
-                <li><a href="/admin/products">Products</a></li>
-                <li><a href="/orders">Orders</a></li>
-                <li><a href="/admin/users">Users</a></li>
-                <li><a href="/admin/categories">Category</a></li>
-                <li><a href="/offers">Offers</a></li>
-                <li><a href="/coupons">Coupons</a></li>
-                <li><a href="/settings">Settings</a></li>
-                <li><a href="/logout">Logout</a></li>
+                <li><a href="/admin/dashboard" class="active">
+                    <i class="fas fa-home"></i> Dashboard
+                </a></li>
+                <li><a href="/admin/products">
+                    <i class="fas fa-box"></i> Products
+                </a></li>
+                <li><a href="/orders">
+                    <i class="fas fa-shopping-cart"></i> Orders
+                </a></li>
+                <li><a href="/admin/users">
+                    <i class="fas fa-users"></i> Users
+                </a></li>
+                <li><a href="/admin/categories">
+                    <i class="fas fa-tags"></i> Category
+                </a></li>
+                <li><a href="/offers">
+                    <i class="fas fa-gift"></i> Offers
+                </a></li>
+                <li><a href="/coupons">
+                    <i class="fas fa-ticket-alt"></i> Coupons
+                </a></li>
+                <li><a href="/settings">
+                    <i class="fas fa-cog"></i> Settings
+                </a></li>
+                <li><a href="/logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a></li>
             </ul>
         </aside>
         <main class="main-content">
             <header class="topbar">
-                <input type="text" placeholder="Search..." class="search-bar">
+                <div class="search-container">
+                    <input type="text" placeholder="Search..." class="search-bar">
+                </div>
                 <div class="user-info">
-                    <span>Abdulla Dilshad</span>
-                    <span>Admin</span>
+                    <div class="user-details">
+                        <div class="name">Abdulla Dilshad</div>
+                        <div class="role">Admin</div>
+                    </div>
+                    <img src="/images/adminlogo1.png" alt="Profile">
                 </div>
             </header>
             <section class="dashboard-overview">
                 <div class="card">
-                    <h3>Total Users</h3>
+                    <h3><i class="fas fa-users"></i> Total Users</h3>
                     <p>40,689</p>
-                    <span class="stat-positive">8.5% Up from yesterday</span>
+                    <span class="stat-positive"><i class="fas fa-arrow-up"></i> 8.5% Up from yesterday</span>
                 </div>
                 <div class="card">
-                    <h3>Total Orders</h3>
+                    <h3><i class="fas fa-shopping-cart"></i> Total Orders</h3>
                     <p>10,293</p>
-                    <span class="stat-positive">1.3% Up from past week</span>
+                    <span class="stat-positive"><i class="fas fa-arrow-up"></i> 1.3% Up from past week</span>
                 </div>
                 <div class="card">
-                    <h3>Total Sales</h3>
+                    <h3><i class="fas fa-dollar-sign"></i> Total Sales</h3>
                     <p>$89,000</p>
-                    <span class="stat-negative">4.3% Down from yesterday</span>
+                    <span class="stat-negative"><i class="fas fa-arrow-down"></i> 4.3% Down from yesterday</span>
                 </div>
                 <div class="card">
-                    <h3>Total Pending</h3>
+                    <h3><i class="fas fa-clock"></i> Total Pending</h3>
                     <p>2,040</p>
-                    <span class="stat-positive">1.8% Up from yesterday</span>
+                    <span class="stat-positive"><i class="fas fa-arrow-up"></i> 1.8% Up from yesterday</span>
                 </div>
             </section>
             <section class="sales-report">
                 <h2>Sales Report</h2>
                 <div class="chart">
-                    <!-- Include charting library or use placeholder -->
                     <p>Chart goes here</p>
                 </div>
-                <button class="print-button">Print Report</button>
+                <button class="print-button"><i class="fas fa-print"></i> Print Report</button>
             </section>
         </main>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
 </body>
 </html>

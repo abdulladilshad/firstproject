@@ -182,6 +182,12 @@ const addProduct = async (req, res) => {
     }
 
     try {
+        // 🔍 **Check total products count**
+        const productCount = await productModel.countDocuments();
+        if (productCount < 2) {
+            return res.status(403).send("At least 2 products must exist before adding a new one."); // 403 Forbidden
+        }
+
         // 🔍 **Check if product already exists**
         const existingProduct = await productModel.findOne({ productName: productName.trim() });
         if (existingProduct) {
@@ -211,7 +217,6 @@ const addProduct = async (req, res) => {
             // Write the image file
             await fs.promises.writeFile(filePath, imageBuffer);
 
-            
             return `images/${productname}/${filename}`;
         };
 
@@ -258,6 +263,7 @@ const addProduct = async (req, res) => {
         res.status(500).send('Error saving product');
     }
 };
+
 
 
 

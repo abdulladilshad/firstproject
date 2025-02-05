@@ -27,7 +27,7 @@ router.put('/products/toggle-status/:product_id', adminController.toggleProductS
 //CATEGORIES
 router.get('/categories',adminController.LoadCategory)
 router.get('/addcategories',adminController.AddCategory)
-router.post('/categories',adminController.postAddCategory);
+router.post('/addcategories',adminController.postAddCategory);
 router.get('/categories/edit/:id',adminController.loadEditCategory)
 router.post('/categories/edit/:id',adminController.editCategory)  
 

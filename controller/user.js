@@ -117,7 +117,7 @@ const postotp = async (req, res) => {
 
         // Store user session and redirect to homepage
         req.session.user = { email };
-        return res.redirect('/user/home'); // This return statement prevents further code execution
+         res.redirect('/'); // This return statement prevents further code execution
     } catch (error) {
         console.error('Error during OTP verification:', error);
         return res.render('user/otp', { message: 'Something went wrong' });

@@ -12,7 +12,7 @@
   <div class="login-box">
     <h2>OTP Verification</h2>
     <h4 style="color:rgba(219, 210, 210, 0.982)"> <%= message %> </h4>
-    <form action="/user/verify-otp" method="post" id="otpForm" onsubmit="formvalidate(event)">
+    <form action="/verify-otp" method="post" id="otpForm" onsubmit="formvalidate(event)">
       <!-- Hidden input to pass email -->
       <input type="hidden" name="email" value="<%= email %>" />
       
@@ -30,7 +30,7 @@
       <p id="timer"></p> <!-- OTP timer -->
   
       <!-- Resend OTP link -->
-      <a href="/user/resend-otp?email=<%= email %>" class="submitt" id="resendOtp">Resend OTP</a>
+      <a href="/resend-otp?email=<%= email %>" class="submitt" id="resendOtp">Resend OTP</a>
     </form>
   </div>
 

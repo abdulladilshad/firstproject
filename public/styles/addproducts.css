@@ -39,7 +39,7 @@ body {
 }
 
 .sidebar-menu li a {
-    color: #fff;
+    color: #333;
     text-decoration: none;
     font-size: 16px;
     display: block;
@@ -67,8 +67,9 @@ body {
 }
 
 .topbar h1 {
-    font-size: 24px;
-    color: #2c3e50;
+    font-size: 34px;
+    color: #2c3e50; 
+    font-family: 'Playfair Display', serif;
 }
 
 .add-product-form {
@@ -155,33 +156,193 @@ textarea {
     background-color: #c82333;
 }
 
-/* Responsive Styles */
-@media (max-width: 768px) {
-    .sidebar {
-        width: 200px;
-    }
 
-    .sidebar h2 {
-        font-size: 20px;
-    }
+:root {
+    --primary-color: #2A2D3E;
+    --secondary-color: #4A5568;
+    --accent-color: #667EEA;
+    --light-bg: #F7FAFC;
+}
 
-    .topbar h1 {
-        font-size: 20px;
-    }
+body {
+    background: var(--light-bg);
+}
 
-    .add-product-form {
-        padding: 15px;
-    }
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+}
 
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        font-size: 12px;
-    }
+/* Elegant Sidebar */
+.sidebar {
+    width: 280px;
+    background: #fff;
+    padding: 2rem 1.5rem;
+    color: #333;
+    position: fixed;
+    height: 100vh;
+    box-shadow: 2px 0 15px rgba(0,0,0,0.1);
+}
 
-    .submit-button,
-    .cancel-button {
-        font-size: 14px;
-        padding: 8px 15px;
-    }
+.sidebar h2 {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.sidebar-menu {
+    list-style: none;
+}
+
+.sidebar-menu li {
+    margin: 0.8rem 0;
+}
+
+.sidebar-menu a {
+    color: #CBD5E0;
+    text-decoration: none;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+.sidebar-menu a:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.sidebar-menu .active {
+    background: var(--accent-color);
+    color: white;
+}
+
+/* Main Content Area */
+.main-content {
+    margin-left: 280px;
+    padding: 3rem;
+    width: calc(100% - 280px);
+}
+
+/* Form Styling */
+.add-product-form {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--secondary-color);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #E2E8F0;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    outline: none;
+}
+
+/* Image Upload Section */
+.image-upload-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+    border: 2px dashed #CBD5E0;
+    transition: all 0.3s ease;
+}
+
+.image-upload-section:hover {
+    border-color: var(--accent-color);
+    background: #F8FAFC;
+}
+
+.file-input {
+    display: none;
+}
+
+.file-input-label {
+    display: block;
+    text-align: center;
+    padding: 2rem;
+    cursor: pointer;
+    color: #718096;
+}
+
+.file-input-label:hover {
+    color: var(--accent-color);
+}
+
+.image-preview-container {
+    margin-top: 1rem;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Buttons */
+.form-actions {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.submit-button {
+    background: var(--accent-color);
+    color: white;
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.submit-button:hover {
+    background: #5A67D8;
+    transform: translateY(-1px);
+}
+
+.cancel-button {
+    background: white;
+    color: var(--secondary-color);
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 2px solid #E2E8F0;
+    cursor: pointer;
+}
+
+.cancel-button:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+/* Error Messages */
+.error-message {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #E53E3E;
+    display: none;
 }
