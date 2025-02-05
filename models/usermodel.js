@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate-v2'); 
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -7,12 +8,6 @@ const userSchema = new mongoose.Schema({
     trim: true, // Removes extra spaces
     lowercase: true // Converts email to lowercase
   },
-  // phone:{
-  //   type:String,
-  //   unique:true,
-  //   sparse:true,
-  //   default:null
-  // },
   googleId:{
     type:String,
     unique:true
@@ -32,5 +27,5 @@ const userSchema = new mongoose.Schema({
   },
 },{timestamps:true});
 
-// Exporting the model
+userSchema.plugin(mongoosePaginate);
 module.exports = mongoose.model('User', userSchema);

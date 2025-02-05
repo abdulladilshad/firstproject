@@ -188,7 +188,7 @@ body {
     font-size: 1.8rem;
     margin-bottom: 2rem;
     font-weight: 600;
-    color: #333;
+    color: #fff;
 }
 
 .sidebar-menu {
@@ -345,4 +345,58 @@ body {
     font-size: 0.875rem;
     color: #E53E3E;
     display: none;
+}
+
+
+
+.sidebar {
+    width: 250px;
+    background: #2c3e50;
+    color: white;
+    padding: 1.5rem 0;
+}
+
+.sidebar-header {
+    padding: 0 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.sidebar-header h2 {
+    font-family: 'Playfair Display', serif;
+    margin: 0;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+}
+
+.brand-divider {
+    height: 2px;
+    background: linear-gradient(to right, transparent, #ffffff50, transparent);
+    margin: 1rem 0;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 1.5rem;
+    font-size: 18px;
+    color: #ffffff90;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.sidebar-menu li a:hover, .sidebar-menu li a.active {
+    background: #ffffff15;
+    color: white;
+}
+
+.sidebar-menu li a i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
 }

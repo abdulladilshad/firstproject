@@ -1,80 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Management</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/styles/admiUsers.css">
 </head>
 
 <body>
     <div class="dashboard-container">
         <aside class="sidebar">
-            <h2>Admin Panel</h2>
+            <div class="sidebar-header">
+                <h2>ADMIN PANEL</h2>
+                <div class="brand-divider"></div>
+            </div>
             <ul class="sidebar-menu">
-                <li><a href="/admin/dashboard">Dashboard</a></li>
-                <li><a href="/admin/products">Products</a></li>
-                <li><a href="/admin/orders">Orders</a></li>
-                <li><a href="/admin/users" class="active">Users</a></li>
-                <li><a href="/admin/categories">Categories</a></li>
-                <li><a href="/admin/offers">Offers</a></li>
-                <li><a href="/admin/settings">Settings</a></li>
-                <li><a href="/logout">Logout</a></li>
+                <li><a href="/admin/dashboard">
+                    <i class="fas fa-home"></i> Dashboard
+                </a></li>
+                <li><a href="/admin/products">
+                    <i class="fas fa-box"></i> Products
+                </a></li>
+                <li><a href="/admin/orders">
+                    <i class="fas fa-shopping-cart"></i> Orders
+                </a></li>
+                <li><a href="/admin/users" class="active">
+                    <i class="fas fa-users"></i> Users
+                </a></li>
+                <li><a href="/admin/categories">
+                    <i class="fas fa-tags"></i> Categories
+                </a></li>
+                <li><a href="/admin/offers">
+                    <i class="fas fa-gift"></i> Offers
+                </a></li>
+                <li><a href="/admin/settings">
+                    <i class="fas fa-cog"></i> Settings
+                </a></li>
+                <li><a href="/logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a></li>
             </ul>
         </aside>
+        
         <main class="main-content">
             <header class="topbar">
-                <h1>User Management</h1>
+                <div class="header-content">
+                    <h1>User Management</h1>
+                    <p class="subtitle">Manage your user accounts</p>
+                </div>
                 <div class="topbar-actions">
-                    <input type="text" placeholder="Search users..." class="search-bar" value=""
-                        oninput="window.location.href = '/admin/users?search=' + this.value">
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input 
+                            type="text" 
+                            placeholder="Search users..." 
+                            class="search-bar" 
+                            value=""
+                            oninput="window.location.href = '/admin/users?search=' + this.value"
+                        >
+                    </div>
                 </div>
             </header>
+
             <section class="user-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Created At</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Dynamic rows rendered using EJS -->
-                        <% users.forEach((user, index)=> { %>
+                <div class="table-container">
+                    <table>
+                        <thead>
                             <tr>
-                                <td>
-                                    <%= index + 1 %>
-                                </td>
-                                <td>
-                                    <%= user.email %>
-                                </td>
-                                <td>
-                                    <%= user.role %>
-                                </td>
-                                <td>
-                                    <%= user.createdAt.toDateString() %>
-                                </td>
-                                <td class="block-button">
-                                
-                                
-
-                                    <button
-                                    onclick="toggleUserStatus('<%= user._id %>', '<%= user.isBlock %>')">
-                                        <%= user.isBlock ? 'Unblock' : 'Block' %>
-                                    </button>
-                                    
-                                </td>
-
+                                <th>#</th>
+                                <th>Email</th>
+                                <th>Google ID</th>
+                                <th>Role</th>
+                                <th>Created At</th>
+                                <th>Actions</th>
                             </tr>
-                            <% }); %>
-                    </tbody>
-                </table>
-            </section>
+                        </thead>
+                        <tbody>
+                            <% users.docs.forEach((user, index) => { %>
 
+                                <tr>
+                                    <td><%= index + 1 %></td>
+                                    <td><%= user.email %></td>
+                                    <td>
+                                        <span class="badge <%= user.googleId ? 'success' : 'neutral' %>">
+                                            <%= user.googleId ? 'Yes' : 'No' %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="role-badge <%= user.role.toLowerCase() %>">
+                                            <%= user.role %>
+                                        </span>
+                                    </td>
+                                    <td><%= user.createdAt.toDateString() %></td>
+                                    <td>
+                                        <button 
+                                            class="action-btn <%= user.isBlock ? 'unblock' : 'block' %>"
+                                            onclick="toggleUserStatus('<%= user._id %>', '<%= user.isBlock %>')"
+                                        >
+                                            <i class="fas fa-<%= user.isBlock ? 'unlock' : 'ban' %>"></i>
+                                            <%= user.isBlock ? 'Unblock' : 'Block' %>
+                                        </button>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <section class="pagination">
+                <% if (users.hasPrevPage) { %>
+                    <a href="?page=<%= users.prevPage %>" class="pagination-btn">
+                        <i class="fas fa-angle-double-left"></i> Previous
+                    </a>
+                <% } %>
+            
+                <span>Page <%= users.page %> of <%= users.totalPages %></span>
+            
+                <% if (users.hasNextPage) { %>
+                    <a href="?page=<%= users.nextPage %>" class="pagination-btn">
+                        Next <i class="fas fa-angle-double-right"></i>
+                    </a>
+                <% } %>
+            </section>
         </main>
     </div>
 

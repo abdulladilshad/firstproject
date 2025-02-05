@@ -1,12 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Management</title>
+    <script src="https://kit.fontawesome.com/YOUR-KIT-ID.js" crossorigin="anonymous"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="/styles/adminproducts.css">
 </head>
+
 <body>
     <div class="dashboard-container">
         <aside class="sidebar">
@@ -47,13 +53,8 @@
             <header class="topbar">
                 <h1>Product Management</h1>
                 <div class="topbar-actions">
-                    <input
-                        type="text"
-                        placeholder="Search products..."
-                        class="search-bar"
-                        value=""
-                        oninput="window.location.href = '/admin/products?search=' + this.value"
-                    >
+                    <input type="text" placeholder="Search products..." class="search-bar" value=""
+                        oninput="window.location.href = '/admin/products?search=' + this.value">
                     <a href="/admin/addproducts"><button class="add-button">Add Product</button></a>
                 </div>
             </header>
@@ -72,40 +73,66 @@
                         </tr>
                     </thead>
                     <tbody>
-                         <!-- Dynamic rows rendered using EJS -->
-                        <% products.forEach((product, index) => { %>
-                        <tr>
-                            <td><%= index + 1 %></td>
-                            <td><%= product.productName %></td>
-                            <td>$<%= product.price %></td>
-                            <td><%= product.stock %></td>
-                            <td>
-                                <button onclick="viewProduct('<%= product.id %>')">view</button>
-                            </td>
-                            <td><%= product.color %></td>
-                            <td><%= product.category.name %></td>
-                            <td>
-                                <!-- <button onclick="editProduct(<%= product.id %>)">Edit</button> -->
-                                <a href="/admin/editproducts/<%= product._id %>"><button >Edit</button></a>
+                        <!-- Dynamic rows rendered using EJS -->
+                        <% products.forEach((product, index)=> { %>
+                            <tr>
+                                <td>
+                                    <%= index + 1 %>
+                                </td>
+                                <td>
+                                    <%= product.productName %>
+                                </td>
+                                <td>$<%= product.price %>
+                                </td>
+                                <td>
+                                    <%= product.stock %>
+                                </td>
+                                <td>
+                                    <button onclick="viewProduct('<%= product.id %>')">view</button>
+                                </td>
+                                <td>
+                                    <%= product.color %>
+                                </td>
+                                <td>
+                                    <%= product.category.name %>
+                                </td>
+                                <td>
+                                    <!-- <button onclick="editProduct(<%= product.id %>)">Edit</button> -->
+                                    <a href="/admin/editproducts/<%= product._id %>"><button>Edit</button></a>
 
-                                <button onclick="toggleProductStatus('<%= product._id %>', '<%= product.isDelete %>')">
-                                    <%= product.isDelete ? 'unlist' : 'list' %>
-                                </button>
-                                                           
-                            </td>
-                        </tr>
-                        <% }); %>
+                                    <button
+                                        onclick="toggleProductStatus('<%= product._id %>', '<%= product.isDelete %>')">
+                                        <%= product.isDelete ? 'unlist' : 'list' %>
+                                    </button>
+
+                                </td>
+                            </tr>
+                            <% }); %>
                     </tbody>
                 </table>
             </section>
-            
+
+            <div class="pagination">
+                <% if (currentPage> 1) { %>
+                    <a href="?page=<%= currentPage - 1 %>" class="prev"><button class="back-btnn"><i
+                                class="fa-solid fa-angles-left icon"></i> Back</button></a>
+                    <% } %>
+
+                        Page <%= currentPage %> of <%= totalPages %>
+
+                                <% if (currentPage < totalPages) { %>
+                                    <a href="?page=<%= currentPage + 1 %>" class="next"><button class="next-btnn">Next
+                                            <i class="fa-solid fa-angles-right icon"></i> </button></a>
+                                    <% } %>
+            </div>
+
         </main>
     </div>
-<!-- Include SweetAlert2 -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Include SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-       
+
 
         function editProduct(productId) {
             window.location.href = '/admin/products/edit/' + productId;
@@ -126,80 +153,78 @@
         }
 
         function viewProduct(productId) {
-    console.log('Product ID:', productId);
-    fetch(`getProductById/${productId}`)
-        .then(response => response.json())
-        .then(product => {
-            console.log('Fetched Product:', product);  // Check product data in the console
-            const images = product.imagePaths;  // Assuming imagePaths is the correct field
-            if (images && images.length > 0) {
-                let imageHTML = '';
-                images.forEach(image => {
-                    imageHTML += `<img src=/${image} alt="Product Image" style="width: 100%; max-width: 300px; margin: 5px;">`;
-                });
+            console.log('Product ID:', productId);
+            fetch(`getProductById/${productId}`)
+                .then(response => response.json())
+                .then(product => {
+                    console.log('Fetched Product:', product);  // Check product data in the console
+                    const images = product.imagePaths;  // Assuming imagePaths is the correct field
+                    if (images && images.length > 0) {
+                        let imageHTML = '';
+                        images.forEach(image => {
+                            imageHTML += `<img src=/${image} alt="Product Image" style="width: 100%; max-width: 300px; margin: 5px;">`;
+                        });
 
-                Swal.fire({
-                    title: `<strong>${product.productName}</strong>`,  // Product name as title
-                    html: imageHTML,  // Display the images inside SweetAlert
-                    showCloseButton: true,  // Allow closing the modal
-                    width: '600px',  // Customize width
-                });
-            } else {
-                Swal.fire('No Images', 'This product does not have any images.', 'info');
-            }
-        })
-        .catch(err => {
-            console.error('Error fetching product:', err);
-            Swal.fire('Error', 'Could not fetch product images.', 'error');
-        });
-}
-
-function toggleProductStatus(productId, isDelete) {
-    // Define action based on the current listed status
-    const action = isDelete ? "unlist" : "list"; 
-
-    // Confirm the action using SweetAlert
-    Swal.fire({
-        title: `Are you sure?`,
-        text: `Do you want to ${action} this product?`,
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: `Yes, ${action} it!`
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Only call the API after the confirmation
-            fetch(`/admin/products/toggle-status/${productId}`, {
-                method: 'PUT',
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    if (data.success) {
                         Swal.fire({
-                            title: "Success!",
-                            text: `Product has been ${action}ed.`,
-                            icon: "success",
-                            timer: 2000,
-                            showConfirmButton: false
-                        }).then(() => {
-                            window.location.reload(); // Reload to update the UI
+                            title: `<strong>${product.productName}</strong>`,  // Product name as title
+                            html: imageHTML,  // Display the images inside SweetAlert
+                            showCloseButton: true,  // Allow closing the modal
+                            width: '600px',  // Customize width
                         });
                     } else {
-                        Swal.fire("Error!", data.error || "Failed to update product status.", "error");
+                        Swal.fire('No Images', 'This product does not have any images.', 'info');
                     }
                 })
-                .catch((error) => {
-                    console.error('Error:', error);
-                    Swal.fire("Error!", "An error occurred while updating the product status.", "error");
+                .catch(err => {
+                    console.error('Error fetching product:', err);
+                    Swal.fire('Error', 'Could not fetch product images.', 'error');
                 });
         }
-    });
-}
+
+        function toggleProductStatus(productId, isDelete) {
+            // Define action based on the current listed status
+            const action = isDelete ? "unlist" : "list";
+
+            // Confirm the action using SweetAlert
+            Swal.fire({
+                title: `Are you sure?`,
+                text: `Do you want to ${action} this product?`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: `Yes, ${action} it!`
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Only call the API after the confirmation
+                    fetch(`/admin/products/toggle-status/${productId}`, {
+                        method: 'PUT',
+                    })
+                        .then((response) => response.json())
+                        .then((data) => {
+                            if (data.success) {
+                                Swal.fire({
+                                    title: "Success!",
+                                    text: `Product has been ${action}ed.`,
+                                    icon: "success",
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    window.location.reload(); // Reload to update the UI
+                                });
+                            } else {
+                                Swal.fire("Error!", data.error || "Failed to update product status.", "error");
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Error:', error);
+                            Swal.fire("Error!", "An error occurred while updating the product status.", "error");
+                        });
+                }
+            });
+        }
 
     </script>
 </body>
+
 </html>
-
-
-

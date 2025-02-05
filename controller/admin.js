@@ -92,15 +92,21 @@ const Loddashbord = async (req, res) => {
 }
 
       
-const Loadusers = async (req,res)=>{
+const Loadusers = async (req, res) => {
     try {
-        const users = await usermodel.find()
-        res.render('admin/adminUser',{users})
+        const page = parseInt(req.query.page) || 1; // Get current page, default is 1
+        const limit = 8; // Number of users per page
+
+        const users = await usermodel.paginate({}, { page, limit });
+
+        res.render('admin/adminUser', { users });
     } catch (error) {
-        res.status(500).send('server error')
-        
+        console.error(error);
+        res.status(500).send('Server error');
     }
-}
+};
+
+
 
 const toggleUserStatus = async (req, res) => {
     try {
@@ -127,17 +133,31 @@ const toggleUserStatus = async (req, res) => {
 
 
 
-
 const LoadProducts = async (req, res) => {
     try {
-      const products = await productModel.find()  // Fetch all products
-        .populate('category','name');  // Populate category name
-      res.render('admin/products', { products });
+        let page = parseInt(req.query.page) || 1;  // Default to page 1
+        let limit = 7;  // Products per page
+
+        const options = { 
+            page, 
+            limit, 
+            populate: { path: 'category', select: 'name' }  // Populate category name
+        };
+
+        const products = await productModel.paginate({}, options); // Ensure paginate is used
+
+        res.render('admin/products', { 
+            products: products.docs,  // Paginated product list
+            currentPage: page, 
+            totalPages: products.totalPages 
+        });
+
     } catch (error) {
-      console.error('Error loading products:', error);
-      res.render('admin/login', { message: 'Failed to load products' });
+        console.error('Error loading products:', error);
+        res.render('admin/login', { message: 'Failed to load products' });
     }
-  };
+};
+
   
 const renderAddProduct = async (req, res) => {
     try {

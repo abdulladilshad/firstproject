@@ -20,6 +20,10 @@ router.get('/addproducts', adminController.renderAddProduct);
 router.get('/editproducts/:id',adminController.editproducts)
 router.post('/editproducttt',adminController.editproducttt)
 
+//products pagination
+
+
+
 //UNLIST AND LIST PRODUCTS
 router.put('/products/toggle-status/:product_id', adminController.toggleProductStatus);
 
