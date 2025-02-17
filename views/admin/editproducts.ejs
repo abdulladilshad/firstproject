@@ -13,16 +13,37 @@
 <body>
     <div class="dashboard-container">
         <aside class="sidebar">
-            <h2>Admin Panel</h2>
+            <div class="sidebar-header">
+                <h2>PRODUCTS</h2>
+            </div>
             <ul class="sidebar-menu">
-                <li><a href="/admin/dashboard">Dashboard</a></li>
-                <li><a href="/admin/products" class="active">Products</a></li>
-                <li><a href="/orders">Orders</a></li>
-                <li><a href="/users">Users</a></li>
-                <li><a href="/categories">Categories</a></li>
-                <li><a href="/offers">Offers</a></li>
-                <li><a href="/settings">Settings</a></li>
-                <li><a href="/logout">Logout</a></li>
+                <li><a href="/admin/dashboard">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a></li>
+                <li><a href="/admin/products" class="active">
+                        <i class="fas fa-box"></i> Products
+                    </a></li>
+                <li><a href="/orders">
+                        <i class="fas fa-shopping-cart"></i> Orders
+                    </a></li>
+                <li><a href="/admin/users">
+                        <i class="fas fa-users"></i> Users
+                    </a></li>
+                <li><a href="/admin/categories">
+                        <i class="fas fa-tags"></i> Category
+                    </a></li>
+                <li><a href="/offers">
+                        <i class="fas fa-gift"></i> Offers
+                    </a></li>
+                <li><a href="/coupons">
+                        <i class="fas fa-ticket-alt"></i> Coupons
+                    </a></li>
+                <li><a href="/settings">
+                        <i class="fas fa-cog"></i> Settings
+                    </a></li>
+                <li><a href="/logout">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a></li>
             </ul>
         </aside>
         <main class="main-content">
@@ -36,110 +57,225 @@
                         <label for="productName">Product Name</label>
                         <input type="text" id="productName" name="productId" value="<%= products._id %>" hidden>
                         <input type="text" id="productName" name="productName" value="<%= products.productName %>">
-                        <div class="error-message" id="productNameError" style="display:none; color: red;">Product name is required</div>
+                        <div class="error-message" id="productNameError" style="display:none; color: red;">Product name
+                            is required</div>
                     </div>
-                
+
                     <!-- Category -->
                     <div class="form-group">
                         <label for="category">Category</label>
                         <select id="category" name="category">
-                            <% categories.forEach(category => { %>
-                                <option value="<%= category._id %>" <%= category._id == products.category ? 'selected' : '' %>>
+                            <% categories.forEach(category=> { %>
+                                <option value="<%= category._id %>">
                                     <%= category?.name %>
                                 </option>
-                            <% }) %>
+                                <% }) %>
                         </select>
-                        <div class="error-message" id="categoryError" style="display:none; color: red;">Category is required</div>
+                        <div class="error-message" id="categoryError" style="display:none; color: red;">Category is
+                            required</div>
                     </div>
-                
+
                     <!-- Price -->
                     <div class="form-group">
                         <label for="price">Price ($)</label>
                         <input type="number" id="price" name="price" value="<%= products.price %>">
-                        <div class="error-message" id="priceError" style="display:none; color: red;">Price is required</div>
+                        <div class="error-message" id="priceError" style="display:none; color: red;">Price is required
+                        </div>
                     </div>
-                
+
                     <!-- Brand -->
                     <div class="form-group">
                         <label for="brand">Brand</label>
                         <input type="text" id="brand" name="brand" value="<%= products.brand %>">
-                        <div class="error-message" id="brandError" style="display:none; color: red;">Brand is required</div>
+                        <div class="error-message" id="brandError" style="display:none; color: red;">Brand is required
+                        </div>
                     </div>
-                
-                    <!-- Stock -->
+
+                    <!-- coming -->
                     <div class="form-group">
-                        <label for="stock">Stock</label>
-                        <input type="number" id="stock" name="stock" value="<%= products.stock %>">
-                        <div class="error-message" id="stockError" style="display:none; color: red;">Stock is required</div>
+                        <button type="button" id="openVariantModal" class="variant-button">Color & Stock</button>
+                        <div id="variantsList" class="variants-summary mt-2">
+                            <% if (products.variants && products.variants.length > 0) { %>
+                                <% products.variants.forEach(variant => { %>
+                                    <p><strong><%= variant.color %></strong>: <%= variant.quantity%>  in stock</p>
+                                <% }) %>
+                            <% } else { %>
+                                <p>No variants added yet.</p>
+                            <% } %>
+                        </div>
                     </div>
-                
-                    <!-- Color -->
+
+                   <!-- Variant Modal -->
+        <div id="variantModal" class="modal" style="display: none">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2>Add Color & Stock</h2>
+                <div class="variant-form">
                     <div class="form-group">
-                        <label for="color">Color</label>
-                        <input type="text" id="color" name="color" value="<%= products.color %>">
-                        <div class="error-message" id="colorError" style="display:none; color: red;">Color is required</div>
+                        <label for="colorInput">Color</label>
+                        <select id="colorInput" name="color">
+                            <option value="">Select Color</option>
+                            <option value="Red">Red</option>
+                            <option value="Blue">Blue</option>
+                            <option value="Green">Green</option>
+                            <option value="Black">Black</option>
+                            <option value="White">White</option>
+                            <option value="Yellow">Yellow</option>
+                        </select>
                     </div>
-                
+                    <div class="form-group">
+                        <label for="stockInput">Stock Quantity</label>
+                        <input type="number" id="stockInput" name="stock" min="0">
+                    </div>
+                    <button type="button" id="addVariant" class="add-variant-btn">Add Variant</button>
+                </div>
+                <div class="variants-list">
+                    <h3>Added Variants</h3>
+                    <div id="modalVariantsList">
+                        <% if (products.variants && products.variants.length > 0) { %>
+                            <% products.variants.forEach((variant, index) => { %>
+                                <div class="variant-item" data-index="<%= index %>">
+                                    <p><strong><%= variant.color %></strong>: <%= variant.quantity %> in stock</p>
+                                    <button type="button" class="remove-variant-btn" onclick="removeVariant(<%= index %>)">Remove</button>
+                                </div>
+                            <% }) %>
+                        <% } %>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="saveVariants" class="save-variants-btn">Save Variants</button>
+                </div>
+            </div>
+        </div>
+                    <!-- Hidden Input for Variants Data -->
+        <input type="hidden" id="variantsData" name="variants" value='<%= JSON.stringify(products.variants || []) %>'>
+
                     <!-- Material -->
                     <div class="form-group">
                         <label for="material">Material</label>
                         <input type="text" id="material" name="material" value="<%= products.material %>">
-                        <div class="error-message" id="materialError" style="display:none; color: red;">Material is required</div>
+                        <div class="error-message" id="materialError" style="display:none; color: red;">Material is
+                            required</div>
                     </div>
-                
+
                     <!-- Product Description -->
                     <div class="form-group">
                         <label for="productDescription">Product Description</label>
-                        <textarea id="productDescription" name="productDescription" rows="5"><%= products.productDescription %></textarea>
-                        <div class="error-message" id="productDescriptionError" style="display:none; color: red;">Description is required</div>
+                        <textarea id="productDescription" name="productDescription"
+                            rows="5"><%= products.productDescription %></textarea>
+                        <div class="error-message" id="productDescriptionError" style="display:none; color: red;">
+                            Description is required</div>
                     </div>
-                
+
                     <!-- Product Images -->
-                    <div class="container mx-auto p-6">
-                        <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-6">
-                            <h2 class="text-2xl font-bold mb-6">Product Image Uploader</h2>
-                
-                            <div class="grid grid-cols-2 gap-6">
-                                <% products.imagePaths.forEach((imagePath, index) => { %>
-                                    
-                                <div id="imageUploadSection<%= index + 1 %>" class="image-upload-section">
-                                    <input type="hidden" name="existingImages[]" >
-                                    <input type="file" value="<%= imagePath %>" id="imageUpload<%= index + 1 %>" accept="image/*" class="mb-4 file-input">
-
-
-                                    <div class="image-container" style="max-height: 300px;">
-                                        <button type="button" id="deleteButton<%= index + 1 %>" class="delete-button text-red-500 mt-2" style="display:none;">Delete</button>
-                                        <img id="cropperImage<%= index + 1 %>" class="w-full" src="\<%= imagePath %>" style="display:block; max-height: 300px;">
-                                    </div>
-                                    <div class="image-preview-container" id="previewContainer<%= index + 1 %>" style="display:none;">
-                                        <h3 class="mt-4">Cropped Preview:</h3>
-                                        <img id="croppedPreview<%= index + 1 %>" class="w-full" style="max-height: 200px;">
-                                    </div>
-                                    <div class="flex space-x-4 mt-4">
-                                        <button id="cropButton<%= index + 1 %>" type="button" class="crop-button px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600" disabled>Crop</button>
-                                        <button id="resetButton<%= index + 1 %>" type="button" class="reset-button px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600" disabled>Reset</button>
-                                    </div>
-                                    <div class="error-message" id="imageError<%= index + 1 %>" style="display:none; color: red;">Image is required</div>
-                                </div>
-                                <% }) %>
-                            </div>
+                    <div style="margin: 2%;" class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-8">
+                        <div class="flex items-center justify-between mb-8">
+                            <h2 class="text-2xl font-bold text-gray-800">Product Images</h2>
+                            <span class="text-sm text-gray-500">Upload up to 4 images</span>
                         </div>
-                    </div
-                
-                    <!-- Hidden Inputs for Base64 Images -->
-                    <% products.imagePaths.forEach((imagePath, index) => { %>
-                    <input type="hidden" id="image<%= index + 1 %>" name="image<%= index + 1 %>">
-                   
-                    <% }) %>
-                
-                    <!-- Submit and Cancel Buttons -->
-                    <div class="form-actions">
-                        <button type="submit" class="submit-button">Edit</button>
-                        <button type="button" class="cancel-button" onclick="window.history.back()">Cancel</button>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <% let imagesToDisplay=products.imagePaths.slice(); %>
+                                <% while (imagesToDisplay.length < 4) { %>
+                                    <% imagesToDisplay.push(''); %> <!-- Adding empty placeholder for missing images -->
+                                        <% } %>
+
+                                            <% imagesToDisplay.forEach((imagePath, index)=> { %>
+                                                <div id="imageUploadSection<%= index + 1 %>" class="relative group">
+                                                    <div
+                                                        class="min-h-[300px] bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-6 transition-all duration-300 hover:border-blue-500 hover:bg-gray-100">
+                                                        <label for="imageUpload<%= index + 1 %>" class="block h-full">
+                                                            <div
+                                                                class="flex flex-col items-center justify-center h-full space-y-4 cursor-pointer">
+                                                                <!-- Upload Icon -->
+                                                                <div
+                                                                    class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                                                                    <svg class="w-8 h-8 text-gray-400" fill="none"
+                                                                        stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round"
+                                                                            stroke-linejoin="round" stroke-width="2"
+                                                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                                    </svg>
+                                                                </div>
+                                                                <!-- Upload Text -->
+                                                                <div class="text-center">
+                                                                    <p class="text-sm font-medium text-gray-700">Image
+                                                                        <%= index + 1 %>
+                                                                    </p>
+                                                                    <p class="mt-1 text-xs text-gray-500">Drop your
+                                                                        image here, or click to browse</p>
+                                                                    <p class="mt-2 text-xs text-gray-400">PNG, JPG up to
+                                                                        5MB</p>
+                                                                </div>
+                                                            </div>
+                                                        </label>
+
+                                                        <!-- Current Image Preview -->
+                                                        <div style="height: 200px;"
+                                                            class="relative w-full h-[300px] overflow-hidden border border-gray-300 rounded-lg">
+                                                            <% if (imagePath) { %>
+                                                                <img id="cropperImage<%= index + 1 %>"
+                                                                    class="absolute inset-0 w-full h-full object-contain"
+                                                                    src="/<%= imagePath %>" style="display:block;">
+                                                                <% } %>
+                                                        </div>
+
+                                                        <input type="file" id="imageUpload<%= index + 1 %>"
+                                                            accept="image/*" class="hidden">
+                                                        <input type="hidden" name="existingImages[]"
+                                                            value="<%= imagePath %>">
+                                                    </div>
+
+                                                    <!-- Action Buttons -->
+                                                    <div class="flex items-center gap-3 mt-4">
+                                                        <button id="cropButton<%= index + 1 %>" type="button" disabled
+                                                            class="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 
+                                                   transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                                            Crop
+                                                        </button>
+                                                        <button id="resetButton<%= index + 1 %>" type="button" disabled
+                                                            class="flex items-center px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 
+                                                   transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
+                                                                viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                            </svg>
+                                                            Reset
+                                                        </button>
+                                                        <button id="deleteButton<%= index + 1 %>" type="button"
+                                                            class="flex items-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
+                                                                viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                            </svg>
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <% }) %>
+
+                        </div>
                     </div>
+
+                    <!-- Hidden Inputs for Base64 Images -->
+                    <% products.imagePaths.forEach((imagePath, index)=> { %>
+                        <input type="hidden" id="image<%= index + 1 %>" name="image<%= index + 1 %>">
+
+                        <% }) %>
+
+                            <!-- Submit and Cancel Buttons -->
+                            <div class="form-actions">
+                                <button type="submit" class="submit-button">Edit</button>
+                                <button type="button" class="cancel-button"
+                                    onclick="window.history.back()">Cancel</button>
+                            </div>
                 </form>
-                
-                    
+
+
             </section>
         </main>
     </div>
@@ -158,96 +294,96 @@
         ];
 
         imageUploads.forEach((item, index) => {
-    item.upload.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) {
-            item.error.textContent = "Image is required";
-            item.error.style.display = 'block';
-            return;
-        }
-        const reader = new FileReader();
+            item.upload.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (!file) {
+                    item.error.textContent = "Image is required";
+                    item.error.style.display = 'block';
+                    return;
+                }
+                const reader = new FileReader();
 
-        reader.onload = function(event) {
-            item.image.src = event.target.result;
-            item.image.style.display = 'block';
+                reader.onload = function (event) {
+                    item.image.src = event.target.result;
+                    item.image.style.display = 'block';
 
-            if (croppers[index]) {
-                croppers[index].destroy();
-            }
+                    if (croppers[index]) {
+                        croppers[index].destroy();
+                    }
 
-            croppers[index] = new Cropper(item.image, {
-                viewMode: 1,
-                dragMode: 'move',
-                autoCropArea: 0.8,
-                restore: true,
-                guides: true,
-                center: true,
-                highlight: true,
-                cropBoxMovable: true,
-                cropBoxResizable: true,
+                    croppers[index] = new Cropper(item.image, {
+                        viewMode: 1,
+                        dragMode: 'move',
+                        autoCropArea: 0.8,
+                        restore: true,
+                        guides: true,
+                        center: true,
+                        highlight: true,
+                        cropBoxMovable: true,
+                        cropBoxResizable: true,
+                    });
+
+                    item.cropBtn.disabled = false;
+                    item.resetBtn.disabled = false;
+                    item.error.style.display = 'none';
+                };
+
+                reader.readAsDataURL(file);
             });
 
-            item.cropBtn.disabled = false;
-            item.resetBtn.disabled = false;
-            item.error.style.display = 'none';
-        };
+            item.cropBtn.addEventListener('click', function () {
+                const cropper = croppers[index];
+                if (!cropper) return;
 
-        reader.readAsDataURL(file);
-    });
+                const croppedCanvas = cropper.getCroppedCanvas();
+                if (!croppedCanvas) {
+                    item.error.style.display = 'block';
+                    return;
+                }
 
-    item.cropBtn.addEventListener('click', function() {
-        const cropper = croppers[index];
-        if (!cropper) return;
+                const base64Image = croppedCanvas.toDataURL();
+                croppedImages[`image${index + 1}`] = base64Image;
 
-        const croppedCanvas = cropper.getCroppedCanvas();
-        if (!croppedCanvas) {
-            item.error.style.display = 'block';
-            return;
-        }
+                // Store cropped image in hidden input field
+                document.getElementById(`image${index + 1}`).value = base64Image;
 
-        const base64Image = croppedCanvas.toDataURL();
-        croppedImages[`image${index + 1}`] = base64Image;
+                // Show the cropped image preview below the crop button
+                const previewContainer = document.getElementById(`previewContainer${index + 1}`);
+                const previewImage = document.getElementById(`croppedPreview${index + 1}`);
+                previewImage.src = base64Image;
+                previewContainer.style.display = 'block';  // Show preview container
+            });
 
-        // Store cropped image in hidden input field
-        document.getElementById(`image${index + 1}`).value = base64Image;
+            item.resetBtn.addEventListener('click', function () {
+                croppers[index].reset();
+                item.error.style.display = 'none';
 
-        // Show the cropped image preview below the crop button
-        const previewContainer = document.getElementById(`previewContainer${index + 1}`);
-        const previewImage = document.getElementById(`croppedPreview${index + 1}`);
-        previewImage.src = base64Image;
-        previewContainer.style.display = 'block';  // Show preview container
-    });
+                // Hide preview if reset is clicked
+                const previewContainer = document.getElementById(`previewContainer${index + 1}`);
+                previewContainer.style.display = 'none';
+            });
 
-    item.resetBtn.addEventListener('click', function() {
-        croppers[index].reset();
-        item.error.style.display = 'none';
+            item.deleteBtn.addEventListener('click', function () {
+                // Hide the image preview and the delete button
+                item.image.style.display = 'none';
+                item.deleteBtn.style.display = 'none';
 
-        // Hide preview if reset is clicked
-        const previewContainer = document.getElementById(`previewContainer${index + 1}`);
-        previewContainer.style.display = 'none';
-    });
+                // Reset the cropper and remove the cropped image
+                croppers[index].reset();
+                item.error.style.display = 'none';
 
-    item.deleteBtn.addEventListener('click', function() {
-        // Hide the image preview and the delete button
-        item.image.style.display = 'none';
-        item.deleteBtn.style.display = 'none';
+                // Optionally clear the hidden input field for the image
+                document.getElementById(`image${index + 1}`).value = '';
 
-        // Reset the cropper and remove the cropped image
-        croppers[index].reset();
-        item.error.style.display = 'none';
-
-        // Optionally clear the hidden input field for the image
-        document.getElementById(`image${index + 1}`).value = '';
-
-        // Hide preview if delete is clicked
-        const previewContainer = document.getElementById(`previewContainer${index + 1}`);
-        previewContainer.style.display = 'none';
-    });
-});
+                // Hide preview if delete is clicked
+                const previewContainer = document.getElementById(`previewContainer${index + 1}`);
+                previewContainer.style.display = 'none';
+            });
+        });
 
         // Form validation logic
         const form = document.getElementById('productForm');
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', function (e) {
             let valid = true;
 
             // Hide all previous error messages
@@ -259,10 +395,7 @@
             const fields = [
                 { field: 'productName', error: 'productNameError' },
                 { field: 'category', error: 'categoryError' },
-                { field: 'price', error: 'priceError' },
                 { field: 'brand', error: 'brandError' },
-                { field: 'stock', error: 'stockError' },
-                { field: 'color', error: 'colorError' },
                 { field: 'material', error: 'materialError' },
                 { field: 'productDescription', error: 'productDescriptionError' },
             ];
@@ -275,10 +408,18 @@
                 }
             });
 
+            // Validate Price (should be greater than 0)
+            const priceInput = document.getElementById('price');
+            const priceValue = parseFloat(priceInput.value);
+            if (isNaN(priceValue) || priceValue <= 0) {
+                document.getElementById('priceError').style.display = 'block';
+                valid = false;
+            }
+
             // Validate that at least one image has been uploaded
             if (!croppedImages.image1 && !croppedImages.image2 && !croppedImages.image3 && !croppedImages.image4) {
                 imageUploads.forEach((item) => {
-                    item.error.style.display = 'block'  ;
+                    item.error.style.display = 'block';
                 });
                 valid = false;
             }
@@ -287,6 +428,145 @@
                 e.preventDefault();
             }
         });
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById('variantModal');
+            const openBtn = document.getElementById('openVariantModal');
+            const closeBtn = document.querySelector('.close-modal');
+            const addVariantBtn = document.getElementById('addVariant');
+            const saveVariantsBtn = document.getElementById('saveVariants');
+            const variantsData = [];
+
+            openBtn.onclick = function () {
+                modal.style.display = "block";
+            }
+
+            closeBtn.onclick = function () {
+                modal.style.display = "none";
+            }
+
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+
+            addVariantBtn.onclick = function () {
+    const color = document.getElementById('colorInput').value;
+    const stock = document.getElementById('stockInput').value;
+
+    if (!color || stock === '') {
+        alert("Color and Stock are required!");
+        return;
+    }
+
+    if (parseInt(stock) <= 0) {
+        alert("Stock must be greater than 0!");
+        return;
+    }
+
+    variantsData.push({ color, quantity: parseInt(stock) });
+    updateVariantsList();
+    document.getElementById('colorInput').value = '';
+    document.getElementById('stockInput').value = '';
+};
+saveVariantsBtn.onclick = function () {
+    if (variantsData.length === 0) {
+        alert("Please add at least one variant.");
+        return;
+    }
+
+    document.getElementById('variantsData').value = JSON.stringify(variantsData);
+    updateVariantsSummary();
+    modal.style.display = "none";
+};
+
+            function updateVariantsList() {
+                const list = document.getElementById('modalVariantsList');
+                list.innerHTML = variantsData.map((variant, index) => `
+            <div class="variant-item">
+                Color: ${variant.color}, Stock: ${variant.quantity}
+                <button onclick="removeVariant(${index})">Remove</button>
+            </div>
+        `).join('');
+            }
+
+            function updateVariantsSummary() {
+                const summary = document.getElementById('variantsList');
+                summary.innerHTML = variantsData.map(variant =>
+                    `<div>Color: ${variant.color}, Stock: ${variant.quantity}</div>`
+                ).join('');
+            }
+
+            window.removeVariant = function (index) {
+                variantsData.splice(index, 1);
+                updateVariantsList();
+            }
+        });
+
+
+        document.getElementById('addProductForm').onsubmit = function (event) {
+    try {
+        const variantsField = document.getElementById('variantsData');
+        let variantsData = variantsField.value.trim(); // Get value & remove spaces
+
+        if (!variantsData) {
+            alert("Variants data is missing!");
+            event.preventDefault();
+            return;
+        }
+
+        let parsedVariants = JSON.parse(variantsData);
+
+        if (!Array.isArray(parsedVariants)) {
+            alert("Invalid format: Variants must be an array!");
+            event.preventDefault();
+            return;
+        }
+
+        for (let variant of parsedVariants) {
+            if (!variant.color || variant.quantity <= 0) {
+                alert("Each variant must have a color and stock > 0!");
+                event.preventDefault();
+                return;
+            }
+        }
+    } catch (error) {
+        alert("Error parsing variants data: " + error.message);
+        event.preventDefault();
+    }
+};
+
+document.getElementById("productForm").onsubmit = function (event) {
+    try {
+        const variantsData = JSON.stringify(variantsArray); // Convert array to JSON
+        document.getElementById("variantsData").value = variantsData; // Assign JSON to hidden field
+    } catch (error) {
+        console.error("Error setting variants JSON:", error);
+        event.preventDefault(); // Stop form submission if JSON conversion fails
+        alert("Invalid variants format. Please check your selections.");
+    }
+};
+
+document.getElementById('productForm').addEventListener('submit', function (event) {
+    const variantsData = document.getElementById('variantsData').value.trim();
+    const variantsError = document.getElementById('variantsError');
+
+    try {
+        const variants = JSON.parse(variantsData); // Try parsing JSON
+
+        if (!Array.isArray(variants) || variants.length === 0) {
+            throw new Error(); // If not an array or empty, trigger error
+        }
+
+        variantsError.style.display = "none"; // Hide error if valid
+    } catch (error) {
+        variantsError.style.display = "block"; // Show error message
+        event.preventDefault(); // Stop form submission
+    }
+});
+
+        
+
     </script>
 </body>
 

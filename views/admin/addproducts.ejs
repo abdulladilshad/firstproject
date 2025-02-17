@@ -91,21 +91,61 @@
                         </div>
                     </div>
 
-                    <!-- Stock -->
+                    <!-- coming sooon -->
                     <div class="form-group">
-                        <label for="stock">Stock</label>
-                        <input type="number" id="stock" name="stock">
-                        <div class="error-message" id="stockError" style="display:none; color: red;">Stock is required
+                        <button type="button" id="openVariantModal" class="variant-button">
+                            Color & Stock
+                        </button>
+                        <div id="variantsList" class="variants-summary mt-2"></div>
+                        <div class="error-message" id="variants" style="display:none; color: red;">variant is required
                         </div>
                     </div>
 
-                    <!-- Color -->
-                    <div class="form-group">
-                        <label for="color">Color</label>
-                        <input type="text" id="color" name="color">
-                        <div class="error-message" id="colorError" style="display:none; color: red;">Color is required
+                    <!-- Variant Modal -->
+                    <div id="variantModal" class="modal" style="display: none">
+                        <div class="modal-content">
+                            <span class="close-modal">&times;</span>
+                            <h2>Add Color & Stock</h2>
+                    
+                            <div class="variant-form">
+                                <div class="form-group">
+                                    <label for="colorInput">Color</label>
+                                    <select id="colorInput" name="color">
+                                        <option value="">Select Color</option>
+                                        <option value="Red">Red</option>
+                                        <option value="Blue">Blue</option>
+                                        <option value="Green">Green</option>
+                                        <option value="Black">Black</option>
+                                        <option value="White">White</option>
+                                        <option value="Yellow">Yellow</option>
+                                    </select>
+                                    <div class="error-message" id="color12" style="display:none; color: red;">color is required
+                                    </div>
+
+                                </div>
+                                <div class="form-group">
+                                    <label for="stockInput">Stock Quantity</label>
+                                    <input type="number" id="stockInput" name="stock" min="0">
+                                    <div class="error-message" id="stock12" style="display:none; color: red;">color is required
+                                    </div>
+                                </div>
+                    
+                                <button type="button" id="addVariant" class="add-variant-btn">Add Variant</button>
+                            </div>
+                    
+                            <div class="variants-list">
+                                <h3>Added Variants</h3>
+                                <div id="modalVariantsList"></div>
+                            </div>
+                    
+                            <div class="modal-actions">
+                                <button type="button" id="saveVariants" class="save-variants-btn">Save Variants</button>
+                            </div>
                         </div>
                     </div>
+                    
+                    <!-- Hidden Input for Variants Data -->
+                    <input type="hidden" id="variantsData" name="variants" value="[{...}]">
 
                     <!-- Material -->
                     <div class="form-group">
@@ -157,21 +197,18 @@
                                                         to browse</p>
                                                     <p class="mt-2 text-xs text-gray-400">PNG, JPG up to 5MB</p>
                                                     <!-- Image Cropper Container -->
-                                                    <div style="height: 200px;"
-                                                        class="relative w-full h-[300px] overflow-hidden border border-gray-300 rounded-lg">
-                                                        <img id="cropperImage<%= i %>"
-                                                            class="absolute inset-0 w-full h-full object-contain" src=""
-                                                            style="display:none;">
-                                                    </div>
 
                                                 </div>
                                             </div>
                                         </label>
+                                        <div style="height: 200px;"
+                                            class="relative w-full h-[300px] overflow-hidden border border-gray-300 rounded-lg">
+                                            <img id="cropperImage<%= i %>"
+                                                class="absolute inset-0 w-full h-full object-contain" src=""
+                                                style="display:none;">
+                                        </div>
                                         <input type="file" id="imageUpload<%= i %>" accept="image/*" class="hidden">
                                     </div>
-
-
-
 
 
                                     <!-- Image Preview -->
@@ -364,14 +401,11 @@
                 el.style.display = 'none';
             });
 
-            // Validate text fields (name, category, price, etc.)
+            // Validate text fields
             const fields = [
                 { field: 'productName', error: 'productNameError' },
                 { field: 'category', error: 'categoryError' },
-                { field: 'price', error: 'priceError' },
                 { field: 'brand', error: 'brandError' },
-                { field: 'stock', error: 'stockError' },
-                { field: 'color', error: 'colorError' },
                 { field: 'material', error: 'materialError' },
                 { field: 'productDescription', error: 'productDescriptionError' },
             ];
@@ -383,11 +417,28 @@
                     valid = false;
                 }
             });
+           //validate variants 
+            if(!document.getElementById('variant')){
+              document.getElementById('variants').style.display = 'block';
+              valid=false
+            }
+            // Validate Price (should be greater than 0)
+            const priceInput = document.getElementById('price');
+            const priceValue = parseFloat(priceInput.value);
+            if (isNaN(priceValue) || priceValue <= 0) {
+                document.getElementById('priceError').style.display = 'block';
+                valid = false;
+            }
 
-            // Validate that at least one image has been uploaded
-            if (!croppedImages.image1 && !croppedImages.image2 && !croppedImages.image3 && !croppedImages.image4) {
-                imageUploads.forEach((item) => {
-                    item.error.style.display = 'block';
+            // Validate at least one image is uploaded
+            const image1 = document.getElementById('image1').value;
+            const image2 = document.getElementById('image2').value;
+            const image3 = document.getElementById('image3').value;
+            const image4 = document.getElementById('image4').value;
+
+            if (!image1 && !image2 && !image3 && !image4) {
+                document.querySelectorAll('[id^="imageError"]').forEach(el => {
+                    el.style.display = 'block';
                 });
                 valid = false;
             }
@@ -396,6 +447,160 @@
                 e.preventDefault();
             }
         });
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById('variantModal');
+            const openBtn = document.getElementById('openVariantModal');
+            const closeBtn = document.querySelector('.close-modal');
+            const addVariantBtn = document.getElementById('addVariant');
+            const saveVariantsBtn = document.getElementById('saveVariants');
+            const variantsData = [];
+
+            openBtn.onclick = function () {
+                modal.style.display = "block";
+            }
+
+            closeBtn.onclick = function () {
+                modal.style.display = "none";
+            }
+
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+
+            addVariantBtn.onclick = function () {
+    const color = document.getElementById('colorInput').value.trim();
+    const stock = document.getElementById('stockInput').value.trim();
+
+     // Hide previous error messages
+     document.getElementById('color12').style.display = 'none';
+    document.getElementById('stock12').style.display = 'none';
+   
+    let valid = true;
+
+    if (!color ) {
+        document.getElementById('color12').style.display = 'block';
+        valid = false;
+    }
+
+    if (stock === '') {
+        document.getElementById('stock12').innerText = 'Stock is required';
+        document.getElementById('stock12').style.display = 'block';
+        valid = false;
+    } else if (parseInt(stock) <= 0) {
+        document.getElementById('stock12').innerText = 'Stock must be greater than 0!';
+        document.getElementById('stock12').style.display = 'block';
+        valid = false;
+    }
+     if (!valid) {
+        return; // Stop execution if validation fails
+    }
+
+    variantsData.push({ color, quantity: parseInt(stock) });
+    updateVariantsList();
+    document.getElementById('colorInput').value = '';
+    document.getElementById('stockInput').value = '';
+};
+saveVariantsBtn.onclick = function () {
+    if (variantsData.length === 0) {
+        alert("Please add at least one variant.");
+        return;
+    }
+
+    document.getElementById('variantsData').value = JSON.stringify(variantsData);
+    updateVariantsSummary();
+    modal.style.display = "none";
+};
+
+            function updateVariantsList() {
+                const list = document.getElementById('modalVariantsList');
+                list.innerHTML = variantsData.map((variant, index) => `
+            <div id='variant' class="variant-item">
+                Color: ${variant.color}, Stock: ${variant.quantity}
+                <button onclick="removeVariant(${index})">Remove</button>
+            </div>
+        `).join('');
+            }
+
+            function updateVariantsSummary() {
+                const summary = document.getElementById('variantsList');
+                summary.innerHTML = variantsData.map(variant =>
+                    `<div>Color: ${variant.color}, Stock: ${variant.quantity}</div>`
+                ).join('');
+            }
+
+            window.removeVariant = function (index) {
+                variantsData.splice(index, 1);
+                updateVariantsList();
+            }
+        });
+
+
+        document.getElementById('addProductForm').onsubmit = function (event) {
+    try {
+        const variantsField = document.getElementById('variantsData');
+        let variantsData = variantsField.value.trim(); // Get value & remove spaces
+
+        if (!variantsData) {
+            alert("Variants data is missing!");
+            event.preventDefault();
+            return;
+        }
+
+        let parsedVariants = JSON.parse(variantsData);
+
+        if (!Array.isArray(parsedVariants)) {
+            alert("Invalid format: Variants must be an array!");
+            event.preventDefault();
+            return;
+        }
+
+        for (let variant of parsedVariants) {
+            if (!variant.color || variant.quantity <= 0) {
+                alert("Each variant must have a color and stock > 0!");
+                event.preventDefault();
+                return;
+            }
+        }
+    } catch (error) {
+        alert("Error parsing variants data: " + error.message);
+        event.preventDefault();
+    }
+};
+
+document.getElementById("productForm").onsubmit = function (event) {
+    try {
+        const variantsData = JSON.stringify(variantsArray); // Convert array to JSON
+        document.getElementById("variantsData").value = variantsData; // Assign JSON to hidden field
+    } catch (error) {
+        console.error("Error setting variants JSON:", error);
+        event.preventDefault(); // Stop form submission if JSON conversion fails
+        alert("Invalid variants format. Please check your selections.");
+    }
+};
+
+document.getElementById('productForm').addEventListener('submit', function (event) {
+    const variantsData = document.getElementById('variantsData').value.trim();
+    const variantsError = document.getElementById('variantsError');
+
+    try {
+        const variants = JSON.parse(variantsData); // Try parsing JSON
+
+        if (!Array.isArray(variants) || variants.length === 0) {
+            throw new Error(); // If not an array or empty, trigger error
+        }
+
+        variantsError.style.display = "none"; // Hide error if valid
+    } catch (error) {
+        variantsError.style.display = "block"; // Show error message
+        event.preventDefault(); // Stop form submission
+    }
+});
+
+
     </script>
 </body>
 

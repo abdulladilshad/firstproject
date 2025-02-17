@@ -7,6 +7,11 @@ const checkSession = (req,res,next)=>{
 }
 
 const isLogin = (req, res, next) => {
+    console.log('andiiiiiii');
+    
+    console.log(req.session.user );
+    console.log('kundiiiiiiiiiiiiii');
+    
     if (req.session && req.session.user) {
         return res.redirect('/');
     } else {

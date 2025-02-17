@@ -218,7 +218,7 @@ const login = async (req, res) => {
         // Load home page with products & categories
         const products = await productModel.find({});
         const categories = await categoryModel.find({});
-        res.render('user/index', { products, categories });
+        res.redirect('/' );
 
     } catch (error) {
         console.error('Error during login:', error);

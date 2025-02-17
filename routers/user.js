@@ -11,7 +11,7 @@ router.post('/register',userController.register)
 
 
 router.get('/login',auth.isLogin,userController.Loadlogin)
-router.post('/login',userController.login)
+router.post('/login',auth.isLogin,userController.login)
 
 // router.get('/home',userController.Loadhome)
 router.get('/logout',auth.checkSession,userController.logout)

@@ -74,10 +74,12 @@
                     </thead>
                     <tbody>
                         <!-- Dynamic rows rendered using EJS -->
+                         <%w=(currentPage==1)?0:(currentPage-1)*7%>
                         <% products.forEach((product, index)=> { %>
                             <tr>
                                 <td>
-                                    <%= index + 1 %>
+                                   <%= ((index)+1)+w%>
+
                                 </td>
                                 <td>
                                     <%= product.productName %>

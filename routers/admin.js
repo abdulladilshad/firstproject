@@ -13,30 +13,23 @@ router.post('/login', adminController.login);
 //DASHBORD
 router.get('/dashboard', adminauth.cheksession, adminController.Loddashbord);
 
-//PRODUCTS
-router.get('/products',adminController.LoadProducts)
-router.post('/addproducts',adminController.addProduct);
-router.get('/addproducts', adminController.renderAddProduct);
-router.get('/editproducts/:id',adminController.editproducts)
-router.post('/editproducttt',adminController.editproducttt)
-
-//products pagination
-
+// PRODUCT MANAGEMENT 
+router.get('/products', adminauth.cheksession, adminController.LoadProducts);
+router.post('/addproducts', adminauth.cheksession, adminController.addProduct);
+router.get('/addproducts', adminauth.cheksession, adminController.renderAddProduct);
+router.get('/editproducts/:id', adminauth.cheksession, adminController.editproducts);
+router.post('/editproducttt', adminauth.cheksession, adminController.editproducttt);
+router.put('/products/toggle-status/:product_id', adminauth.cheksession, adminController.toggleProductStatus);
 
 
-//UNLIST AND LIST PRODUCTS
-router.put('/products/toggle-status/:product_id', adminController.toggleProductStatus);
+// CATEGORY MANAGEMENT 
+router.get('/categories', adminauth.cheksession, adminController.LoadCategory);
+router.get('/addcategories', adminauth.cheksession, adminController.AddCategory);
+router.post('/addcategories', adminauth.cheksession, adminController.postAddCategory);
+router.get('/categories/edit/:id', adminauth.cheksession, adminController.loadEditCategory);
+router.post('/categories/edit/:id', adminauth.cheksession, adminController.editCategory);
+router.put('/categories/toggle-status/:category_id', adminauth.cheksession, adminController.togglecategories);
 
-
-//CATEGORIES
-router.get('/categories',adminController.LoadCategory)
-router.get('/addcategories',adminController.AddCategory)
-router.post('/addcategories',adminController.postAddCategory);
-router.get('/categories/edit/:id',adminController.loadEditCategory)
-router.post('/categories/edit/:id',adminController.editCategory)  
-
-//UNLIST & LIST CATEGORIES
-router.put('/categories/toggle-status/:category_id',adminController.togglecategories)
 
       
 //PRODUCT IMAGE VIEW
@@ -56,11 +49,11 @@ router.get('/getProductById/:id', async (req, res) => {
     }
 });
 
-//USER 
-router.get('/users',adminController.Loadusers)
 
-//BLOCK AND UNBLOCK USERS
-router.put('/users/toggle-status/:user_id', adminController.toggleUserStatus);
+
+  // USER MANAGEMENT
+router.get('/users', adminauth.cheksession, adminController.Loadusers);
+router.put('/users/toggle-status/:user_id', adminauth.cheksession, adminController.toggleUserStatus);
 
 
 //LOGOUT

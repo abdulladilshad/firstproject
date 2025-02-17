@@ -265,9 +265,14 @@
                 <li><a href="/settings">
                     <i class="fas fa-cog"></i> Settings
                 </a></li>
-                <li><a href="/logout">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a></li>
+                <li>
+                    <form id="logoutForm" action="/admin/logout" method="POST">
+                        <a href="#" onclick="document.getElementById('logoutForm').submit();">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </form>
+                </li>
+                
             </ul>
         </aside>
         <main class="main-content">
