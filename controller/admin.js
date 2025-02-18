@@ -162,7 +162,9 @@ const LoadProducts = async (req, res) => {
 const renderAddProduct = async (req, res) => {
     try {
         const categories = await categoryModel.find({});
-        res.render('admin/addproducts', { categories });
+        
+    
+        res.render('admin/addproducts', { categories ,error:''});
     } catch (error) {
         console.error('Error while fetching categories:', error);
         res.render('admin/addproducts');
@@ -209,9 +211,10 @@ const addProduct = async (req, res) => {
         }
 
         //  Check if product already exists
-        const existingProduct = await productModel.findOne({ productName: productName.trim() });
+        const existingProduct = await productModel.findOne({ productName : productName.trim() });
         if (existingProduct) {
-            return res.status(409).send("Product already exists."); // 409 Conflict
+            const categories = await categoryModel.find({});
+         return res.render('admin/addproducts',{ error: 'Product name already exists' ,categories});
         }
 
         // Array to store image paths
@@ -460,7 +463,7 @@ const editproducts = async (req, res) => {
         console.log(products);
 
         const categories = await categoryModel.find({})
-        res.render('admin/editproducts', { categories, products })
+        res.render('admin/editproducts', { categories, products ,errorMessage:''})
     }
     catch (er) {
         console.log(er);
@@ -483,10 +486,28 @@ const editproducttt = async (req, res) => {
             return res.status(404).send("Product not found.");
         }
 
-        // Update product name if provided
+
+
+        // Check if the new product name already exists (excluding the current product)
         if (productName) {
+            const existingProduct = await productModel.findOne({ 
+                productName: productName.trim(), 
+                _id: { $ne: productId } // Exclude the current product
+            });
+
+            if (existingProduct) {
+                const categories = await categoryModel.find()
+                return res.render('admin/editproducts', { 
+                    errorMessage: "Product name already exists!", 
+                    products: product ,
+                    categories
+
+                });
+            }
+
             product.productName = productName.trim();
         }
+
 
         // Function to save base64 images to a file
         const saveBase64ToFile = async (base64Data, filename) => {

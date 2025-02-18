@@ -59,6 +59,11 @@
                         <input type="text" id="productName" name="productName" value="<%= products.productName %>">
                         <div class="error-message" id="productNameError" style="display:none; color: red;">Product name
                             is required</div>
+                            <% if (errorMessage) { %>
+                                <div style="color: red; margin-bottom: 15px;">
+                                    <%= errorMessage %>
+                                </div>
+                                <% } %>
                     </div>
 
                     <!-- Category -->
