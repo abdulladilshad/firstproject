@@ -469,118 +469,103 @@ const editproducts = async (req, res) => {
 
 }
 
-
 const editproducttt = async (req, res) => {
-    const { image1, image2, image3, image4, productName, productId } = req.body
+    const { productId, image1, image2, image3, image4, productName } = req.body;
 
-    let productname = productName.trim().replace(/\s+/g, '_');
-
-    const savedImagePaths = []
-
-    const saveBase64ToFile = (base64Data, filename) => {
-
-        const matches = base64Data.match(/^data:image\/(png|jpg|jpeg);base64,(.+)$/);
-        if (!matches) {
-            return false; // Invalid base64 format
-        }
-
-
-        const imageBuffer = Buffer.from(matches[2], 'base64');
-
-        // Specify the relative path where images should be saved
-        const filePath = path.join('public', 'images', productname, filename);
-
-        // Ensure the directory exists, or create it if not
-        const dirPath = path.dirname(filePath);
-        if (!fs.existsSync(dirPath)) {
-            fs.mkdirSync(dirPath, { recursive: true });
-        }
-
-        // Write the image file to the path
-        fs.writeFileSync(filePath, imageBuffer);
-
-        // Return the relative file path
-        return `images/${productname}/${filename}`;
-    };
-
-    // Save each image if base64 data is provided and store the path
-    if (image1) {
-        const savedPath = saveBase64ToFile(image1, 'image1.png');
-        if (savedPath) {
-            savedImagePaths.push(savedPath);
-            console.log('image1 saved:', savedPath);
-        }
-    }
-    if (image2) {
-        const savedPath = saveBase64ToFile(image2, 'image2.png');
-        if (savedPath) {
-            savedImagePaths.push(savedPath);
-            console.log('image2 saved:', savedPath);
-        }
-    }
-    if (image3) {
-        const savedPath = saveBase64ToFile(image3, 'image3.png');
-        if (savedPath) {
-            savedImagePaths.push(savedPath);
-            console.log('image3 saved:', savedPath);
-        }
-    }
-    if (image4) {
-        const savedPath = saveBase64ToFile(image4, 'image4.png');
-        if (savedPath) {
-            savedImagePaths.push(savedPath);
-            console.log('image4 saved:', savedPath);
-        }
-    }
-
-    // Remove base64 images from req.body
-    delete req.body.image1;
-    delete req.body.image2;
-    delete req.body.image3;
-    delete req.body.image4;
-
-    // Add the saved image paths array to req.body
-    req.body.imagePaths = savedImagePaths;
-
-    if (req.body.variants) {
-        try {
-            req.body.variants = JSON.parse(req.body.variants);
-            if (!Array.isArray(req.body.variants)) throw new Error("Variants must be an array.");
-        } catch (error) {
-            return res.status(400).send("Invalid JSON format for variants.");
-        }
-    } else {
-        req.body.variants = []; // Default empty array if missing
-    }
-
-    // ✅ Validate each variant
-    for (let variant of req.body.variants) {
-        if (!variant.color || typeof variant.color !== 'string' || variant.color.trim() === "") {
-            return res.status(400).send("Each variant must have a valid color.");
-        }
-        if (!variant.quantity || isNaN(variant.quantity) || Number(variant.quantity) <= 0) {
-            return res.status(400).send("Each variant must have a stock quantity greater than 0.");
-        }
+    if (!productId) {
+        return res.status(400).send("Product ID is required.");
     }
 
     try {
-        const updatedProduct = await productModel.findByIdAndUpdate(
-            productId,
-            req.body,
-            { new: true, runValidators: true }
-        );
+        // Find the existing product
+        const product = await productModel.findById(productId);
+        if (!product) {
+            return res.status(404).send("Product not found.");
+        }
 
-        if (!updatedProduct) return res.status(404).send('Product not found');
+        // Update product name if provided
+        if (productName) {
+            product.productName = productName.trim();
+        }
 
-        console.log('Product updated successfully:', updatedProduct);
+        // Function to save base64 images to a file
+        const saveBase64ToFile = async (base64Data, filename) => {
+            const matches = base64Data.match(/^data:image\/(png|jpg|jpeg);base64,(.+)$/);
+            if (!matches) return false;
+
+            const imageBuffer = Buffer.from(matches[2], 'base64');
+            const productname = product.productName.replace(/\s+/g, '');
+            const filePath = path.join('public', 'images', productname, filename);
+            const dirPath = path.dirname(filePath);
+
+            try {
+                await fs.promises.access(dirPath);
+            } catch (error) {
+                await fs.promises.mkdir(dirPath, { recursive: true });
+            }
+
+            await fs.promises.writeFile(filePath, imageBuffer);
+            return `images/${productname}/${filename}`;
+        };
+
+        // Array to store new image paths
+        const savedImagePaths = [...(product.imagePaths || [])];
+
+        // Save new images if provided
+        if (image1) {
+            savedImagePaths[0] = await saveBase64ToFile(image1, 'image1.png');
+        }
+        if (image2) {
+            savedImagePaths[1] = await saveBase64ToFile(image2, 'image2.png');
+        }
+        if (image3) {
+            savedImagePaths[2] = await saveBase64ToFile(image3, 'image3.png');
+        }
+        if (image4) {
+            savedImagePaths[3] = await saveBase64ToFile(image4, 'image4.png');
+        }
+
+        // Update image paths
+        product.imagePaths = savedImagePaths;
+
+        // Convert color string to array if exists
+        if (req.body.color) {
+            product.color = req.body.color.split(",").map(c => c.trim());
+        }
+
+        // Validate and parse variants
+        let variants;
+        try {
+            variants = JSON.parse(req.body.variants || '[]');
+            if (!Array.isArray(variants)) {
+                return res.status(400).send("Variants must be an array.");
+            }
+            for (let variant of variants) {
+                if (!variant.color || typeof variant.color !== 'string' || variant.color.trim() === "") {
+                    return res.status(400).send("Each variant must have a valid color.");
+                }
+                if (!variant.quantity || isNaN(variant.quantity) || Number(variant.quantity) <= 0) {
+                    return res.status(400).send("Each variant must have a stock quantity greater than 0.");
+                }
+            }
+        } catch (err) {
+            console.error("Error parsing variants JSON:", err);
+            return res.status(400).send("Invalid JSON format for variants.");
+        }
+
+        // Update product variants
+        product.variants = variants;
+
+        await product.save();
         res.redirect('/admin/products');
     } catch (error) {
         console.error('Error updating product:', error);
         res.status(500).send('Error updating product');
     }
+};
 
 
-}
+
 
 const logout = async (req, res) => {
     req.session.admin = null
