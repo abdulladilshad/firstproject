@@ -6,7 +6,7 @@ const auth=require('../middleware/auth')
 
 
 router.get('/register',auth.isLogin,userController.loadregister)
-router.get('/',auth.isBan,auth.checkSession,userController.loadhome)
+router.get('/',auth.checkSession,auth.isBan,userController.loadhome)
 router.post('/register',userController.register)
 
 
@@ -23,10 +23,7 @@ router.post('/verify-otp',userController.postotp)
 //RESEND OTP
 router.get("/resend-otp",userController.ResendOtp)
 
-// router.get('/auth/google',passport.authenticate('google',{scope:['profile','email']}))
-// router.get ('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/register'}),(req,res)=>{
-//     res.redirect('/home')
-// })
+
 
 
 router.get('/auth/google', 
@@ -36,18 +33,17 @@ router.get('/auth/google',
 router.get('/auth/google/callback', 
     passport.authenticate('google', { 
       failureRedirect: '/register',
-      failureMessage: true // Optional: store failure message in session
+      failureMessage: true 
     }),
     (req, res) => {
-      // Session is automatically created at this point
-      // You can add custom session data here if needed
+      
       req.session.user = {
         id: req.user.id,
         email: req.user.email,
         name: req.user.displayName
       };
   
-      // Force session save before redirect (optional)
+      
       req.session.save((err) => {
         if (err) {
           console.error('Session save error:', err);
@@ -57,8 +53,8 @@ router.get('/auth/google/callback',
     }
   );
 
-router.get('/shope',auth.isBan,userController.Loadshope)
-router.get('/product/:id', userController.Loadproductdeatails);
+router.get('/shope',auth.isBan,auth.checkSession,userController.Loadshope)
+router.get('/product/:id',auth.isBan,auth.checkSession,userController.Loadproductdeatails);
 
 
 

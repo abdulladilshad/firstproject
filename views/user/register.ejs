@@ -7,21 +7,29 @@
   <form action="/register" method="post" id="form">
 
     <div class="user-box">
-      <input type="email" name="email" id="email" style="color: #ffff;"/>
-      <label >Email</label>
+      <input type="email" name="email" id="email" style="color: #ffff;" />
+      <label>Email</label>
+      <small class="error-message" id="email-error"></small>
     </div>
+
     <div class="user-box">
       <input type="password" name="password" id="password" style="color: #ffff;" />
       <label>Password</label>
+      <small class="error-message" id="password-error"></small>
     </div>
+
     <div class="user-box">
       <input type="password" name="confirmpassword" id="confirmpassword" style="color: #ffff;" />
       <label>Confirm Password</label>
+      <small class="error-message" id="confirm-password-error"></small>
     </div>
+
     <div class="submit">
-      <button type="submit" >Submit</button>
+      <button type="submit">Submit</button>
     </div>
+
     <a href="/login" class="submitt">Go to Login</a>
+
     <div class="gbutton">
       <a href="/auth/google" target="_blank" class="sing">
         <button type="button">
@@ -29,9 +37,7 @@
           Sign in with Google
         </button>
       </a>
-      
     </div>
-    
   </form>
 </div>
 
@@ -43,19 +49,65 @@
   function formvalidate(e) {
     e.preventDefault();
 
-    var email = document.getElementById('email').value;
-    var password = document.getElementById('password').value;
-    var confirmpassword = document.getElementById('confirmpassword').value;
+    // Get form values
+    var email = document.getElementById('email').value.trim();
+    var password = document.getElementById('password').value.trim();
+    var confirmpassword = document.getElementById('confirmpassword').value.trim();
 
-    if (email === "" || password === "" || confirmpassword === "") {
-      alert("All fields are required");
-      return false;
-    } else if (password !== confirmpassword) {
-      alert("Passwords do not match");
-      return false;
+    // Error message elements
+    var emailError = document.getElementById('email-error');
+    var passwordError = document.getElementById('password-error');
+    var confirmPasswordError = document.getElementById('confirm-password-error');
+
+    // Reset previous errors
+    emailError.textContent = "";
+    passwordError.textContent = "";
+    confirmPasswordError.textContent = "";
+
+    let isValid = true;
+
+    // Email validation
+    var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (email === "") {
+      emailError.textContent = "Email is required";
+      isValid = false;
+    } else if (!emailPattern.test(email)) {
+      emailError.textContent = "Enter a valid email";
+      isValid = false;
     }
 
-    e.target.submit();
-    return true;
+    // Password validation
+    if (password === "") {
+      passwordError.textContent = "Password is required";
+      isValid = false;
+    } else if (password.length < 6) {
+      passwordError.textContent = "Password must be at least 6 characters";
+      isValid = false;
+    } else if (/\s/.test(password)) {
+      passwordError.textContent = "Password cannot contain spaces";
+      isValid = false;
+    }
+
+    // Confirm password validation
+    if (confirmpassword === "") {
+      confirmPasswordError.textContent = "Confirm password is required";
+      isValid = false;
+    } else if (password !== confirmpassword) {
+      confirmPasswordError.textContent = "Passwords do not match";
+      isValid = false;
+    }
+
+    // If all checks pass, submit the form
+    if (isValid) {
+      e.target.submit();
+    }
   }
 </script>
+
+<style>
+  .error-message {
+    color: red;
+    font-size: 12px;
+    display: block;
+  }
+</style>

@@ -130,6 +130,10 @@
                                         <option value="Black">Black</option>
                                         <option value="White">White</option>
                                         <option value="Yellow">Yellow</option>
+                                        <option value="White gold">White gold</option>
+                                        <option value="gold">gold</option>
+                                        <option value="brown">brown</option>
+                                        <option value="silver">silver</option>
                                     </select>
                                     <div class="error-message" id="colorEx" style="display:none; color: red;">Alredy
                                         exist this color
@@ -420,7 +424,6 @@
                 });
                 valid = false;
             }
-            alert(valid)
             if (!valid) {
                 e.preventDefault();
             }
@@ -452,21 +455,20 @@
                 const stock = document.getElementById('stockInput').value;
                 const colorEx = document.getElementById('colorEx');
                 const existingVariantsList = document.getElementById('variantsList');
+                
+                // Get existing variants from the hidden input
+                let existingVariants = [];
+                try {
+                    existingVariants = JSON.parse(document.getElementById('variantsData').value);
+                } catch (e) {
+                    existingVariants = [];
+                }
 
                 // Hide any previous error message
                 colorEx.style.display = 'none';
 
-                // Check if color exists in variantsData
-                if (variantsData.some(variant => variant.color.toLowerCase() === color.toLowerCase())) {
-                    colorEx.style.display = 'block';
-                    return;
-                }
-
-                // Check if color exists in the variantsList div
-                const existingColors = existingVariantsList.querySelectorAll('p strong');
-                if (Array.from(existingColors).some(element =>
-                    element.textContent.trim().toLowerCase() === color.toLowerCase()
-                )) {
+                // Check if color exists in existing variants
+                if (existingVariants.some(variant => variant.color.toLowerCase() === color.toLowerCase())) {
                     colorEx.style.display = 'block';
                     return;
                 }
@@ -481,7 +483,13 @@
                     return;
                 }
 
-                variantsData.push({ color, quantity: parseInt(stock) });
+                // Add new variant to existing variants
+                existingVariants.push({ color, quantity: parseInt(stock) });
+                
+                // Update variantsData with combined variants
+                variantsData.length = 0;
+                variantsData.push(...existingVariants);
+                
                 updateVariantsList();
                 document.getElementById('colorInput').value = '';
                 document.getElementById('stockInput').value = '';

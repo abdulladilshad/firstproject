@@ -36,7 +36,7 @@ const isBan = async (req, res, next) => {
                 return next(err);
             }
             // Set flash in the new session created after destruction
-            res.render('user/login', { message:['bannneeeedijkuasfhukasdgfuiawsd'] });
+            res.render('user/login', { message:['You have been Blocked'] });
         ;
         });
     } else {

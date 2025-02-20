@@ -5,8 +5,8 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    trim: true, // Removes extra spaces
-    lowercase: true // Converts email to lowercase
+    trim: true, 
+    lowercase: true 
   },
   googleId:{
     type:String,
@@ -18,8 +18,8 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'admin'], // Restricts role to 'user' or 'admin'
-    default: 'user' // Default role is 'user'
+    enum: ['user', 'admin'], 
+    default: 'user' 
   },
   isBlock:{
     type:Boolean,

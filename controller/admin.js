@@ -3,7 +3,7 @@ const adminSchema = require('../models/adminmodel')
 const bcrypt = require('bcrypt')
 const categoryModel = require('../models/categories')
 const productModel = require('../models/product')
-const fs = require('fs'); // Import the promises version of fs
+const fs = require('fs');
 const path = require('path');
 
 const Loadlogin = async (req, res) => {
@@ -20,7 +20,7 @@ const Loadlogin = async (req, res) => {
             await admin.save();
             console.log('Admin created successfully');
         }
-        // Pass an empty message or null if no message is needed
+
         res.render('admin/login', { message: null });
     } catch (error) {
         console.error('Error creating admin:', error);
@@ -42,9 +42,9 @@ const login = async (req, res) => {
             return res.render("admin/login", { message: "Invalid credentials" });
         }
 
-        // Set the session variable after login
+
         req.session.admin = true;
-        console.log(req.session); // Check session after setting
+        console.log(req.session);
 
         res.redirect("/admin/dashboard");
     } catch (error) {
@@ -61,7 +61,7 @@ const Loddashbord = async (req, res) => {
 
         const searchQuery = req.query.search || ""
 
-        let users = [];  // Initialize users as an empty array
+        let users = [];
 
         if (searchQuery) {
             users = await usermodel
@@ -70,10 +70,10 @@ const Loddashbord = async (req, res) => {
                 })
                 .exec()
         } else {
-            users = await usermodel.find({}).exec()  // Fetch all users if no search query
+            users = await usermodel.find({}).exec()
         }
 
-        // Map through the users only if the array is not empty
+
         const usersWithIndex = users.map((user, index) => {
             const userObject = user.toObject();
             userObject.originalIndex = index + 1
@@ -81,7 +81,7 @@ const Loddashbord = async (req, res) => {
         })
 
         res.render('admin/dashbord', {
-            users: usersWithIndex,  // Send the modified users list
+            users: usersWithIndex,
             searchQuery: searchQuery,
         })
 
@@ -94,8 +94,8 @@ const Loddashbord = async (req, res) => {
 
 const Loadusers = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1; // Get current page, default is 1
-        const limit = 8; // Number of users per page
+        const page = parseInt(req.query.page) || 1;
+        const limit = 8;
 
         const users = await usermodel.paginate({}, { page, limit });
 
@@ -117,7 +117,7 @@ const toggleUserStatus = async (req, res) => {
             return res.status(404).json({ success: false, error: 'User not found' });
         }
 
-        user.isBlock = !user.isBlock; // Toggle status
+        user.isBlock = !user.isBlock;
         await user.save();
 
         res.status(200).json({
@@ -135,19 +135,20 @@ const toggleUserStatus = async (req, res) => {
 
 const LoadProducts = async (req, res) => {
     try {
-        let page = parseInt(req.query.page) || 1;  // Default to page 1
-        let limit = 7;  // Products per page
+        let page = parseInt(req.query.page) || 1;
+        let limit = 7;
 
         const options = {
             page,
             limit,
-            populate: { path: 'category', select: 'name' }  // Populate category name
+            sort: { _id: -1 },
+            populate: { path: 'category', select: 'name' }
         };
 
-        const products = await productModel.paginate({}, options); // Ensure paginate is used
+        const products = await productModel.paginate({}, options);
 
         res.render('admin/products', {
-            products: products.docs,  // Paginated product list
+            products: products.docs,
             currentPage: page,
             totalPages: products.totalPages
         });
@@ -180,7 +181,7 @@ const toggleProductStatus = async (req, res) => {
             return res.status(404).json({ success: false, error: 'Product not found' });
         }
 
-        product.isDelete = !product.isDelete; // Toggle the isListed status
+        product.isDelete = !product.isDelete;
         await product.save();
 
         res.status(200).json({
@@ -198,21 +199,21 @@ const toggleProductStatus = async (req, res) => {
 const addProduct = async (req, res) => {
     const { image1, image2, image3, image4, productName } = req.body;
 
-    // Validate required fields
+
     if (!productName) {
         return res.status(400).send("Product name is required.");
     }
 
     try {
-        // Check total products count   
+
         const productCount = await productModel.countDocuments();
         if (productCount < 2) {
-            return res.status(403).send("At least 2 products must exist before adding a new one."); // 403 Forbidden
+            return res.status(403).send("At least 2 products must exist before adding a new one.");
         }
 
-        // Check if product already exists (case-insensitive)
+
         const existingProduct = await productModel.findOne({
-            productName: { $regex: new RegExp("^" + productName.trim() + "$", "i") } // Case-insensitive match
+            productName: { $regex: new RegExp("^" + productName.trim() + "$", "i") }
         });
 
         if (existingProduct) {
@@ -223,33 +224,33 @@ const addProduct = async (req, res) => {
             });
         }
 
-        // Array to store image paths
+
         const savedImagePaths = [];
 
-        //  Function to save base64 images to a file
+
         const saveBase64ToFile = async (base64Data, filename) => {
             const matches = base64Data.match(/^data:image\/(png|jpg|jpeg);base64,(.+)$/);
-            if (!matches) return false; // Invalid base64 format
+            if (!matches) return false;
 
             const imageBuffer = Buffer.from(matches[2], 'base64');
             const productname = productName.trim().replace(/\s+/g, '');
             const filePath = path.join('public', 'images', productname, filename);
             const dirPath = path.dirname(filePath);
 
-            // Ensure the directory exists
+
             try {
                 await fs.promises.access(dirPath);
             } catch (error) {
                 await fs.promises.mkdir(dirPath, { recursive: true });
             }
 
-            // Write the image file
+
             await fs.promises.writeFile(filePath, imageBuffer);
 
             return `images/${productname}/${filename}`;
         };
 
-        // Save each image if base64 data is provided
+
         if (image1) {
             const savedPath = await saveBase64ToFile(image1, 'image1.png');
             if (savedPath) savedImagePaths.push(savedPath);
@@ -267,21 +268,21 @@ const addProduct = async (req, res) => {
             if (savedPath) savedImagePaths.push(savedPath);
         }
 
-        // Remove base64 images from req.body
+
         delete req.body.image1;
         delete req.body.image2;
         delete req.body.image3;
         delete req.body.image4;
 
-        // Add image paths array to req.body
+
         req.body.imagePaths = savedImagePaths;
 
-        // Convert color string to array if exists
+
         if (req.body.color) {
             req.body.color = req.body.color.split(",").map(c => c.trim());
         }
 
-        // Validate and parse variants
+
         let variants;
         try {
             variants = JSON.parse(req.body.variants || '[]');
@@ -304,7 +305,7 @@ const addProduct = async (req, res) => {
         }
 
 
-        // Assign validated variants back to req.body
+
         req.body.variants = variants;
 
 
@@ -323,7 +324,7 @@ const addProduct = async (req, res) => {
 
 
 
-// Load categories and display them on the management page
+
 const LoadCategory = async (req, res) => {
     try {
         const admin = req.session.admin;
@@ -335,8 +336,8 @@ const LoadCategory = async (req, res) => {
 
         const products = await productModel.find({ category: { $in: categoryIds } });
 
-        console.log("ffffffffffffffffffff",products )
-        
+        console.log("ffffffffffffffffffff", products)
+
         res.render('admin/categories', { categories, products });
     } catch (error) {
         console.error('Error loading categories:', error);
@@ -348,18 +349,18 @@ const postAddCategory = async (req, res) => {
     try {
         const { name, description } = req.body;
 
-        
+
         if (!name || !description) {
             return res.render('admin/addcategories', { error: 'Category name and description are required' });
         }
 
-        // Check for duplicate category name
+
         const existingCategory = await categoryModel.findOne({ name: { $regex: new RegExp(`^${name}$`, "i") } });
         if (existingCategory) {
             return res.render('admin/addcategories', { error: 'Category name already exists' });
         }
 
-       
+
         const newCategory = new categoryModel({ name, description });
         await newCategory.save();
 
@@ -388,10 +389,10 @@ const editCategory = async (req, res) => {
         const { name, description } = req.body;
 
 
-          // Case-insensitive check for existing category (excluding the current one)
-          const existingCategory = await categoryModel.findOne({ 
-            name: { $regex: new RegExp(`^${name}$`, "i") }, 
-            _id: { $ne: categoryId } // Exclude the current category
+
+        const existingCategory = await categoryModel.findOne({
+            name: { $regex: new RegExp(`^${name}$`, "i") },
+            _id: { $ne: categoryId }
         });
 
         if (existingCategory) {
@@ -401,15 +402,15 @@ const editCategory = async (req, res) => {
             });
         }
 
-        // Update the category
+
         await categoryModel.findByIdAndUpdate(categoryId, { name, description });
 
-        // Redirect to the categories list on success
+
         res.redirect('/admin/categories?success=Category updated successfully.');
     } catch (error) {
         console.error('Error updating category:', error);
 
-        // Render the edit page with a general error message
+
         res.render('editCategory', {
             category: { _id: req.params.id, name: req.body.name, description: req.body.description },
             error: 'An error occurred while updating the category.',
@@ -428,8 +429,8 @@ const togglecategories = async (req, res) => {
         category.isdelete = !category.isdelete
 
         await productModel.updateMany(
-            { category: categoryId },  
-            { $set: { isDelete: true } }  
+            { category: categoryId },
+            { $set: { isDelete: true } }
         );
 
 
@@ -447,28 +448,28 @@ const loadEditCategory = async (req, res) => {
     try {
         const categoryId = req.params.id;
 
-        // Log the category ID
+
         console.log('Category ID:', categoryId);
 
-        // Fetch the category by ID
+
         const category = await categoryModel.findById(categoryId);
 
-        // Log the fetched category for debugging
+
         console.log('Fetched Category:', category);
 
-        // If the category is not found, redirect to the categories list
+
         if (!category) {
             console.warn('Category not found for ID:', categoryId);
             return res.redirect('/admin/categories');
         }
 
-        // Render the editcategories page with the category data
+
         res.render('admin/editcategories', { category, error: null });
     } catch (error) {
-        // Log the error with detailed information
+
         console.error('Error loading edit category page:', error);
 
-        // Redirect to the categories list in case of an error
+
         res.redirect('/admin/categories');
     }
 };
@@ -502,7 +503,7 @@ const editproducttt = async (req, res) => {
     }
 
     try {
-        // Find the existing product
+
         const product = await productModel.findById(productId);
         if (!product) {
             return res.status(404).send("Product not found.");
@@ -528,7 +529,7 @@ const editproducttt = async (req, res) => {
         }
 
 
-        // Function to save base64 images to a file
+
         const saveBase64ToFile = async (base64Data, filename) => {
             const matches = base64Data.match(/^data:image\/(png|jpg|jpeg);base64,(.+)$/);
             if (!matches) return false;
@@ -548,10 +549,10 @@ const editproducttt = async (req, res) => {
             return `images/${productname}/${filename}`;
         };
 
-        // Array to store new image paths
+
         const savedImagePaths = [...(product.imagePaths || [])];
 
-        // Save new images if provided
+
         if (image1) {
             savedImagePaths[0] = await saveBase64ToFile(image1, 'image1.png');
         }
@@ -591,7 +592,7 @@ const editproducttt = async (req, res) => {
             return res.status(400).send("Invalid JSON format for variants.");
         }
 
-        // Update product variants
+
         product.variants = variants;
 
         await product.save();

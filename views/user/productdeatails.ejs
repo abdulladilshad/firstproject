@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" dir="rtl">
+
 <head>
     <title>Product Details - Kaira Fashion Store</title>
     <meta charset="utf-8">
@@ -7,283 +8,258 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Poppins:wght@300;400;500&display=swap"
+        rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/styles/userProductDeatails.css">
     <style>
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .related-products {
+            padding: 60px 0;
+            background-color: #f8f9fa;
         }
 
-        @keyframes shimmer {
-            0% {
-                background-position: -1000px 0;
-            }
-            100% {
-                background-position: 1000px 0;
-            }
+        .section-header {
+            margin-bottom: 40px;
         }
 
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #f6f6f8 0%, #f0f0f3 100%);
-            color: #333;
-        }
-        
-        .product-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 30px;
-            box-shadow: 
-                0 10px 30px rgba(0,0,0,0.1),
-                inset 0 0 0 1px rgba(255,255,255,0.5);
-            overflow: hidden;
-            margin: 2rem auto;
-            animation: fadeInUp 0.8s ease-out;
-        }
-        
-        .gallery-section {
-            padding: 2rem;
-            background: linear-gradient(145deg, #ffffff, #f8f9fa);
-        }
-        
-        .main-image {
-            position: relative;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 15px 25px rgba(0,0,0,0.05);
-            animation: float 6s ease-in-out infinite;
-            cursor: none;
-        }
-        
-        .main-image img {
-            width: 100%;
-            height: 600px;
-            object-fit: cover;
-            transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .main-image:hover img {
-            transform: scale(1.1) rotate(-2deg);
-        }
-
-        .magnifying-glass {
-            position: absolute;
-            width: 150px;
-            height: 150px;
-            border: 3px solid #fff;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            pointer-events: none;
-            transform: translate(-50%, -50%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: 10;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            background-repeat: no-repeat;
-            background-size: 200% 200%;
-        }
-
-        .main-image:hover .magnifying-glass {
-            opacity: 1;
-        }
-        
-        .thumbnails-container {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-        
-        .thumbnail-wrapper {
-            position: relative;
-            border-radius: 15px;
-            overflow: hidden;
-            cursor: pointer;
-            transform-origin: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .thumbnail-wrapper img {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .thumbnail-wrapper::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(45deg, rgba(0,0,0,0.1), transparent);
-            z-index: 1;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .thumbnail-wrapper:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-        
-        .thumbnail-wrapper:hover::before {
-            opacity: 1;
-        }
-        
-        .product-info {
-            padding: 3rem;
-            animation: fadeInUp 1s ease-out 0.3s backwards;
-        }
-        
-        .product-title {
-            font-size: 3rem;
-            font-weight: 600;
-            background: linear-gradient(45deg, #1a1a1a, #4a4a4a);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 1rem;
-        }
-        
-        .price {
+        .section-title {
             font-size: 2.5rem;
-            background: linear-gradient(45deg, #2c3e50, #3498db);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 2rem;
-            animation: shimmer 3s infinite linear;
-            background-size: 200% 100%;
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 15px;
         }
-        
-        .product-meta {
-            background: rgba(255,255,255,0.8);
-            backdrop-filter: blur(10px);
-            padding: 2rem;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 
-                0 10px 30px rgba(0,0,0,0.05),
-                inset 0 0 0 1px rgba(255,255,255,0.5);
-            animation: fadeInUp 1s ease-out 0.6s backwards;
+
+        .section-divider {
+            width: 60px;
+            height: 2px;
+            background-color: #000;
+            margin: 15px auto;
         }
-        
-        .meta-item {
+
+        .section-subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .related-products-slider {
+            padding: 20px;
+            position: relative;
             display: flex;
-            justify-content: space-between;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+            justify-content: center;
+            margin: 0 auto;
+            max-width: 1200px;
+        }
+
+        .related-products-slider::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+
+        .swiper-wrapper {
+            display: flex;
+            gap: 20px;
+            padding: 10px 5px;
+        }
+
+        .swiper-slide {
+            flex: 0 0 auto;
+            width: 280px; /* Fixed width for each card */
+        }
+
+        .product-card {
+            width: 100%;
+            margin: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-image {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
+        }
+
+        .product-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.1);
+            display: flex;
             align-items: center;
-            padding: 1rem 0;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 2;
         }
-        
-        .meta-item:hover {
-            transform: translateX(10px);
-            padding-right: 1rem;
+
+        .product-actions {
+            display: flex;
+            gap: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 25px;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
         }
-        
-        .color-option {
+
+        .action-btn {
             width: 35px;
             height: 35px;
             border-radius: 50%;
+            background: white;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            transition: all 0.2s ease;
             cursor: pointer;
-            border: 3px solid #fff;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .color-option:hover {
-            transform: scale(1.2) rotate(360deg);
-        }
-        
-        .color-option.selected {
-            box-shadow: 0 0 0 3px #333, 0 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        .btn-dark, .btn-outline-dark {
-            padding: 1.2rem 2.5rem;
-            font-weight: 500;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            border-radius: 15px;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .btn-dark {
-            background: linear-gradient(45deg, #1a1a1a, #333);
-            border: none;
-            animation: fadeInUp 1s ease-out 0.9s backwards;
-        }
-        
-        .btn-dark::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                90deg,
-                transparent,
-                rgba(255,255,255,0.2),
-                transparent
-            );
-            transition: 0.5s;
-        }
-        
-        .btn-dark:hover::before {
-            left: 100%;
-        }
-        
-        .btn-dark:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-        
-        .btn-outline-dark {
-            background: transparent;
-            border: 2px solid #1a1a1a;
-            animation: fadeInUp 1s ease-out 1.2s backwards;
-        }
-        
-        .btn-outline-dark:hover {
-            background: #1a1a1a;
-            color: #fff;
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            text-decoration: none;
+            font-size: 14px;
         }
 
-        @media (max-width: 768px) {
-            .thumbnails-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .main-image img {
-                height: 400px;
-            }
-            
-            .product-title {
-                font-size: 2.2rem;
-            }
+        .action-btn:hover {
+            background: #000;
+            color: white;
+            border-color: #000;
+            transform: translateY(-2px);
+        }
+
+        .product-card:hover .product-overlay {
+            opacity: 1;
+        }
+
+        .product-card:hover .product-actions {
+            transform: translateY(0);
+        }
+
+        .product-info {
+            padding: 15px;
+            text-align: center;
+        }
+
+        .product-name {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .product-name a {
+            color: #000;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .product-name a:hover {
+            color: #666;
+        }
+
+        .product-price {
+            font-weight: 600;
+            color: #000;
+            font-size: 1.2rem;
+        }
+
+        .swiper-button-prev,
+        .swiper-button-next {
+            color: #000;
+            background: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .swiper-button-prev:after,
+        .swiper-button-next:after {
+            font-size: 18px;
+        }
+
+        .swiper-pagination-bullet {
+            background: #000;
         }
     </style>
 </head>
 
 <body>
+   
+    <nav class="navbar navbar-expand-lg fixed-top bg-white">
+        <div class="container fle">
+            <!-- Brand -->
+            <div class="nav-icons">
+                <a href="/search" class="nav-icon" title="Search">
+                    <i class="fas fa-search"></i>
+                </a>
+                <a href="/wishlist" class="nav-icon" title="Wishlist">
+                    <i class="fas fa-heart"></i>
+                    <span class="icon-badge wishlist-count">0</span>
+                </a>
+                <a href="/cart" class="nav-icon" title="Cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="icon-badge cart-count">0</span>
+                </a>
+                <a href="/account" class="nav-icon" title="Account">
+                    <i class="fas fa-user"></i>
+                </a>
+            </div>
+    
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="toggler-icon"></span>
+            </button>
+    
+           
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <!-- Main Menu -->
+                <ul class="navbar-nav mx-auto text-uppercase">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/shop">Shop</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/men">Men</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/women">Women</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/limited-edition">Limited Edition</a>
+                    </li>
+                </ul>
+    
+               
+                <a class="navbar-brand" href="/">
+                    LUXE TIME 
+                    <span class="brand-dot"></span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
     <div class="container-fluid py-5">
         <div class="product-container">
             <div class="row g-0">
@@ -294,42 +270,58 @@
                             <div class="magnifying-glass"></div>
                         </div>
                         <div class="thumbnails-container">
-                            <% product.imagePaths.forEach(imagePath => { %>
+                            <% product.imagePaths.forEach(imagePath=> { %>
                                 <div class="thumbnail-wrapper">
                                     <img src="/<%= imagePath %>" alt="<%= product.productName %>">
                                 </div>
-                            <% }) %>
+                                <% }) %>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-lg-5">
                     <div class="product-info">
-                        <h1 class="product-title"><%= product.productName %></h1>
-                        <div class="price">$<%= product.price.toFixed(2) %></div>
-                        
+                        <h1 class="product-title">
+                            <%= product.productName %>
+                        </h1>
+                        <div class="price">$<%= product.price.toFixed(2) %>
+                        </div>
+
                         <div class="product-meta">
                             <div class="meta-item">
                                 <span class="fw-medium">Brand</span>
-                                <span><%= product.brand %></span>
+                                <span>
+                                    <%= product.brand %>
+                                </span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="fw-medium">Category</span>
+                                <span>
+                                    <%= product.category.name%>
+                                </span>
                             </div>
                             <div class="meta-item">
                                 <span class="fw-medium">Material</span>
-                                <span><%= product.material %></span>
+                                <span>
+                                    <%= product.material %>
+                                </span>
                             </div>
                             <div class="meta-item">
-                                <span class="fw-medium">Available Colors</span>
-                                <div class="d-flex gap-3">
-                                    <div class="color-option selected" style="background-color: #1a1a1a;"></div>
-                                    <div class="color-option" style="background-color: #964B00;"></div>
-                                    <div class="color-option" style="background-color: #808080;"></div>
-                                    <div class="color-option" style="background-color: #483D8B;"></div>
+                                <span class="fw-medium">Available colors</span>
+                                <div class="variants-list">
+                                    <% product.variants.forEach(variant=> { %>
+                                        <div class="variant-item">
+                                            <%= variant.color %>
+                                        </div>
+                                        <% }) %>
                                 </div>
                             </div>
                         </div>
 
-                        <p class="product-description"><%= product.productDescription %></p>
-                        
+                        <p class="product-description">
+                            <%= product.productDescription %>
+                        </p>
+
                         <div class="d-grid gap-3">
                             <button class="btn btn-dark">Add to Cart</button>
                             <button class="btn btn-outline-dark">Add to Wishlist</button>
@@ -339,50 +331,99 @@
             </div>
         </div>
     </div>
+
+    <section class="related-products mt-5">
+        <div class="section-header text-center mb-5">
+            <h2 class="section-title">Similar Products</h2>
+            <div class="section-divider"></div>
+            <p class="section-subtitle">More from this category</p>
+        </div>
+    
+        <div class="related-products-slider swiper">
+            <div class="swiper-wrapper">
+                <% sameCategoryProducts.forEach(product => { %>
+                    <div class="swiper-slide">
+                        <div class="product-card">
+                            <div class="product-image">
+                                <img src="/<%= product.imagePaths[0] %>" alt="<%= product.productName %>">
+                                <div class="product-overlay">
+                                    <div class="product-actions">
+                                        <a href="/product/<%= product._id %>" class="action-btn" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <button class="action-btn" title="Add to Cart">
+                                            <i class="fas fa-shopping-cart"></i>
+                                        </button>
+                                        <button class="action-btn" title="Add to Wishlist">
+                                            <i class="fas fa-heart"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="product-info">
+                                <h3 class="product-name">
+                                    <a href="/product/<%= product._id %>"><%= product.productName %></a>
+                                </h3>
+                                <div class="product-price">$<%= product.price.toFixed(2) %></div>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+           
+        </div>
+    </section>
     <script>
-   const mainImage = document.querySelector('.main-image img');
-    const magnifyingGlass = document.querySelector('.magnifying-glass');
-    const thumbnailWrappers = document.querySelectorAll('.thumbnail-wrapper');
-document.addEventListener('DOMContentLoaded', function () {
- 
+        const mainImage = document.querySelector('.main-image img');
+        const magnifyingGlass = document.querySelector('.magnifying-glass');
+        const thumbnailWrappers = document.querySelectorAll('.thumbnail-wrapper');
 
-    // Thumbnail click event to change the main image
-    thumbnailWrappers.forEach(wrapper => {
-        wrapper.addEventListener('click', function () {
-            const img = this.querySelector('img');
-            mainImage.setAttribute('src', img.src);
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            thumbnailWrappers.forEach(wrapper => {
+                wrapper.addEventListener('click', function () {
+                    const img = this.querySelector('img');
+                    mainImage.setAttribute('src', img.src);
+                });
+            });
+
+            
+            mainImage.addEventListener('mousemove', function (e) {
+                const rect = mainImage.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                
+                magnifyingGlass.style.left = `${x}px`;
+                magnifyingGlass.style.top = `${y}px`;
+
+                
+                const zoomLevel = 2.5;
+
+               
+                const bgX = (x / rect.width) * 100;
+                const bgY = (y / rect.height) * 100;
+                magnifyingGlass.style.backgroundImage = `url('${mainImage.src}')`;
+                magnifyingGlass.style.backgroundSize = `${mainImage.width * zoomLevel}px ${mainImage.height * zoomLevel}px`;
+                magnifyingGlass.style.backgroundPosition = `${bgX}% ${bgY}%`;
+            });
         });
-    });
 
-    // Magnifying glass logic remains the same
-    mainImage.addEventListener('mousemove', function (e) {
-        // ... existing magnifying glass code ...
+
+        document.addEventListener('DOMContentLoaded', function() {
+ 
+    window.addEventListener('scroll', function() {
+        const navbar = document.querySelector('.navbar');
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
     });
 });
-          
-  
-          mainImage.addEventListener('mousemove', function (e) {
-              const rect = mainImage.getBoundingClientRect();
-              const x = e.clientX - rect.left;
-              const y = e.clientY - rect.top;
-              
-              // Update magnifier position
-              magnifyingGlass.style.left = `${x}px`;
-              magnifyingGlass.style.top = `${y}px`;
-              
-              // Set zoom level
-              const zoomLevel = 2.5; 
-              
-              // Calculate background position for zoom effect
-              const bgX = (x / rect.width) * 100;
-              const bgY = (y / rect.height) * 100;
-              magnifyingGlass.style.backgroundImage = `url('${mainImage.src}')`;
-              magnifyingGlass.style.backgroundSize = `${mainImage.width * zoomLevel}px ${mainImage.height * zoomLevel}px`;
-              magnifyingGlass.style.backgroundPosition = `${bgX}% ${bgY}%`;
-          });
-      
-  </script>
-  
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

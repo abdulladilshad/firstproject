@@ -53,7 +53,7 @@
             </header>
             <section class="add-product-form">
                 <form id="productForm" action="/admin/addproducts" method="POST">
-                    <!-- Product Name -->
+                 
                     <div class="form-group">
                         <label for="productName">Product Name</label>
                         <input type="text" id="productName" name="productName">
@@ -65,7 +65,7 @@
                             </div>
                             <% } %>
                     </div>
-                    <!-- Category -->
+                  
                     <div class="form-group">
                         <label for="category">Category</label>
                         <select id="category" name="category">
@@ -79,7 +79,7 @@
                             required</div>
                     </div>
 
-                    <!-- Price -->
+                   
                     <div class="form-group">
                         <label for="price">Price ($)</label>
                         <input type="number" id="price" name="price">
@@ -87,7 +87,7 @@
                         </div>
                     </div>
 
-                    <!-- Brand -->
+                    
                     <div class="form-group">
                         <label for="brand">Brand</label>
                         <input type="text" id="brand" name="brand">
@@ -95,7 +95,7 @@
                         </div>
                     </div>
 
-                    <!-- coming sooon -->
+                    
                     <div class="form-group">
                         <button type="button" id="openVariantModal" class="variant-button">
                             Color & Stock
@@ -105,7 +105,7 @@
                         </div>
                     </div>
 
-                    <!-- Variant Modal -->
+                    
                     <div id="variantModal" class="modal" style="display: none">
                         <div class="modal-content">
                             <span class="close-modal">&times;</span>
@@ -153,10 +153,10 @@
                         </div>
                     </div>
 
-                    <!-- Hidden Input for Variants Data -->
+                  
                     <input type="hidden" id="variantsData" name="variants" value="[{...}]">
 
-                    <!-- Material -->
+                    
                     <div class="form-group">
                         <label for="material">Material</label>
                         <input type="text" id="material" name="material">
@@ -164,7 +164,7 @@
                             required</div>
                     </div>
 
-                    <!-- Product Description -->
+                    
                     <div class="form-group">
                         <label for="productDescription">Product Description</label>
                         <textarea id="productDescription" name="productDescription" rows="5"></textarea>
@@ -172,7 +172,7 @@
                             Description is required</div>
                     </div>
 
-                    <!-- Product Images -->
+                  
                     <div style="margin: 2%;" class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-8">
                         <div class="flex items-center justify-between mb-8">
                             <h2 class="text-2xl font-bold text-gray-800">Product Images</h2>
@@ -182,13 +182,13 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <% for (let i=1; i <=4; i++) { %>
                                 <div id="imageUploadSection<%= i %>" class="relative group">
-                                    <!-- Upload Area -->
+                               
                                     <div
                                         class="min-h-[300px] bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-6 transition-all duration-300 hover:border-blue-500 hover:bg-gray-100">
                                         <label for="imageUpload<%= i %>" class="block h-full">
                                             <div
                                                 class="flex flex-col items-center justify-center h-full space-y-4 cursor-pointer">
-                                                <!-- Upload Icon -->
+                                              
                                                 <div
                                                     class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
                                                     <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor"
@@ -198,14 +198,14 @@
                                                             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                     </svg>
                                                 </div>
-                                                <!-- Upload Text -->
+                                               
                                                 <div class="text-center">
                                                     <p class="text-sm font-medium text-gray-700">Image <%= i %>
                                                     </p>
                                                     <p class="mt-1 text-xs text-gray-500">Drop your image here, or click
                                                         to browse</p>
                                                     <p class="mt-2 text-xs text-gray-400">PNG, JPG up to 5MB</p>
-                                                    <!-- Image Cropper Container -->
+                                                  
 
                                                 </div>
                                             </div>
@@ -236,7 +236,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- Action Buttons -->
+                                  
                                     <div class="flex items-center gap-3 mt-4">
                                         <button id="cropButton<%= i %>" type="button" disabled
                                             class="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 
@@ -265,7 +265,7 @@
                                         </button>
                                     </div>
 
-                                    <!-- Error Message -->
+                                    
                                     <div id="imageError<%= i %>" class="hidden mt-2">
                                         <p class="text-sm text-red-500 flex items-center">
                                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
@@ -281,13 +281,13 @@
                         </div>
                     </div>
 
-                    <!-- Hidden Inputs for Base64 Images -->
+                 
                     <input type="hidden" id="image1" name="image1">
                     <input type="hidden" id="image2" name="image2">
                     <input type="hidden" id="image3" name="image3">
                     <input type="hidden" id="image4" name="image4">
 
-                    <!-- Submit and Cancel Buttons -->
+                  
                     <div class="form-actions">
                         <button type="submit" class="submit-button">Add Product</button>
                         <button type="button" class="cancel-button" onclick="window.history.back()">Cancel</button>
@@ -363,56 +363,55 @@
                 const base64Image = croppedCanvas.toDataURL();
                 croppedImages[`image${index + 1}`] = base64Image;
 
-                // Store cropped image in hidden input field
+               
                 document.getElementById(`image${index + 1}`).value = base64Image;
 
-                // Show the cropped image preview below the crop button
+                
                 const previewContainer = document.getElementById(`previewContainer${index + 1}`);
                 const previewImage = document.getElementById(`croppedPreview${index + 1}`);
                 previewImage.src = base64Image;
-                previewContainer.style.display = 'block';  // Show preview container
+                previewContainer.style.display = 'block';  
             });
 
             item.resetBtn.addEventListener('click', function () {
                 croppers[index].reset();
                 item.error.style.display = 'none';
 
-                // Hide preview if reset is clicked
+            
                 const previewContainer = document.getElementById(`previewContainer${index + 1}`);
                 previewContainer.style.display = 'none';
             });
 
             item.deleteBtn.addEventListener('click', function () {
-                // Hide the image preview and the delete button
+            
                 item.image.style.display = 'none';
                 item.deleteBtn.style.display = 'none';
 
-                // Reset the cropper and remove the cropped image
+
                 croppers[index].reset();
                 item.error.style.display = 'none';
 
-                // Optionally clear the hidden input field for the image
+               
                 document.getElementById(`image${index + 1}`).value = '';
 
-                // Hide preview if delete is clicked
+              
                 const previewContainer = document.getElementById(`previewContainer${index + 1}`);
                 previewContainer.style.display = 'none';
             });
         });
 
-        // Form validation logic
+     
         const form = document.getElementById('productForm');
         form.addEventListener('submit', function (e) {
             let valid = true;
 
-            // Hide all previous error messages
+     
             document.querySelectorAll('.error-message').forEach((el) => {
                 el.style.display = 'none';
             });
 
-            // Validate text fields
+         
             const fields = [
-                { field: 'productName', error: 'productNameError' },
                 { field: 'category', error: 'categoryError' },
                 { field: 'brand', error: 'brandError' },
                 { field: 'material', error: 'materialError' },
@@ -426,16 +425,16 @@
                     valid = false;
                 }
             });
-            //validate variants 
+           
             if (!document.getElementById('variant')) {
                 document.getElementById('variants').style.display = 'block';
                 valid = false
             }
-            // Validate Price (should be greater than 0)
+          
             const priceInput = document.getElementById('price');
             const priceValue = parseFloat(priceInput.value);
             const priceError = document.getElementById('priceError');
-            
+
             if (isNaN(priceValue)) {
                 priceError.innerText = "Please enter a valid price";
                 priceError.style.display = 'block';
@@ -450,7 +449,32 @@
                 valid = false;
             }
 
-            // Validate at least one image is uploaded
+            
+            const productNameInput = document.getElementById('productName');
+            const productNameValue = productNameInput.value.trim();
+            const productNameError = document.getElementById('productNameError');
+
+            const specialCharRegex = /[!@#$%^&*()_+={}\[\]:;"'<>,.?/\\|`~]/;
+            const onlyZerosRegex = /^0+$/;
+
+            if (productNameValue === "") {
+                productNameError.innerText = "Product name is required.";
+                productNameError.style.display = 'block';
+                valid = false;
+            } else if (specialCharRegex.test(productNameValue)) {
+                productNameError.innerText = "Product name cannot contain special characters.";
+                productNameError.style.display = 'block';
+                valid = false;
+            } else if (onlyZerosRegex.test(productNameValue)) {
+                productNameError.innerText = "Product name cannot be only zeros.";
+                productNameError.style.display = 'block';
+                valid = false;
+            } else {
+                productNameError.style.display = 'none'; 
+            }
+
+
+           
             const image1 = document.getElementById('image1').value;
             const image2 = document.getElementById('image2').value;
             const image3 = document.getElementById('image3').value;
@@ -495,7 +519,7 @@
                 const color = document.getElementById('colorInput').value.trim();
                 const stock = document.getElementById('stockInput').value.trim();
 
-                // Hide previous error messages
+                
                 document.getElementById('color12').style.display = 'none';
                 document.getElementById('stock12').style.display = 'none';
                 document.getElementById('colorEx').style.display = 'none';
@@ -522,7 +546,7 @@
                     valid = false;
                 }
                 if (!valid) {
-                    return; // Stop execution if validation fails
+                    return;
                 }
 
                 variantsData.push({ color, quantity: parseInt(stock) });
@@ -568,7 +592,7 @@
         document.getElementById('addProductForm').onsubmit = function (event) {
             try {
                 const variantsField = document.getElementById('variantsData');
-                let variantsData = variantsField.value.trim(); // Get value & remove spaces
+                let variantsData = variantsField.value.trim(); 
 
                 if (!variantsData) {
                     alert("Variants data is missing!");
@@ -599,11 +623,11 @@
 
         document.getElementById("productForm").onsubmit = function (event) {
             try {
-                const variantsData = JSON.stringify(variantsArray); // Convert array to JSON
-                document.getElementById("variantsData").value = variantsData; // Assign JSON to hidden field
+                const variantsData = JSON.stringify(variantsArray); 
+                document.getElementById("variantsData").value = variantsData; 
             } catch (error) {
                 console.error("Error setting variants JSON:", error);
-                event.preventDefault(); // Stop form submission if JSON conversion fails
+                event.preventDefault(); 
                 alert("Invalid variants format. Please check your selections.");
             }
         };
@@ -613,16 +637,16 @@
             const variantsError = document.getElementById('variantsError');
 
             try {
-                const variants = JSON.parse(variantsData); // Try parsing JSON
+                const variants = JSON.parse(variantsData);
 
                 if (!Array.isArray(variants) || variants.length === 0) {
-                    throw new Error(); // If not an array or empty, trigger error
+                    throw new Error(); 
                 }
 
-                variantsError.style.display = "none"; // Hide error if valid
+                variantsError.style.display = "none"; 
             } catch (error) {
-                variantsError.style.display = "block"; // Show error message
-                event.preventDefault(); // Stop form submission
+                variantsError.style.display = "block"; 
+                event.preventDefault(); 
             }
         });
 

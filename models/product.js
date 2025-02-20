@@ -10,12 +10,12 @@ const productSchema = new mongoose.Schema(
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Category', // References the Category model
+      ref: 'Category', 
       required: true,
     },
     imagePaths: {
-      type: [String],  // An array of strings to store image paths
-      required: true,   // Ensures that the image array is required
+      type: [String],  
+      required: true,   
       validate: {
         validator: function (value) {
           return Array.isArray(value) && value.every((item) => typeof item === 'string' && item.trim() !== '');
@@ -55,13 +55,13 @@ const productSchema = new mongoose.Schema(
         quantity: {
           type: Number,
           required: true,
-          min: 0, // Ensures quantity is not negative
+          min: 0, 
         },
       },
     ],
   },
   {
-    timestamps: true, // Adds createdAt and updatedAt fields
+    timestamps: true, 
   }
 );
 

@@ -405,7 +405,7 @@
       <div class="row">
         <div class="swiper main-swiper py-4" data-aos="fade-up" data-aos-delay="600">
           <div class="swiper-wrapper d-flex border-animation-left">
-            <% products.slice(0, 3).forEach(product => { %> <!-- Limit to 3 products -->
+            <% products.forEach(product => { %> <!-- Limit to 3 products -->
               <% if (product.imagePaths && product.imagePaths.length > 0) { %> <!-- Check if imagePaths exists -->
                 <div class="swiper-slide">
                   <div class="banner-item image-zoom-effect">
