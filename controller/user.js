@@ -193,49 +193,53 @@ const login = async (req, res) => {
         const { email, password } = req.body;
 
         if (!email || !password) {
-            return res.render('user/login', { message: 'Email and password are required' });
+            req.flash('error', 'Email and password are required');
+            return res.redirect('/login');
         }
 
         const user = await userschema.findOne({ email });
 
         if (!user) {
-            return res.render('user/login', { message: 'User does not exist' });
-        }
-
-        // Check if user is blocked
-        if (user.isBlock) {
-            req.session.destroy();
-            return res.render('user/login', { message: 'Your account is blocked. Contact support.' });
+            req.flash('error', 'User does not exist');
+            return res.redirect('/login');
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.render('user/login', { message: 'Incorrect password' });
+            req.flash('error', 'Incorrect password');
+            return res.redirect('/login');
         }
-
+        // Check if user is banned
+        if (user.isBlock) {
+            req.session.destroy();
+            return res.render('user/login', { message: ['Your account has been banned'] });
+        }
         req.session.user = { id: user._id, email: user.email };
 
-        // Load home page with products & categories
-        const products = await productModel.find({});
-        const categories = await categoryModel.find({});
-        res.redirect('/' );
+        res.redirect('/'); // Redirect to home page
 
     } catch (error) {
         console.error('Error during login:', error);
-        res.render('user/login', { message: 'Something went wrong' });
+       
+        res.redirect('/login');
     }
 };
+    
 
 
 
 const Loadlogin = (req, res) => {
-    const message = req.query.message || '';
-    res.render('user/login', { message });
+    const message = req.flash('error'); 
+    console.log('dsujkgfdksjhfghdsjkfhgsdjk');
+console.log(message);
+    
+    console.log('dsujkgfdksjhfghdsjkfhgsdjk');
+
+    res.render('user/login', { message: Array.isArray(message) ? message : [message] });
 };
 
 
 // const Loadhome = (req,res)=>{
-
 // res.render('user/Home')
 // }
 
@@ -243,14 +247,13 @@ const Loadlogin = (req, res) => {
 
 const loadhome = async (req, res) => {
     try {
-        const products = await productModel.find({})
+        const products = await productModel.find({isDelete:false})
         console.log(products);
 
-        const categories = await categoryModel.find({})
+        const categories = await categoryModel.find({isdelete:false})
         console.log(categories);
         res.render('user/index', { categories,products })
-
-
+          
 
     } catch (error) {
         console.error('Error loading home:', error);
@@ -261,10 +264,10 @@ const loadhome = async (req, res) => {
 
 const Loadshope = async (req, res) => {
     try {
-        const products = await productModel.find({})
+        const products = await productModel.find({isDelete:false})
         console.log(products);
 
-        const categories = await categoryModel.find({})
+        const categories = await categoryModel.find({isdelete:false})
         console.log(categories);
         res.render('user/shope', { categories ,products})
 

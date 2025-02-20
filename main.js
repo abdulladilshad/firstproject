@@ -9,6 +9,7 @@ const passport = require('./ConnectDb/passport')
 const nocache = require('nocache')
 const session = require('express-session')
 const morgan = require('morgan')
+const flash = require('connect-flash');
 
 
 
@@ -42,10 +43,17 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(flash());
 
 
 app.use('/',user)
 app.use('/admin',admin)
+
+app.use((req, res, next) => {
+    res.locals.error_msg = req.flash('error'); // Pass flash messages to views
+    next();
+});
+
 
 app.listen(process.env.PORT, () => {
     console.log('PORT connected in http://localhost:3002');

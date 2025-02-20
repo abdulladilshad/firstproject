@@ -66,66 +66,97 @@
                             <th>Name</th>
                             <th>Price</th>
                             <th>Stock</th>
-                            <th>Image</th>
-                            <th>Color</th>
+
                             <th>Category</th>
+                            <th>Image</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <!-- Dynamic rows rendered using EJS -->
-                         <%w=(currentPage==1)?0:(currentPage-1)*7%>
-                        <% products.forEach((product, index)=> { %>
-                            <tr>
-                                <td>
-                                   <%= ((index)+1)+w%>
+                        <%w=(currentPage==1)?0:(currentPage-1)*7%>
+                            <% products.forEach((product, index)=> { %>
+                                <tr>
+                                    <td>
+                                        <%= ((index)+1)+w%>
 
-                                </td>
-                                <td>
-                                    <%= product.productName %>
-                                </td>
-                                <td>$<%= product.price %>
-                                </td>
-                                <td>
-                                    <%= product.stock %>
-                                </td>
-                                <td>
-                                    <button onclick="viewProduct('<%= product.id %>')">view</button>
-                                </td>
-                                <td>
-                                    <%= product.color %>
-                                </td>
-                                <td>
-                                    <%= product.category.name %>
-                                </td>
-                                <td>
-                                    <!-- <button onclick="editProduct(<%= product.id %>)">Edit</button> -->
-                                    <a href="/admin/editproducts/<%= product._id %>"><button>Edit</button></a>
+                                    </td>
+                                    <td>
+                                        <%= product.productName %>
+                                    </td>
+                                    <td>$<%= product.price %>
+                                    </td>
+                                    <td>
+                                        <% product.variants.forEach(variant => { %>
+                                          Color: <%= variant.color %>, Quantity: <%= variant.quantity %> <br>
+                                        <% }) %>
+                                      </td>
+                                      
 
-                                    <button
-                                        onclick="toggleProductStatus('<%= product._id %>', '<%= product.isDelete %>')">
-                                        <%= product.isDelete ? 'unlist' : 'list' %>
-                                    </button>
+                                    <td>
+                                        <%= product.category.name %>
+                                    </td>
+                                    <td>
+                                        <button onclick="viewProduct('<%= product.id %>')">view</button>
+                                    </td>
 
-                                </td>
-                            </tr>
-                            <% }); %>
+                                    <td>
+                                        <!-- <button onclick="editProduct(<%= product.id %>)">Edit</button> -->
+                                        <a href="/admin/editproducts/<%= product._id %>"><button>Edit</button></a>
+
+                                        <button
+                                            onclick="toggleProductStatus('<%= product._id %>', '<%= product.isDelete %>')">
+                                            <%= product.isDelete ? 'unlist' : 'list' %>
+                                        </button>
+
+                                    </td>
+                                </tr>
+                                <% }); %>
                     </tbody>
                 </table>
             </section>
-
             <div class="pagination">
-                <% if (currentPage> 1) { %>
-                    <a href="?page=<%= currentPage - 1 %>" class="prev"><button class="back-btnn"><i
-                                class="fa-solid fa-angles-left icon"></i> Back</button></a>
+                <% if (currentPage > 1) { %>
+                    <a href="?page=<%= currentPage - 1 %>" class="nav-btn">
+                        <i class="fa-solid fa-angle-left"></i>
+                    </a>
+                <% } %>
+            
+                <div class="page-numbers">
+                    <% 
+                    let startPage = Math.max(1, currentPage - 2);
+                    let endPage = Math.min(totalPages, startPage + 4);
+                    if (endPage - startPage < 4) {
+                        startPage = Math.max(1, endPage - 4);
+                    }
+                    %>
+            
+                    <% if (startPage > 1) { %>
+                        <a href="?page=1" class="page-btn">1</a>
+                        <% if (startPage > 2) { %>
+                            <span class="dots">...</span>
+                        <% } %>
                     <% } %>
-
-                        Page <%= currentPage %> of <%= totalPages %>
-
-                                <% if (currentPage < totalPages) { %>
-                                    <a href="?page=<%= currentPage + 1 %>" class="next"><button class="next-btnn">Next
-                                            <i class="fa-solid fa-angles-right icon"></i> </button></a>
-                                    <% } %>
+            
+                    <% for (let i = startPage; i <= endPage; i++) { %>
+                        <a href="?page=<%= i %>" class="page-btn <%= currentPage === i ? 'active' : '' %>">
+                            <%= i %>
+                        </a>
+                    <% } %>
+            
+                    <% if (endPage < totalPages) { %>
+                        <% if (endPage < totalPages - 1) { %>
+                            <span class="dots">...</span>
+                        <% } %>
+                        <a href="?page=<%= totalPages %>" class="page-btn"><%= totalPages %></a>
+                    <% } %>
+                </div>
+            
+                <% if (currentPage < totalPages) { %>
+                    <a href="?page=<%= currentPage + 1 %>" class="nav-btn">
+                        <i class="fa-solid fa-angle-right"></i>
+                    </a>
+                <% } %>
             </div>
 
         </main>

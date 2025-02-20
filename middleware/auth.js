@@ -1,17 +1,19 @@
-const checkSession = (req,res,next)=>{
-    if( req.session && req.session.user){
+
+const { session } = require('passport');
+const usermodel = require('../models/usermodel')
+const checkSession = (req, res, next) => {
+    if (req.session && req.session.user) {
         next()
-    }else{
+    } else {
         res.redirect('/login')
     }
 }
 
 const isLogin = (req, res, next) => {
-    console.log('andiiiiiii');
-    
-    console.log(req.session.user );
-    console.log('kundiiiiiiiiiiiiii');
-    
+
+    console.log(req.session.user);
+
+
     if (req.session && req.session.user) {
         return res.redirect('/');
     } else {
@@ -19,4 +21,27 @@ const isLogin = (req, res, next) => {
     }
 };
 
-module.exports={checkSession,isLogin} 
+const isBan = async (req, res, next) => {
+    const ID = req.session?.user?.id;
+
+    const user = await usermodel.findOne({ _id: ID });
+    console.log(user);
+    
+    if (user?.isBlock) {
+        console.log('User is blocked');
+
+        req.session.destroy((err) => {
+            if (err) {
+                console.error('Error destroying session:', err);
+                return next(err);
+            }
+            // Set flash in the new session created after destruction
+            res.render('user/login', { message:['bannneeeedijkuasfhukasdgfuiawsd'] });
+        ;
+        });
+    } else {
+        next();
+    }
+};
+
+module.exports = { checkSession, isLogin, isBan } 

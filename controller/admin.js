@@ -162,9 +162,9 @@ const LoadProducts = async (req, res) => {
 const renderAddProduct = async (req, res) => {
     try {
         const categories = await categoryModel.find({});
-        
-    
-        res.render('admin/addproducts', { categories ,error:''});
+
+
+        res.render('admin/addproducts', { categories, error: '' });
     } catch (error) {
         console.error('Error while fetching categories:', error);
         res.render('admin/addproducts');
@@ -210,11 +210,17 @@ const addProduct = async (req, res) => {
             return res.status(403).send("At least 2 products must exist before adding a new one."); // 403 Forbidden
         }
 
-        //  Check if product already exists
-        const existingProduct = await productModel.findOne({ productName : productName.trim() });
+        // Check if product already exists (case-insensitive)
+        const existingProduct = await productModel.findOne({
+            productName: { $regex: new RegExp("^" + productName.trim() + "$", "i") } // Case-insensitive match
+        });
+
         if (existingProduct) {
             const categories = await categoryModel.find({});
-         return res.render('admin/addproducts',{ error: 'Product name already exists' ,categories});
+            return res.render('admin/addproducts', {
+                error: 'Product name already exists',
+                categories
+            });
         }
 
         // Array to store image paths
@@ -324,7 +330,14 @@ const LoadCategory = async (req, res) => {
         if (!admin) return res.redirect('/admin/login');
 
         const categories = await categoryModel.find({});
-        res.render('admin/categories', { categories });
+
+        const categoryIds = categories.map(cat => cat._id);
+
+        const products = await productModel.find({ category: { $in: categoryIds } });
+
+        console.log("ffffffffffffffffffff",products )
+        
+        res.render('admin/categories', { categories, products });
     } catch (error) {
         console.error('Error loading categories:', error);
         res.render('admin/dashbord', { message: 'Failed to load categories' });
@@ -335,18 +348,18 @@ const postAddCategory = async (req, res) => {
     try {
         const { name, description } = req.body;
 
-        // Check for missing fields
+        
         if (!name || !description) {
             return res.render('admin/addcategories', { error: 'Category name and description are required' });
         }
 
         // Check for duplicate category name
-        const existingCategory = await categoryModel.findOne({ name });
+        const existingCategory = await categoryModel.findOne({ name: { $regex: new RegExp(`^${name}$`, "i") } });
         if (existingCategory) {
             return res.render('admin/addcategories', { error: 'Category name already exists' });
         }
 
-        // Save the new category
+       
         const newCategory = new categoryModel({ name, description });
         await newCategory.save();
 
@@ -375,10 +388,13 @@ const editCategory = async (req, res) => {
         const { name, description } = req.body;
 
 
-        const existingCategory = await categoryModel.findOne({ name });
+          // Case-insensitive check for existing category (excluding the current one)
+          const existingCategory = await categoryModel.findOne({ 
+            name: { $regex: new RegExp(`^${name}$`, "i") }, 
+            _id: { $ne: categoryId } // Exclude the current category
+        });
 
-        if (existingCategory && existingCategory._id.toString() !== categoryId) {
-            // If a duplicate category name is found
+        if (existingCategory) {
             return res.render('admin/editcategories', {
                 category: { _id: categoryId, name, description },
                 error: 'Category name already exists.',
@@ -407,9 +423,15 @@ const togglecategories = async (req, res) => {
         const categoryId = req.params.category_id
         const category = await categoryModel.findOne({ _id: categoryId })
         console.log(category);
-        console.log('reached reached')
+        console.log('reached reached', req.query)
 
         category.isdelete = !category.isdelete
+
+        await productModel.updateMany(
+            { category: categoryId },  
+            { $set: { isDelete: true } }  
+        );
+
 
         await category.save()
         res.status(200).json({ success: true, message: 'category is unlisted' })
@@ -463,7 +485,7 @@ const editproducts = async (req, res) => {
         console.log(products);
 
         const categories = await categoryModel.find({})
-        res.render('admin/editproducts', { categories, products ,errorMessage:''})
+        res.render('admin/editproducts', { categories, products, errorMessage: '' })
     }
     catch (er) {
         console.log(er);
@@ -473,7 +495,7 @@ const editproducts = async (req, res) => {
 }
 
 const editproducttt = async (req, res) => {
-    const { productId, image1, image2, image3, image4, productName } = req.body;
+    const { productId, image1, image2, image3, image4, productName, category, price, brand, productDescription, material } = req.body;
 
     if (!productId) {
         return res.status(400).send("Product ID is required.");
@@ -487,21 +509,18 @@ const editproducttt = async (req, res) => {
         }
 
 
-
-        // Check if the new product name already exists (excluding the current product)
         if (productName) {
-            const existingProduct = await productModel.findOne({ 
-                productName: productName.trim(), 
-                _id: { $ne: productId } // Exclude the current product
+            const existingProduct = await productModel.findOne({
+                productName: { $regex: new RegExp("^" + productName.trim() + "$", "i") },
+                _id: { $ne: productId }
             });
 
             if (existingProduct) {
-                const categories = await categoryModel.find()
-                return res.render('admin/editproducts', { 
-                    errorMessage: "Product name already exists!", 
-                    products: product ,
+                const categories = await categoryModel.find();
+                return res.render('admin/editproducts', {
+                    errorMessage: "Product name already exists!",
+                    products: product,
                     categories
-
                 });
             }
 
@@ -546,15 +565,13 @@ const editproducttt = async (req, res) => {
             savedImagePaths[3] = await saveBase64ToFile(image4, 'image4.png');
         }
 
-        // Update image paths
         product.imagePaths = savedImagePaths;
+        product.category = category;
+        product.productDescription = productDescription
+        product.price = price
+        product.brand = brand
+        product.material = material
 
-        // Convert color string to array if exists
-        if (req.body.color) {
-            product.color = req.body.color.split(",").map(c => c.trim());
-        }
-
-        // Validate and parse variants
         let variants;
         try {
             variants = JSON.parse(req.body.variants || '[]');

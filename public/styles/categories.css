@@ -1,10 +1,14 @@
-/* General Styles */
+:root {
+    --primary-color: #4f46e5;
+    --sidebar-width: 250px;
+    --header-height: 60px;
+}
+
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', sans-serif;
+    background: #f3f4f6;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f9;
-    color: #333;
 }
 
 .dashboard-container {
@@ -12,126 +16,171 @@ body {
     min-height: 100vh;
 }
 
-/* Sidebar Styles */
+/* Sidebar Styling */
 .sidebar {
-    background-color: #1a253c;
+    width: var(--sidebar-width);
+    background: #1e1e2d;
     color: #fff;
-    width: 250px;
-    padding: 20px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    height: 100vh;
+    transition: all 0.3s ease;
 }
 
 .sidebar h2 {
-    text-align: center;
-    font-size: 24px;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #34495e;
-    padding-bottom: 10px;
+    padding: 20px;
+    margin: 0;
+    color: #fff;
+    font-size: 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
 .sidebar-menu {
     list-style: none;
     padding: 0;
-}
-
-.sidebar-menu li {
-    margin-bottom: 15px;
+    margin: 0;
 }
 
 .sidebar-menu li a {
-    color: #fff;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    color: #a2a3b7;
     text-decoration: none;
-    font-size: 16px;
-    display: block;
-    padding: 10px 15px;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .sidebar-menu li a:hover,
 .sidebar-menu li a.active {
-    background-color: #34495e;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
 }
 
-/* Main Content Styles */
+.sidebar-menu li a i {
+    margin-right: 10px;
+    width: 20px;
+}
+
+/* Main Content Styling */
 .main-content {
+    margin-left: var(--sidebar-width);
     flex: 1;
     padding: 20px;
 }
 
 .topbar {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
 }
 
 .topbar h1 {
-    font-size: 24px;
-    color: #2c3e50;
+    margin: 0;
+    font-size: 1.8rem;
+    color: #1e1e2d;
 }
 
 .add-button {
-    background-color: #28a745;
-    color: white;
-    padding: 10px 15px;
+    background: var(--primary-color);
+    color: #fff;
     border: none;
-    border-radius: 4px;
+    padding: 10px 20px;
+    border-radius: 5px;
     cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .add-button:hover {
-    background-color: #218838;
+    background: #4338ca;
 }
 
-/* Table Styles */
-.category-table table {
+/* Table Styling */
+.category-table {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+table {
     width: 100%;
     border-collapse: collapse;
-    background-color: #fff;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.category-table th,
-.category-table td {
-    padding: 12px;
+thead {
+    background: #f8fafc;
+}
+
+th {
+    padding: 15px;
     text-align: left;
-    border-bottom: 1px solid #ddd;
+    font-weight: 600;
+    color: #64748b;
+    border-bottom: 2px solid #e2e8f0;
 }
 
-.category-table th {
-    background-color: #1a253c;
-    color: white;
+td {
+    padding: 15px;
+    border-bottom: 1px solid #e2e8f0;
+    color: #1e293b;
 }
 
-.category-table tr:hover {
-    background-color: #f1f1f1;
+tbody tr:hover {
+    background: #f8fafc;
 }
 
-.category-table button {
-    background-color: #3498db;
-    color: white;
-    padding: 5px 10px;
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-edit {
+    background: #3b82f6;
+    color: #fff;
     border: none;
+    padding: 6px 12px;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 14px;
-    margin-right: 5px;
-    transition: background-color 0.3s ease;
 }
 
-.category-table button:hover {
-    background-color: #2980b9;
+.btn-toggle {
+    background: #10b981;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
-.category-table button:last-child {
-    background-color: #e74c3c;
+.btn-edit:hover, .btn-toggle:hover {
+    opacity: 0.9;
 }
 
-.category-table button:last-child:hover {
-    background-color: #c0392b;
+/* Status Badge */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+}
+
+.status-active {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-inactive {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
 }

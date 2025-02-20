@@ -6,7 +6,7 @@ const auth=require('../middleware/auth')
 
 
 router.get('/register',auth.isLogin,userController.loadregister)
-router.get('/',auth.checkSession,userController.loadhome)
+router.get('/',auth.isBan,auth.checkSession,userController.loadhome)
 router.post('/register',userController.register)
 
 
@@ -57,7 +57,7 @@ router.get('/auth/google/callback',
     }
   );
 
-router.get('/shope',userController.Loadshope)
+router.get('/shope',auth.isBan,userController.Loadshope)
 router.get('/product/:id', userController.Loadproductdeatails);
 
 

@@ -9,8 +9,13 @@
 <body>
   <div class="login-box">
     <h2>Login</h2>
-    <h4 style="color:rgba(219, 210, 210, 0.982) "><%= message %></h4>
-    <form action="/login" method="post">
+    <% if (message.length > 0) { %>
+      <% message.forEach(function(msg) { %>
+          <p style="color: red;"> <%= msg %> </p>
+      <% }); %>
+  <% } %>
+  
+    <form action="/login" method="post" id="form">
       <div class="user-box">
         <input type="email" name="email" id="email" style="color: #ffff;"/>
         <label>Email</label>
@@ -26,27 +31,27 @@
     </form>
   </div>
 
-  <script>
+  <!-- <script>
     document.addEventListener('DOMContentLoaded', function() {
-      document.querySelector('form').addEventListener('submit', formvalidate);
+      document.getElementById('form').addEventListener('submit', formvalidate);
     });
 
     const message = "<%= message %>";
     
-    function formvalidate(e) {
-      e.preventDefault();
+  //   function formvalidate(e) {
+  //     e.preventDefault();
 
-      var email = document.getElementById('email').value;
-      var password = document.getElementById('password').value;
+  //     var email = document.getElementById('email').value;
+  //     var password = document.getElementById('password').value;
 
-      if (email === "" || password === "") {
-        Swal.fire("All fields are required");
-        return false;
-      }
+  //     if (email === "" || password === "") {
+  //       alert("All fields are required");
+  //       return false;
+  //     }
 
-      e.target.submit();
-      return true;
-    }
-  </script>
+  //     e.target.submit();
+  //     return true;
+  //   }
+  // </script> -->
 </body>
 </html>

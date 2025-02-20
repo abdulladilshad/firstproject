@@ -59,11 +59,11 @@
                         <input type="text" id="productName" name="productName" value="<%= products.productName %>">
                         <div class="error-message" id="productNameError" style="display:none; color: red;">Product name
                             is required</div>
-                            <% if (errorMessage) { %>
-                                <div style="color: red; margin-bottom: 15px;">
-                                    <%= errorMessage %>
-                                </div>
-                                <% } %>
+                        <% if (errorMessage) { %>
+                            <div style="color: red; margin-bottom: 15px;">
+                                <%= errorMessage %>
+                            </div>
+                            <% } %>
                     </div>
 
                     <!-- Category -->
@@ -71,11 +71,13 @@
                         <label for="category">Category</label>
                         <select id="category" name="category">
                             <% categories.forEach(category=> { %>
-                                <option value="<%= category._id %>">
-                                    <%= category?.name %>
+                                <option value="<%= category._id %>"
+                                    <%=category._id.toString()===products.category.toString() ? "selected" : "" %>>
+                                    <%= category.name %>
                                 </option>
                                 <% }) %>
                         </select>
+
                         <div class="error-message" id="categoryError" style="display:none; color: red;">Category is
                             required</div>
                     </div>
@@ -100,60 +102,69 @@
                     <div class="form-group">
                         <button type="button" id="openVariantModal" class="variant-button">Color & Stock</button>
                         <div id="variantsList" class="variants-summary mt-2">
-                            <% if (products.variants && products.variants.length > 0) { %>
-                                <% products.variants.forEach(variant => { %>
-                                    <p><strong><%= variant.color %></strong>: <%= variant.quantity%>  in stock</p>
-                                <% }) %>
-                            <% } else { %>
-                                <p>No variants added yet.</p>
-                            <% } %>
+                            <% if (products.variants && products.variants.length> 0) { %>
+                                <% products.variants.forEach(variant=> { %>
+                                    <p><strong>
+                                            <%= variant.color %>
+                                        </strong>: <%= variant.quantity%> in stock</p>
+                                    <% }) %>
+                                        <% } else { %>
+                                            <p>No variants added yet.</p>
+                                            <% } %>
                         </div>
                     </div>
 
-                   <!-- Variant Modal -->
-        <div id="variantModal" class="modal" style="display: none">
-            <div class="modal-content">
-                <span class="close-modal">&times;</span>
-                <h2>Add Color & Stock</h2>
-                <div class="variant-form">
-                    <div class="form-group">
-                        <label for="colorInput">Color</label>
-                        <select id="colorInput" name="color">
-                            <option value="">Select Color</option>
-                            <option value="Red">Red</option>
-                            <option value="Blue">Blue</option>
-                            <option value="Green">Green</option>
-                            <option value="Black">Black</option>
-                            <option value="White">White</option>
-                            <option value="Yellow">Yellow</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="stockInput">Stock Quantity</label>
-                        <input type="number" id="stockInput" name="stock" min="0">
-                    </div>
-                    <button type="button" id="addVariant" class="add-variant-btn">Add Variant</button>
-                </div>
-                <div class="variants-list">
-                    <h3>Added Variants</h3>
-                    <div id="modalVariantsList">
-                        <% if (products.variants && products.variants.length > 0) { %>
-                            <% products.variants.forEach((variant, index) => { %>
-                                <div class="variant-item" data-index="<%= index %>">
-                                    <p><strong><%= variant.color %></strong>: <%= variant.quantity %> in stock</p>
-                                    <button type="button" class="remove-variant-btn" onclick="removeVariant(<%= index %>)">Remove</button>
+                    <!-- Variant Modal -->
+                    <div id="variantModal" class="modal" style="display: none">
+                        <div class="modal-content">
+                            <span class="close-modal">&times;</span>
+                            <h2>Add Color & Stock</h2>
+                            <div class="variant-form">
+                                <div class="form-group">
+                                    <label for="colorInput">Color</label>
+                                    <select id="colorInput" name="color">
+                                        <option value="">Select Color</option>
+                                        <option value="Red">Red</option>
+                                        <option value="Blue">Blue</option>
+                                        <option value="Green">Green</option>
+                                        <option value="Black">Black</option>
+                                        <option value="White">White</option>
+                                        <option value="Yellow">Yellow</option>
+                                    </select>
+                                    <div class="error-message" id="colorEx" style="display:none; color: red;">Alredy
+                                        exist this color
+                                    </div>
                                 </div>
-                            <% }) %>
-                        <% } %>
-                    </div>      
-                </div>
-                <div class="modal-actions">
-                    <button type="button" id="saveVariants" class="save-variants-btn">Save Variants</button>
-                </div>
-            </div>
-        </div>
+                                <div class="form-group">
+                                    <label for="stockInput">Stock Quantity</label>
+                                    <input type="number" id="stockInput" name="stock" min="0">
+                                </div>
+                                <button type="button" id="addVariant" class="add-variant-btn">Add Variant</button>
+                            </div>
+                            <div class="variants-list">
+                                <h3>Added Variants</h3>
+                                <div id="modalVariantsList">
+                                    <% if (products.variants && products.variants.length> 0) { %>
+                                        <% products.variants.forEach((variant, index)=> { %>
+                                            <div class="variant-item" data-index="<%= index %>">
+                                                <p><strong>
+                                                        <%= variant.color %>
+                                                    </strong>: <%= variant.quantity %> in stock</p>
+                                                <button type="button" class="remove-variant-btn"
+                                                    onclick="removeVariant('<%= index %>')">Remove</button>
+                                            </div>
+                                            <% }) %>
+                                                <% } %>
+                                </div>
+                            </div>
+                            <div class="modal-actions">
+                                <button type="button" id="saveVariants" class="save-variants-btn">Save Variants</button>
+                            </div>
+                        </div>
+                    </div>
                     <!-- Hidden Input for Variants Data -->
-        <input type="hidden" id="variantsData" name="variants" value='<%= JSON.stringify(products.variants || []) %>'>
+                    <input type="hidden" id="variantsData" name="variants"
+                        value='<%= JSON.stringify(products.variants || []) %>'>
 
                     <!-- Material -->
                     <div class="form-group">
@@ -179,71 +190,88 @@
                             <span class="text-sm text-gray-500">Upload up to 4 images</span>
                         </div>
 
-                       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-    <% for(let i = 0; i < 4; i++) { 
-        const imagePath = products.imagePaths[i] || ''; %>
-        
-        <div id="imageUploadSection<%= i + 1 %>" class="relative group">
-            <div class="min-h-[300px] bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-6 transition-all duration-300 hover:border-blue-500 hover:bg-gray-100">
-                <label for="imageUpload<%= i + 1 %>" class="block h-full">
-                    <div class="flex flex-col items-center justify-center h-full space-y-4 cursor-pointer">
-                        <!-- Upload Icon -->
-                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
-                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                        <!-- Upload Text -->
-                        <div class="text-center">
-                            <p class="text-sm font-medium text-gray-700">Image <%= i + 1 %></p>
-                            <p class="mt-1 text-xs text-gray-500">Drop your image here, or click to browse</p>
-                            <p class="mt-2 text-xs text-gray-400">PNG, JPG up to 5MB</p>
-                        </div>
-                    </div>
-                </label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <% for(let i=0; i < 4; i++) { const imagePath=products.imagePaths[i] || '' ; %>
 
-                <!-- Current Image Preview -->
-                <div class="relative w-full h-[200px] overflow-hidden border border-gray-300 rounded-lg">
-                    <% if (imagePath) { %>
-                        <img id="cropperImage<%= i + 1 %>" class="absolute inset-0 w-full h-full object-contain" src="/<%= imagePath %>" style="display:block;">
-                    <% } else { %>
-                        <img id="cropperImage<%= i + 1 %>" class="absolute inset-0 w-full h-full object-contain" src="/path/to/default/image.jpg" style="display:none;">
-                    <% } %>
-                </div>
+                                <div id="imageUploadSection<%= i + 1 %>" class="relative group">
+                                    <div
+                                        class="min-h-[300px] bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-6 transition-all duration-300 hover:border-blue-500 hover:bg-gray-100">
+                                        <label for="imageUpload<%= i + 1 %>" class="block h-full">
+                                            <div
+                                                class="flex flex-col items-center justify-center h-full space-y-4 cursor-pointer">
+                                                <!-- Upload Icon -->
+                                                <div
+                                                    class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                    </svg>
+                                                </div>
+                                                <!-- Upload Text -->
+                                                <div class="text-center">
+                                                    <p class="text-sm font-medium text-gray-700">Image <%= i + 1 %>
+                                                    </p>
+                                                    <p class="mt-1 text-xs text-gray-500">Drop your image here, or click
+                                                        to browse</p>
+                                                    <p class="mt-2 text-xs text-gray-400">PNG, JPG up to 5MB</p>
+                                                </div>
+                                            </div>
+                                        </label>
 
-                <input type="file" id="imageUpload<%= i + 1 %>" accept="image/*" class="hidden">
-                <input type="hidden" name="existingImages[]" value="<%= imagePath %>">
-            </div>
-            <div id="previewContainer<%= i %>" class="mt-4 hidden">
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <h3 class="text-sm font-medium text-gray-700 mb-3">Preview</h3>
-                    <img id="croppedPreview<%= i %>"
-                        class="w-full rounded-lg shadow-sm object-cover max-h-[200px]">
-                </div>
-            </div>
-            <!-- Action Buttons -->
-            <div class="flex items-center gap-3 mt-4">
-                <button id="cropButton<%= i + 1 %>" type="button" disabled class="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                    Crop
-                </button>
-                <button onclick="abra('<%= i %>')" id="resetButton<%= i + 1 %>" type="button" disabled class="flex items-center px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    Reset
-                </button>
-               
-            </div>
-        </div>
-    <% } %>
-</div>
+                                        <!-- Current Image Preview -->
+                                        <div
+                                            class="relative w-full h-[200px] overflow-hidden border border-gray-300 rounded-lg">
+                                            <% if (imagePath) { %>
+                                                <img id="cropperImage<%= i + 1 %>"
+                                                    class="absolute inset-0 w-full h-full object-contain"
+                                                    src="/<%= imagePath %>" style="display:block;">
+                                                <% } else { %>
+                                                    <img id="cropperImage<%= i + 1 %>"
+                                                        class="absolute inset-0 w-full h-full object-contain"
+                                                        src="/path/to/default/image.jpg" style="display:none;">
+                                                    <% } %>
+                                        </div>
+
+                                        <input type="file" id="imageUpload<%= i + 1 %>" accept="image/*" class="hidden">
+                                        <input type="hidden" name="existingImages[]" value="<%= imagePath %>">
+                                    </div>
+                                    <div id="previewContainer<%= i %>" class="mt-4 hidden">
+                                        <div class="bg-gray-50 rounded-lg p-4">
+                                            <h3 class="text-sm font-medium text-gray-700 mb-3">Preview</h3>
+                                            <img id="croppedPreview<%= i %>"
+                                                class="w-full rounded-lg shadow-sm object-cover max-h-[200px]">
+                                        </div>
+                                    </div>
+                                    <!-- Action Buttons -->
+                                    <div class="flex items-center gap-3 mt-4">
+                                        <button id="cropButton<%= i + 1 %>" type="button" disabled
+                                            class="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                            Crop
+                                        </button>
+                                        <button onclick="abra('<%= i %>')" id="resetButton<%= i + 1 %>" type="button"
+                                            disabled
+                                            class="flex items-center px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                            </svg>
+                                            Reset
+                                        </button>
+
+                                    </div>
+                                </div>
+                                <% } %>
+                        </div>
                     </div>
 
                     <!-- Hidden Inputs for Base64 Images -->
-                    <% for (let index = 0; index < 4; index++) { %>
+                    <% for (let index=0; index < 4; index++) { %>
                         <input type="hidden" id="image<%= index + 1 %>" name="image<%= index + 1 %>">
-                    <% } %>
-                    
+                        <% } %>
+
 
                             <!-- Submit and Cancel Buttons -->
                             <div class="form-actions">
@@ -327,10 +355,10 @@
 
                 // Show the cropped image preview below the crop button
                 //huhu
-                const previewContainer = document.getElementById(`previewContainer${index }`);
+                const previewContainer = document.getElementById(`previewContainer${index}`);
                 const previewImage = document.getElementById(`cropperImage${index + 1}`);
-                                             
-                const a=document.getElementById(`croppedPreview${index}`)                                                                                                  
+
+                const a = document.getElementById(`croppedPreview${index}`)
                 a.src = base64Image;
                 previewContainer.style.display = 'block';  // Show preview container
             });
@@ -344,14 +372,14 @@
                 previewContainer.style.display = 'none';
             });
 
-            
+
         });
 
         // Form validation logic
         const form = document.getElementById('productForm');
         form.addEventListener('submit', function (e) {
-            let valid = true;
 
+            let valid = true;
             // Hide all previous error messages
             document.querySelectorAll('.error-message').forEach((el) => {
                 el.style.display = 'none';
@@ -377,11 +405,14 @@
             // Validate Price (should be greater than 0)
             const priceInput = document.getElementById('price');
             const priceValue = parseFloat(priceInput.value);
-            if (isNaN(priceValue) || priceValue <= 0) {
+            if (isNaN(priceValue) || priceValue < 0 || priceValue === 0) {
+                document.getElementById('priceError').textContent = 'Price must be greater than zero';
                 document.getElementById('priceError').style.display = 'block';
                 valid = false;
             }
-
+            if (!valid) {
+                e.preventDefault();
+            }
             // Validate that at least one image has been uploaded
             if (!croppedImages.image1 && !croppedImages.image2 && !croppedImages.image3 && !croppedImages.image4) {
                 imageUploads.forEach((item) => {
@@ -389,7 +420,7 @@
                 });
                 valid = false;
             }
-
+            alert(valid)
             if (!valid) {
                 e.preventDefault();
             }
@@ -417,34 +448,54 @@
             }
 
             addVariantBtn.onclick = function () {
-    const color = document.getElementById('colorInput').value;
-    const stock = document.getElementById('stockInput').value;
+                const color = document.getElementById('colorInput').value;
+                const stock = document.getElementById('stockInput').value;
+                const colorEx = document.getElementById('colorEx');
+                const existingVariantsList = document.getElementById('variantsList');
 
-    if (!color || stock === '') {
-        alert("Color and Stock are required!");
-        return;
-    }
+                // Hide any previous error message
+                colorEx.style.display = 'none';
 
-    if (parseInt(stock) <= 0) {
-        alert("Stock must be greater than 0!");
-        return;
-    }
+                // Check if color exists in variantsData
+                if (variantsData.some(variant => variant.color.toLowerCase() === color.toLowerCase())) {
+                    colorEx.style.display = 'block';
+                    return;
+                }
 
-    variantsData.push({ color, quantity: parseInt(stock) });
-    updateVariantsList();
-    document.getElementById('colorInput').value = '';
-    document.getElementById('stockInput').value = '';
-};
-saveVariantsBtn.onclick = function () {
-    if (variantsData.length === 0) {
-        alert("Please add at least one variant.");
-        return;
-    }
+                // Check if color exists in the variantsList div
+                const existingColors = existingVariantsList.querySelectorAll('p strong');
+                if (Array.from(existingColors).some(element =>
+                    element.textContent.trim().toLowerCase() === color.toLowerCase()
+                )) {
+                    colorEx.style.display = 'block';
+                    return;
+                }
 
-    document.getElementById('variantsData').value = JSON.stringify(variantsData);
-    updateVariantsSummary();
-    modal.style.display = "none";
-};
+                if (!color || stock === '') {
+                    alert("Color and Stock are required!");
+                    return;
+                }
+
+                if (parseInt(stock) <= 0) {
+                    alert("Stock must be greater than 0!");
+                    return;
+                }
+
+                variantsData.push({ color, quantity: parseInt(stock) });
+                updateVariantsList();
+                document.getElementById('colorInput').value = '';
+                document.getElementById('stockInput').value = '';
+            };
+            saveVariantsBtn.onclick = function () {
+                if (variantsData.length === 0) {
+                    alert("Please add at least one variant.");
+                    return;
+                }
+
+                document.getElementById('variantsData').value = JSON.stringify(variantsData);
+                updateVariantsSummary();
+                modal.style.display = "none";
+            };
 
             function updateVariantsList() {
                 const list = document.getElementById('modalVariantsList');
@@ -471,74 +522,77 @@ saveVariantsBtn.onclick = function () {
 
 
         document.getElementById('addProductForm').onsubmit = function (event) {
-    try {
-        const variantsField = document.getElementById('variantsData');
-        let variantsData = variantsField.value.trim(); // Get value & remove spaces
+            alert(2)
+            try {
+                const variantsField = document.getElementById('variantsData');
+                let variantsData = variantsField.value.trim(); // Get value & remove spaces
 
-        if (!variantsData) {
-            alert("Variants data is missing!");
-            event.preventDefault();
-            return;
-        }
+                if (!variantsData) {
+                    alert("Variants data is missing!");
+                    event.preventDefault();
+                    return;
+                }
 
-        let parsedVariants = JSON.parse(variantsData);
+                let parsedVariants = JSON.parse(variantsData);
 
-        if (!Array.isArray(parsedVariants)) {
-            alert("Invalid format: Variants must be an array!");
-            event.preventDefault();
-            return;
-        }
+                if (!Array.isArray(parsedVariants)) {
+                    alert("Invalid format: Variants must be an array!");
+                    event.preventDefault();
+                    return;
+                }
 
-        for (let variant of parsedVariants) {
-            if (!variant.color || variant.quantity <= 0) {
-                alert("Each variant must have a color and stock > 0!");
+                for (let variant of parsedVariants) {
+                    if (!variant.color || variant.quantity <= 0) {
+                        alert("Each variant must have a color and stock > 0!");
+                        event.preventDefault();
+                        return;
+                    }
+                }
+            } catch (error) {
+                alert("Error parsing variants data: " + error.message);
                 event.preventDefault();
-                return;
             }
-        }
-    } catch (error) {
-        alert("Error parsing variants data: " + error.message);
-        event.preventDefault();
-    }
-};
+        };
 
-document.getElementById("productForm").onsubmit = function (event) {
-    try {
-        const variantsData = JSON.stringify(variantsArray); // Convert array to JSON
-        document.getElementById("variantsData").value = variantsData; // Assign JSON to hidden field
-    } catch (error) {
-        console.error("Error setting variants JSON:", error);
-        event.preventDefault(); // Stop form submission if JSON conversion fails
-        alert("Invalid variants format. Please check your selections.");
-    }
-};
+        document.getElementById("productForm").onsubmit = function (event) {
+            alert(3)
+            try {
+                const variantsData = JSON.stringify(variantsArray); // Convert array to JSON
+                document.getElementById("variantsData").value = variantsData; // Assign JSON to hidden field
+            } catch (error) {
+                console.error("Error setting variants JSON:", error);
+                event.preventDefault(); // Stop form submission if JSON conversion fails
+                alert("Invalid variants format. Please check your selections.");
+            }
+        };
 
-document.getElementById('productForm').addEventListener('submit', function (event) {
-    const variantsData = document.getElementById('variantsData').value.trim();
-    const variantsError = document.getElementById('variantsError');
+        document.getElementById('productForm').addEventListener('submit', function (event) {
+            alert(4)
+            const variantsData = document.getElementById('variantsData').value.trim();
+            const variantsError = document.getElementById('variantsError');
 
-    try {
-        const variants = JSON.parse(variantsData); // Try parsing JSON
+            try {
+                const variants = JSON.parse(variantsData); // Try parsing JSON
 
-        if (!Array.isArray(variants) || variants.length === 0) {
-            throw new Error(); // If not an array or empty, trigger error
-        }
+                if (!Array.isArray(variants) || variants.length === 0) {
+                    throw new Error(); // If not an array or empty, trigger error
+                }
 
-        variantsError.style.display = "none"; // Hide error if valid
-    } catch (error) {
-        variantsError.style.display = "block"; // Show error message
-        event.preventDefault(); // Stop form submission
-    }
-});
+                variantsError.style.display = "none"; // Hide error if valid
+            } catch (error) {
+                variantsError.style.display = "block"; // Show error message
+                event.preventDefault(); // Stop form submission
+            }
+        });
 
-        function abra(imagenumber){
+        function abra(imagenumber) {
 
-            
-            
+
+
             document.getElementById(`image${+imagenumber + 1}`).value = '';
-      
+
             const h = document.getElementById(`previewContainer${imagenumber}`)
-            h.style.display='none'
+            h.style.display = 'none'
         }
 
     </script>

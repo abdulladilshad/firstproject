@@ -110,19 +110,58 @@
                 </div>
             </section>
             <section class="pagination">
-                <% if (users.hasPrevPage) { %>
-                    <a href="?page=<%= users.prevPage %>" class="pagination-btn">
-                        <i class="fas fa-angle-double-left"></i> Previous
-                    </a>
-                <% } %>
+                <div class="pagination-container">
+                    <% if (users.hasPrevPage) { %>
+                        <a href="?page=<%= users.prevPage %>" class="pagination-link">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    <% } else { %>
+                        <span class="pagination-link disabled">
+                            <i class="fas fa-chevron-left"></i>
+                        </span>
+                    <% } %>
             
-                <span>Page <%= users.page %> of <%= users.totalPages %></span>
+                    <% 
+                    let startPage = Math.max(1, users.page - 2);
+                    let endPage = Math.min(users.totalPages, startPage + 4);
+                    if (endPage - startPage < 4) {
+                        startPage = Math.max(1, endPage - 4);
+                    }
+                    %>
             
-                <% if (users.hasNextPage) { %>
-                    <a href="?page=<%= users.nextPage %>" class="pagination-btn">
-                        Next <i class="fas fa-angle-double-right"></i>
-                    </a>
-                <% } %>
+                    <% if (startPage > 1) { %>
+                        <a href="?page=1" class="pagination-link">1</a>
+                        <% if (startPage > 2) { %>
+                            <span class="pagination-ellipsis">...</span>
+                        <% } %>
+                    <% } %>
+            
+                    <% for (let i = startPage; i <= endPage; i++) { %>
+                        <a href="?page=<%= i %>" 
+                           class="pagination-link <%= users.page === i ? 'active' : '' %>">
+                            <%= i %>
+                        </a>
+                    <% } %>
+            
+                    <% if (endPage < users.totalPages) { %>
+                        <% if (endPage < users.totalPages - 1) { %>
+                            <span class="pagination-ellipsis">...</span>
+                        <% } %>
+                        <a href="?page=<%= users.totalPages %>" class="pagination-link">
+                            <%= users.totalPages %>
+                        </a>
+                    <% } %>
+            
+                    <% if (users.hasNextPage) { %>
+                        <a href="?page=<%= users.nextPage %>" class="pagination-link">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    <% } else { %>
+                        <span class="pagination-link disabled">
+                            <i class="fas fa-chevron-right"></i>
+                        </span>
+                    <% } %>
+                </div>
             </section>
         </main>
     </div>

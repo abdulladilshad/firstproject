@@ -434,8 +434,19 @@
             // Validate Price (should be greater than 0)
             const priceInput = document.getElementById('price');
             const priceValue = parseFloat(priceInput.value);
-            if (isNaN(priceValue) || priceValue <= 0) {
-                document.getElementById('priceError').style.display = 'block';
+            const priceError = document.getElementById('priceError');
+            
+            if (isNaN(priceValue)) {
+                priceError.innerText = "Please enter a valid price";
+                priceError.style.display = 'block';
+                valid = false;
+            } else if (priceValue === 0) {
+                priceError.innerText = "Price cannot be zero";
+                priceError.style.display = 'block';
+                valid = false;
+            } else if (priceValue < 0) {
+                priceError.innerText = "Price cannot be negative";
+                priceError.style.display = 'block';
                 valid = false;
             }
 
