@@ -8,6 +8,28 @@
 </head>
 <body>
     <div class="dashboard-container">
+         
+        <!-- Add this button at the start of your dashboard-container -->
+<button id="hamburger" class="hamburger-menu">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<div class="dashboard-container">
+    <div class="overlay" id="overlay"></div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>PRODUCTS</h2>
+            <button class="close-sidebar" id="closeSidebar">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <!-- Rest of your sidebar content -->
+    </aside>
+    <!-- Rest of your content -->
+</div>
+
         <aside class="sidebar">
             <h2>Admin Panel</h2>
             <ul class="sidebar-menu">
@@ -87,6 +109,43 @@
 
             return isValid;
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+    const hamburger = document.getElementById('hamburger');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const closeSidebar = document.getElementById('closeSidebar');
+
+    function toggleSidebar() {
+        hamburger.classList.toggle('active');
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+        document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+    }
+
+    hamburger.addEventListener('click', toggleSidebar);
+    closeSidebar.addEventListener('click', toggleSidebar);
+    overlay.addEventListener('click', toggleSidebar);
+
+    // Close sidebar on window resize if screen becomes larger
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768 && sidebar.classList.contains('active')) {
+            toggleSidebar();
+        }
+    });
+
+    // Add smooth hover effect for menu items
+    const menuItems = document.querySelectorAll('.sidebar-menu li a');
+    menuItems.forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateX(5px)';
+        });
+        item.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateX(0)';
+        });
+    });
+});
+
     </script>
 </body>
 </html>
