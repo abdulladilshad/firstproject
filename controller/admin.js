@@ -1,6 +1,6 @@
 const usermodel = require('../models/usermodel')
 const adminSchema = require('../models/adminmodel')
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcryptjs'); // If using bcryptjs
 const categoryModel = require('../models/categories')
 const productModel = require('../models/product')
 const fs = require('fs');
@@ -97,7 +97,7 @@ const Loadusers = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = 8;
 
-        const users = await usermodel.paginate({}, { page, limit });
+        const users = await usermodel.paginate({}, { page, limit })
 
         res.render('admin/adminUser', { users });
     } catch (error) {

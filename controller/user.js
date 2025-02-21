@@ -5,7 +5,7 @@ const Otp =require('../models/otpModel')
 const nodemailer = require('nodemailer')
 const otpGenerator = require('otp-generator')
 const dotenv =require ("dotenv") 
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcryptjs'); // If using bcryptjs
 const saltround = 10
 
 dotenv.config()
