@@ -262,42 +262,54 @@ const loadhome = async (req, res) => {
 
 const Loadshope = async (req, res) => {
     try {
-        const itemsPerPage = 10; 
-        const page = parseInt(req.query.page) || 1; 
+        const itemsPerPage = 9;
+        const page = parseInt(req.query.page) || 1;
+
+      
+        const totalItems = await productModel.countDocuments({ isDelete: false });
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
 
         
-        const totalItems = await productModel.countDocuments({ isDelete: false });
+        const currentPage = Math.max(1, Math.min(page, totalPages));
+        const skip = (currentPage - 1) * itemsPerPage;
 
-       
+        
         const products = await productModel
             .find({ isDelete: false })
-            .skip((page - 1) * itemsPerPage)
-            .limit(itemsPerPage);
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(itemsPerPage)
+            .lean(); 
 
-        const categories = await categoryModel.find({ isdelete: false });
+        
+        const categories = await categoryModel
+            .find({ isdelete: false })
+            .lean();
 
-        res.render('user/shope', { 
+        res.render('user/shope', {
             categories,
             products,
-            currentPage: page,
-            totalPages: Math.ceil(totalItems / itemsPerPage),
+            currentPage,
+            totalPages,
             totalItems,
-            itemsPerPage
+            itemsPerPage,
+            title: 'Shop - LUXE TIME WORLD'
         });
 
     } catch (error) {
-        console.error('Error loading shop:', error);
-        res.render('user/shope', { 
+        console.error('Error in Loadshope:', error);
+        res.status(500).render('user/shope', {
             categories: [],
-            products: [], 
+            products: [],
             currentPage: 1,
             totalPages: 1,
             totalItems: 0,
-            itemsPerPage: 10,
-            message: 'Failed to load products' 
+            itemsPerPage: 9,
+            error: 'Failed to load products'
         });
     }
 };
+
 
 
 

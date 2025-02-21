@@ -54,6 +54,9 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use((req, res, next) => {
+    res.status(404).send('Does not Exist');
+});
 
 app.listen(process.env.PORT, () => {
     console.log('PORT connected in http://localhost:3002');
