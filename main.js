@@ -7,13 +7,13 @@ const user=require('./routers/user')
 const admin=require('./routers/admin')
 const passport = require('./ConnectDb/passport')
 const nocache = require('nocache')
-const session = require('express-session')
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const morgan = require('morgan')
 const flash = require('connect-flash');
 
 
-
-
+require('dotenv').config();  
 
 
 
@@ -31,15 +31,21 @@ connectDb()
 
 app.use(nocache())
 
-app.use(session({
-    secret:"mysecretkey",
-    resave:false,
-    saveUninitialized:true,
-    cookie:{
-    maxAge:1000*60*60*24
-    }
-}))
+// app.use(session({
+//     secret:"mysecretkey",
+//     resave:false,
+//     saveUninitialized:true,
+//     cookie:{
+//     maxAge:1000*60*60*24
+//     }
+// }))
 
+app.use(session({
+    secret: 'your-secret-key',
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI })
+}));
 
 app.use(passport.initialize());
 app.use(passport.session());
