@@ -11,10 +11,10 @@ router.get('/login', adminauth.isLogin, adminController.Loadlogin);
 router.post('/login', adminController.login);
 
 //DASHBORD
-router.get('/dashboard', adminauth.cheksession, adminController.Loddashbord);
+router.get('/dashboard',adminauth.cheksession, adminController.Loddashbord);
 
 // PRODUCT MANAGEMENT 
-router.get('/products', adminauth.cheksession, adminController.LoadProducts);
+router.get('/products',adminauth.cheksession, adminController.LoadProducts);
 router.post('/addproducts', adminauth.cheksession, adminController.addProduct);
 router.get('/addproducts', adminauth.cheksession, adminController.renderAddProduct);
 router.get('/editproducts/:id', adminauth.cheksession, adminController.editproducts);

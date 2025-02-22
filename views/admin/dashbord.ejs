@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,29 +8,30 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/styles/admindashbord.css">
 </head>
+
 <body>
     <div class="dashboard-container">
 
         <!-- Add this button at the start of your dashboard-container -->
-<button id="hamburger" class="hamburger-menu">
-    <span></span>
-    <span></span>
-    <span></span>
-</button>
+        <button id="hamburger" class="hamburger-menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
 
-<div class="dashboard-container">
-    <div class="overlay" id="overlay"></div>
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h2>PRODUCTS</h2>
-            <button class="close-sidebar" id="closeSidebar">
-                <i class="fas fa-times"></i>
-            </button>
+        <div class="dashboard-container">
+            <div class="overlay" id="overlay"></div>
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <h2>PRODUCTS</h2>
+                    <button class="close-sidebar" id="closeSidebar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <!-- Rest of your sidebar content -->
+            </aside>
+            <!-- Rest of your content -->
         </div>
-        <!-- Rest of your sidebar content -->
-    </aside>
-    <!-- Rest of your content -->
-</div>
 
         <aside class="sidebar">
             <div class="sidebar-header">
@@ -37,29 +39,29 @@
             </div>
             <ul class="sidebar-menu">
                 <li><a href="/admin/dashboard" class="active">
-                    <i class="fas fa-home"></i> Dashboard
-                </a></li>
+                        <i class="fas fa-home"></i> Dashboard
+                    </a></li>
                 <li><a href="/admin/products">
-                    <i class="fas fa-box"></i> Products
-                </a></li>
+                        <i class="fas fa-box"></i> Products
+                    </a></li>
                 <li><a href="/orders">
-                    <i class="fas fa-shopping-cart"></i> Orders
-                </a></li>
+                        <i class="fas fa-shopping-cart"></i> Orders
+                    </a></li>
                 <li><a href="/admin/users">
-                    <i class="fas fa-users"></i> Users
-                </a></li>
+                        <i class="fas fa-users"></i> Users
+                    </a></li>
                 <li><a href="/admin/categories">
-                    <i class="fas fa-tags"></i> Category
-                </a></li>
+                        <i class="fas fa-tags"></i> Category
+                    </a></li>
                 <li><a href="/offers">
-                    <i class="fas fa-gift"></i> Offers
-                </a></li>
+                        <i class="fas fa-gift"></i> Offers
+                    </a></li>
                 <li><a href="/coupons">
-                    <i class="fas fa-ticket-alt"></i> Coupons
-                </a></li>
+                        <i class="fas fa-ticket-alt"></i> Coupons
+                    </a></li>
                 <li><a href="/settings">
-                    <i class="fas fa-cog"></i> Settings
-                </a></li>
+                        <i class="fas fa-cog"></i> Settings
+                    </a></li>
                 <li>
                     <form id="logoutForm" action="/admin/logout" method="POST">
                         <a href="#" onclick="document.getElementById('logoutForm').submit();">
@@ -67,7 +69,7 @@
                         </a>
                     </form>
                 </li>
-                
+
             </ul>
         </aside>
         <main class="main-content">
@@ -119,41 +121,42 @@
 
     <script>
 
-document.addEventListener('DOMContentLoaded', function() {
-    const hamburger = document.getElementById('hamburger');
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
-    const closeSidebar = document.getElementById('closeSidebar');
+        document.addEventListener('DOMContentLoaded', function () {
+            const hamburger = document.getElementById('hamburger');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            const closeSidebar = document.getElementById('closeSidebar');
 
-    function toggleSidebar() {
-        hamburger.classList.toggle('active');
-        sidebar.classList.toggle('active');
-        overlay.classList.toggle('active');
-        document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
-    }
+            function toggleSidebar() {
+                hamburger.classList.toggle('active');
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+                document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+            }
 
-    hamburger.addEventListener('click', toggleSidebar);
-    closeSidebar.addEventListener('click', toggleSidebar);
-    overlay.addEventListener('click', toggleSidebar);
+            hamburger.addEventListener('click', toggleSidebar);
+            closeSidebar.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
 
-    // Close sidebar on window resize if screen becomes larger
-    window.addEventListener('resize', function() {
-        if (window.innerWidth > 768 && sidebar.classList.contains('active')) {
-            toggleSidebar();
-        }
-    });
+            // Close sidebar on window resize if screen becomes larger
+            window.addEventListener('resize', function () {
+                if (window.innerWidth > 768 && sidebar.classList.contains('active')) {
+                    toggleSidebar();
+                }
+            });
 
-    // Add smooth hover effect for menu items
-    const menuItems = document.querySelectorAll('.sidebar-menu li a');
-    menuItems.forEach(item => {
-        item.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateX(5px)';
+            // Add smooth hover effect for menu items
+            const menuItems = document.querySelectorAll('.sidebar-menu li a');
+            menuItems.forEach(item => {
+                item.addEventListener('mouseenter', function () {
+                    this.style.transform = 'translateX(5px)';
+                });
+                item.addEventListener('mouseleave', function () {
+                    this.style.transform = 'translateX(0)';
+                });
+            });
         });
-        item.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateX(0)';
-        });
-    });
-});
     </script>
 </body>
+
 </html>

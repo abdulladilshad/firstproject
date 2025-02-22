@@ -1,6 +1,6 @@
 const usermodel = require('../models/usermodel')
 const adminSchema = require('../models/adminmodel')
-const bcrypt = require('bcryptjs'); // If using bcryptjs
+const bcrypt = require('bcryptjs');
 const categoryModel = require('../models/categories')
 const productModel = require('../models/product')
 const fs = require('fs');
