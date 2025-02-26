@@ -5,7 +5,7 @@ const categoryModel = require('../models/categories')
 const productModel = require('../models/product')
 const fs = require('fs');
 const path = require('path');
-
+ 
 const Loadlogin = async (req, res) => {
     try {
         const oldAdm = await adminSchema.findOne({ email: 'admin@gmail.com' });
@@ -15,10 +15,8 @@ const Loadlogin = async (req, res) => {
                 email: 'admin@gmail.com',
                 password: hashedPassword
             });
-            console.log(admin);
 
             await admin.save();
-            console.log('Admin created successfully');
         }
 
         res.render('admin/login', { message: null });
@@ -44,7 +42,6 @@ const login = async (req, res) => {
 
 
         req.session.admin = true;
-        console.log(req.session);
 
         res.redirect("/admin/dashboard");
     } catch (error) {
@@ -336,7 +333,6 @@ const LoadCategory = async (req, res) => {
 
         const products = await productModel.find({ category: { $in: categoryIds } });
 
-        console.log("ffffffffffffffffffff", products)
 
         res.render('admin/categories', { categories, products });
     } catch (error) {
@@ -423,8 +419,6 @@ const togglecategories = async (req, res) => {
     try {
         const categoryId = req.params.category_id
         const category = await categoryModel.findOne({ _id: categoryId })
-        console.log(category);
-        console.log('reached reached', req.query)
 
         category.isdelete = !category.isdelete
 
@@ -449,13 +443,11 @@ const loadEditCategory = async (req, res) => {
         const categoryId = req.params.id;
 
 
-        console.log('Category ID:', categoryId);
 
 
         const category = await categoryModel.findById(categoryId);
 
 
-        console.log('Fetched Category:', category);
 
 
         if (!category) {
@@ -481,15 +473,14 @@ const editproducts = async (req, res) => {
     try {
         const { id } = req.params
         const products = await productModel.findOne({ _id: id })
-        console.log(id);
+    
 
-        console.log(products);
 
         const categories = await categoryModel.find({})
         res.render('admin/editproducts', { categories, products, errorMessage: '' })
     }
     catch (er) {
-        console.log(er);
+        console.error(er);
 
     }
 

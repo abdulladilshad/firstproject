@@ -11,7 +11,6 @@ const checkSession = (req, res, next) => {
 
 const isLogin = (req, res, next) => {
 
-    console.log(req.session.user);
 
 
     if (req.session && req.session.user) {
@@ -25,10 +24,8 @@ const isBan = async (req, res, next) => {
     const ID = req.session?.user?.id;
 
     const user = await usermodel.findOne({ _id: ID });
-    console.log(user);
     
     if (user?.isBlock) {
-        console.log('User is blocked');
 
         req.session.destroy((err) => {
             if (err) {

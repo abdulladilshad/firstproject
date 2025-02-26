@@ -36,7 +36,6 @@ router.put('/categories/toggle-status/:category_id', adminauth.cheksession, admi
 router.get('/getProductById/:id', async (req, res) => {
     try {
         const productId = req.params.id;
-        console.log("Fetching product with ID:", productId); 
         const product = await Product.findById(productId);
 
         if (!product) {

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile | <%= user.name %>
+    </title>
+    <link rel="stylesheet" href="/styles/profile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        
+        <div class="sidebar">
+            <a href="/profile" class="sidebar-btn active">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+            <a href="/address" class="sidebar-btn">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>Addresses</span>
+            </a>
+            <a href="/orders" class="sidebar-btn">
+                <i class="fas fa-shopping-bag"></i>
+                <span>Orders</span>
+            </a>
+            <a href="/change-password" class="sidebar-btn">
+                <i class="fas fa-key"></i>
+                <span>Change Password</span>
+            </a>
+        </div>
+
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-image">
+                    <img id="profilePreview" src="<%=user.image || '/images/default-avatar.png' %>"
+                        alt="Profile Picture">
+
+                    <% if (!user.googleId) { %>
+                        <div class="image-upload">
+                            <label for="avatar" class="upload-label">
+                                <i class="fas fa-camera"></i>
+                            </label>
+                            <input type="file" id="avatar" name="avatar" accept="image/*" style="display: none;">
+                        </div>
+                        <% } %>
+                </div>
+                <h1>
+                    <%= user.name || user.email %>
+                </h1>
+                <p class="email"><i class="fas fa-envelope"></i>
+                    <%= user.email %>
+                </p>
+            </div>
+
+            <div class="profile-content">
+                <form id="profileForm" class="profile-form">
+                    <div class="form-group">
+                        <label for="name">
+                            <i class="fas fa-user"></i> Full Name
+                        </label>
+                        <input type="text" id="name" name="name" value="<%= user.name %>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">
+                            <i class="fas fa-envelope"></i> Email Address
+                        </label>
+                        <input type="email" id="email" name="email" value="<%= user.email %>" readonly required>
+                    </div>
+
+                    <button type="submit" class="update-btn">
+                        <i class="fas fa-save"></i> Update Profile
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData();
+            formData.append('name', document.getElementById('name').value);
+            formData.append('email', document.getElementById('email').value);
+
+            const avatarInput = document.getElementById('avatar');
+            if (avatarInput && avatarInput.files[0]) {
+                formData.append('avatar', avatarInput.files[0]);
+            }
+
+            try {
+                const response = await fetch('/profile/update', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.querySelector('.profile-header h1').textContent = data.name;
+                    if (data.avatar) {
+                        document.getElementById('profilePreview').src = data.avatar;
+                    }
+                    alert('Profile updated successfully!');
+                } else {
+                    alert('Failed to update profile');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while updating profile');
+            }
+        });
+
+        
+        if (document.getElementById('avatar')) {
+            document.getElementById('avatar').addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        document.getElementById('profilePreview').src = e.target.result;
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

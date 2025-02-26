@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/styles/cart.css">
+</head>
+
+<body>
+    <h1>Your Shopping Cart</h1>
+
+    <div id="cart-container">
+        <% if (cart && cart.length> 0) { %>
+            <div class="cart-layout">
+                <div class="cart-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Stock</th>
+                                <th>Total</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% cart.forEach(item=> { %>
+                                <tr id="cart-item-<%= item.id %>">
+                                    <td>
+                                        <%= item.name %>
+                                    </td>
+                                    <td>₹<%= item.price %>
+                                    </td>
+                                    <td>
+                                        <%= item.quantity %>
+                                    </td>
+                                    <td>
+                                        <% if (item.stock <=0) { %>
+                                            <span class="out-of-stock">Out of Stock</span>
+                                            <% } else { %>
+                                                <%= item.stock && 'In stock' %>
+                                                    <% } %>
+                                    </td>
+                                    <td>$<%= (item.price * item.quantity).toFixed(2) %>
+                                    </td>
+                                    <td>
+                                        <button onclick="removeFromCart('<%= item.productId %>')">
+                                            <i class="fas fa-trash"></i> Remove
+                                        </button>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="order-summary">
+                    <h2>Order Summary</h2>
+                    <div class="summary-item">
+                        <span>Subtotal</span>
+                        <span>$<%= cart.reduce((acc, item)=> acc + (item.price * item.quantity), 0).toFixed(2) %></span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Tax (10%)</span>
+                        <span>$<%= (cart.reduce((acc, item)=> acc + (item.price * item.quantity), 0) * 0.1).toFixed(2)
+                                %></span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Shipping</span>
+                        <span>$00.00</span>
+                    </div>
+                    <div class="summary-item summary-total">
+                        <span>Total</span>
+                        <span>$<%= (cart.reduce((acc, item)=> acc + (item.price * item.quantity), 0) * 1.1 ).toFixed(2) %></span>
+                    </div>
+                    <a href="/checkout" class="checkout-button">
+                        <i class="fas fa-lock"></i> Proceed to Checkout
+                    </a>
+                </div>
+            </div>
+            <% } else { %>
+                <div class="empty-cart">
+                    <i class="fas fa-shopping-cart" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <p>Your cart is empty.</p>
+                </div>
+                <% } %>
+    </div>
+
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="/shope" class="continue-shopping">
+            <i class="fas fa-arrow-left"></i> Continue Shopping
+        </a>
+    </div>
+    <script>
+        async function removeFromCart(itemId) {
+            try {
+                const response = await fetch(`/cart/remove/${itemId}`, { method: 'DELETE' });
+    
+                const text = await response.text();
+                try {
+                    var result = JSON.parse(text);
+                } catch {
+                    throw new Error(text);
+                }
+    
+                if (response.ok) {
+                    alert(result.message);
+                    
+                    // Remove the entire row from the cart table
+                    const element = document.getElementById(`cart-item-${itemId}`);
+                    if (element) {
+                        element.style.opacity = '0';
+                        element.style.transition = 'opacity 0.3s ease';
+                        setTimeout(() => {
+                            element.remove();
+                            
+                            // Check if cart is empty
+                            const remainingItems = document.querySelectorAll('tbody tr').length;
+                            if (remainingItems === 0) {
+                                const cartContainer = document.querySelector('.cart-container');
+                                if (cartContainer) {
+                                    cartContainer.innerHTML = `
+                                        <div class="empty-cart-message" style="text-align: center; padding: 2rem;">
+                                            <h3>Your cart is empty</h3>
+                                            <p>Add some products to your cart to continue shopping.</p>
+                                            <a href="/products" class="btn btn-primary mt-3">Continue Shopping</a>
+                                        </div>
+                                    `;
+                                }
+                            }
+                        }, 3000);
+                    }
+                } else {
+                    throw new Error(result.message);
+                }
+    
+            } catch (error) {
+                alert('Error: ' + error.message);
+                console.error('Error removing item:', error);
+            }
+        }
+    </script>
+
+
+
+</body>
+
+</html>

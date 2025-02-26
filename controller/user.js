@@ -5,7 +5,8 @@ const Otp =require('../models/otpModel')
 const nodemailer = require('nodemailer')
 const otpGenerator = require('otp-generator')
 const dotenv =require ("dotenv") 
-const bcrypt = require('bcryptjs'); // If using bcryptjs
+const bcrypt = require('bcryptjs');
+
 const saltround = 10
 
 dotenv.config()
@@ -77,8 +78,6 @@ const Loadotp = async (req, res) => {
     const { email } = req.query;
     
     
-    console.log("1",email);
-    
 
     if (!email) {
         return res.status(400).send("Email is required for OTP verification");
@@ -91,7 +90,6 @@ const Loadotp = async (req, res) => {
 const postotp = async (req, res) => {
     try {
         const { email, otp } = req.body;
-        console.log("2", email);
         
        
         if (!email || !otp) {
@@ -230,10 +228,6 @@ const login = async (req, res) => {
 
 const Loadlogin = (req, res) => {
     const message = req.flash('error'); 
-    console.log('dsujkgfdksjhfghdsjkfhgsdjk');
-console.log(message);
-    
-    console.log('dsujkgfdksjhfghdsjkfhgsdjk');
 
     res.render('user/login', { message: Array.isArray(message) ? message : [message] });
 };
@@ -246,11 +240,11 @@ console.log(message);
 const loadhome = async (req, res) => {
     try {
         const products = await productModel.find({ isDelete: false }).sort({ _id: -1 });
-        console.log(products);
 
         const categories = await categoryModel.find({isdelete:false})
-        console.log(categories);
-        res.render('user/index', { categories,products })
+        const user = await userschema.findOne({_id: req.session.user.id}, 'image');
+        
+        res.render('user/index', { categories,products, user })
           
 
     } catch (error) {
@@ -332,10 +326,16 @@ const Loadproductdeatails= async (req, res) => {
 
 }
 
+
+
+
+
+
 const logout = (req, res) => {
     req.session.destroy()
     res.redirect('/login')
 }
+
 
 
 
@@ -350,6 +350,8 @@ module.exports = {
     Loadotp,
     ResendOtp,
     Loadshope,
-    Loadproductdeatails
-
+    Loadproductdeatails,
+    sentOtp,
+    ResendOtp
+        
 }

@@ -26,18 +26,26 @@ passport.use(new GoogleStrategy({
         let user = await User.findOne({ 
             $or: [
                 { googleId: profile.id },
-                { email: profile.emails[0].value }
+                { email: profile.emails[0].value },
+                {image: profile.photos[0].value}
             ]
         });
+
 
         if (!user) {
             user = new User({
                 name: profile.displayName,
                 email: profile.emails[0].value,
-                googleId: profile.id,
+                image: profile.photos[0].value,
                 isVerified: true // Add email verification status
             });
             await user.save();
+        }else {
+            // Update existing user with Google avatar if not already set
+            if (!user.image) {
+                user.image = profile.photos[0].value;
+                await user.save();
+            }
         }
         
         done(null, user);

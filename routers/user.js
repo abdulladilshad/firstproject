@@ -1,7 +1,14 @@
 const router =require('express').Router();
 const passport = require('passport');
 const userController=require('../controller/user')
+const cartController=require('../controller/cart')
+const addressController= require('../controller/address')
+const orderController = require('../controller/order')
+const checkoutController = require('../controller/checkout')
+const profileController = require ('../controller/profile')
+const changePassword=require('../controller/changePassword')
 const auth=require('../middleware/auth')
+const uploadMiddleware= require('../middleware/multer')
 
 
 
@@ -54,7 +61,44 @@ router.get('/auth/google/callback',
   );
 
 router.get('/shope',auth.isBan,auth.checkSession,userController.Loadshope)
+
 router.get('/product/:id',auth.isBan,auth.checkSession,userController.Loadproductdeatails);
+
+//pro
+
+
+router.get('/cart',cartController.LoadCart);
+router.post('/cart',cartController.addCart );
+router.delete('/cart/remove/:productId',cartController.removeCart);
+router.get('/all', cartController.getCartItems);
+
+router.get('/profile', profileController.getProfile);
+router.post('/profile/update',uploadMiddleware,profileController.updateProfile);
+
+router.get("/checkout", checkoutController.getCheckout);
+
+
+router.post("/palce", orderController.placeOrder);
+
+
+
+                
+
+
+router.get('/address',addressController.getAddresses ); 
+router.post('/addresses', addressController.addAddress); 
+router.put('/addresses/:id',addressController.updateAddress); 
+router.delete('/addresses/:id', addressController.deleteAddress);
+router.get('/addresses/:id', addressController.getAddress);
+
+
+router.post('/change-password', changePassword.changePassword);
+router.post('/send-otp', changePassword.sendOtpForGoogleUser);
+router.get('/change-password', changePassword.renderChangePasswordPage);
+
+router.put('/select-address', addressController.selectAddress);
+
+
 
 
 

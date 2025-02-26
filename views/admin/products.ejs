@@ -205,11 +205,9 @@
         }
 
         function viewProduct(productId) {
-            console.log('Product ID:', productId);
             fetch(`getProductById/${productId}`)
                 .then(response => response.json())
                 .then(product => {
-                    console.log('Fetched Product:', product);  // Check product data in the console
                     const images = product.imagePaths;  // Assuming imagePaths is the correct field
                     if (images && images.length > 0) {
                         let imageHTML = '';

@@ -8,6 +8,10 @@ const userSchema = new mongoose.Schema({
     trim: true, 
     lowercase: true 
   },
+  name:{
+    type:String,
+    
+  },
   googleId:{
     type:String,
     unique:true
@@ -24,6 +28,11 @@ const userSchema = new mongoose.Schema({
   isBlock:{
     type:Boolean,
     default:false
+  },
+   image:{
+    type:[String],
+    
+  
   },
 },{timestamps:true});
 
