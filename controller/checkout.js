@@ -36,7 +36,7 @@ const getCheckout = async (req, res) => {
         // Calculate totals
         const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
         const tax = subtotal * 0.1;
-        const total = subtotal + tax + 10;
+        const total = subtotal + tax;
 
         // Render the checkout page
         res.render("user/checkout", { cart, addresses, subtotal, tax, total, selectedAddress });

@@ -80,6 +80,7 @@ router.get("/checkout", checkoutController.getCheckout);
 
 router.post("/order/place", orderController.placeOrder);
 router.get('/order/success/:orderId', orderController.orderSuccess);
+router.get("/orders", orderController.orderHistory);
 
 
 

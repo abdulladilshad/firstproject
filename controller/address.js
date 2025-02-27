@@ -18,9 +18,6 @@ const getAddresses = async (req, res) => {
 
 const selectAddress = async (req, res) => {
     try {
-
-        
-        
         const userId = req.session.user?.id;
         const { addressId } = req.body; // Assuming addressId is sent in the request body
         

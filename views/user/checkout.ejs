@@ -312,7 +312,7 @@
                 console.log("Address selection response:", data);
 
                 if (response.ok) {
-                    selectedAddressId = addressId; 
+                    selectedAddressId = addressId;
                     // Update the UI dynamically with the selected address
                     if (data.selectedAddress) {
                         document.querySelector(".current-address").innerHTML = `
@@ -366,9 +366,14 @@
                 alert('Error saving address: ' + error.message);
             }
         });
+        function getTotal() {
+        return '<%= total.toFixed(2) %>'; 
+    }
 
-       
     async function placeOrder() {
+        let total = getTotal(); // Get total value from EJS
+        console.log("Order Total:", total);
+            
         if (!selectedAddressId) {
             alert("Please select an address before placing the order.");
             return;
@@ -383,11 +388,11 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
+                    total,
                     paymentMethod: 'cod',
                     addressId: selectedAddressId // Send the stored addressId
                 })
             });
-console.log(response, 'jijiij');
 
             if (response.ok) {
                 const result = await response.json();
@@ -399,7 +404,6 @@ console.log(response, 'jijiij');
             alert('Error placing order: ' + error.message);
         }
     }
-
     </script>
 </body>
 

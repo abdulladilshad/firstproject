@@ -1,8 +1,10 @@
 const router =require('express').Router();
 const Product =require("../models/product")
+const OrderModel = require("../models/orderModel")
 
 
 const adminController = require('../controller/admin')
+const orderController = require('../controller/adminOrderController')
 const adminauth = require('../middleware/admin')
 
 
@@ -48,11 +50,38 @@ router.get('/getProductById/:id', async (req, res) => {
     }
 });
 
+router.post('/orders/:orderId/product/:productId/update', async (req, res) => {
+    try {
+        const { orderId, productId } = req.params;
+        const { status } = req.body;
+
+        console.log("Updating status:", { orderId, productId, status });
+
+        const updatedOrder = await OrderModel.findOneAndUpdate(
+            { _id: orderId, "products.productId": productId },
+            { $set: { "products.$.status": status } },
+            { new: true }
+        );
+
+        if (!updatedOrder) {
+            return res.status(404).json({ success: false, message: "Order or product not found" });
+        }
+
+        res.json({ success: true, message: "Status updated successfully", newStatus: status });
+
+    } catch (error) {
+        console.error("Error updating order:", error);
+        res.status(500).json({ success: false, message: "Error updating order status" });
+    }
+});
 
 
-  // USER MANAGEMENT
 router.get('/users', adminauth.cheksession, adminController.Loadusers);
 router.put('/users/toggle-status/:user_id', adminauth.cheksession, adminController.toggleUserStatus);
+
+
+router.get("/orders",orderController.adminOrders);
+router.post("/orders/:orderId/update",orderController.updateOrderStatus);
 
 
 //LOGOUT

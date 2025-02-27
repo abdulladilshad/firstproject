@@ -1,13 +1,143 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Success</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .success-container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: #4CAF50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            animation: scaleUp 0.5s ease-in-out;
+        }
+
+        .success-icon i {
+            color: white;
+            font-size: 50px;
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+        }
+
+        .order-id {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 10px;
+            color: #6c757d;
+            font-size: 1.1rem;
+            margin: 1.5rem 0;
+        }
+
+        .order-id span {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .home-button {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .home-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        @keyframes scaleUp {
+            0% {
+                transform: scale(0);
+            }
+            70% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .thank-you {
+            color: #6c757d;
+            margin: 1.5rem 0;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 480px) {
+            .success-container {
+                padding: 1.5rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .success-icon {
+                width: 80px;
+                height: 80px;
+            }
+
+            .success-icon i {
+                font-size: 40px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h2>Order Placed Successfully!</h2>
-    <p>Your order ID: <%= orderId %></p>
-    <a href="/">Go to Home</a>
+    <div class="success-container">
+        <div class="success-icon">
+            <i class="fas fa-check"></i>
+        </div>
+        <h2>Order Placed Successfully!</h2>
+        <p class="thank-you">Thank you for your purchase</p>
+        <div class="order-id">
+            Order ID: <span><%= orderId %></span>
+        </div>
+        <p class="thank-you">We'll send you an email with your order details shortly.</p>
+        <a href="/" class="home-button">
+            <i class="fas fa-home"></i> Back to Home
+        </a>
+    </div>
 </body>
 </html>
