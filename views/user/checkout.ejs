@@ -282,6 +282,8 @@
 
 
     <script>
+        let selectedAddressId = null;
+
         function showAddressForm() {
             document.getElementById('addressFormModal').style.display = 'block';
         }
@@ -297,7 +299,6 @@
         function closeAddressModal() {
             document.getElementById('addressModal').style.display = 'none';
         }
-
         async function selectAddress(addressId) {
             try {
                 const response = await fetch('/select-address', {
@@ -307,11 +308,11 @@
                     },
                     body: JSON.stringify({ addressId })
                 });
-
                 const data = await response.json();
                 console.log("Address selection response:", data);
 
                 if (response.ok) {
+                    selectedAddressId = addressId; 
                     // Update the UI dynamically with the selected address
                     if (data.selectedAddress) {
                         document.querySelector(".current-address").innerHTML = `
@@ -366,30 +367,39 @@
             }
         });
 
-        async function placeOrder() {
-            if (!confirm('Confirm order placement?')) return;
-
-            try {
-                const response = await fetch('/order/place', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        paymentMethod: 'cod'
-                    })
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    window.location.href = `/order/success/${result.orderId}`;
-                } else {
-                    throw new Error('Failed to place order');
-                }
-            } catch (error) {
-                alert('Error placing order: ' + error.message);
-            }
+       
+    async function placeOrder() {
+        if (!selectedAddressId) {
+            alert("Please select an address before placing the order.");
+            return;
         }
+
+        if (!confirm('Confirm order placement?')) return;
+
+        try {
+            const response = await fetch('/order/place', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    paymentMethod: 'cod',
+                    addressId: selectedAddressId // Send the stored addressId
+                })
+            });
+console.log(response, 'jijiij');
+
+            if (response.ok) {
+                const result = await response.json();
+                window.location.href = `/order/success/${result.orderId}`;
+            } else {
+                throw new Error('Failed to place order');
+            }
+        } catch (error) {
+            alert('Error placing order: ' + error.message);
+        }
+    }
+
     </script>
 </body>
 

@@ -160,7 +160,7 @@
                 if (!response.ok) throw new Error('Failed to fetch address');
 
                 const addressData = await response.json();
-                console.log(addressData.address, 'uuuuuuuuuu'); // Debugging log
+                
 
                 if (addressData.success) {
                     const { fullName, phone, street, city, state, zipCode, isDefault } = addressData.address;
@@ -171,7 +171,7 @@
                     document.getElementById('street').value = street;
                     document.getElementById('city').value = city;
                     document.getElementById('state').value = state;
-                    document.getElementById('zipCode').value = zipCode;cl
+                    document.getElementById('zipCode').value = zipCode;
                     document.getElementById('isDefault').checked = isDefault;
                 } else {
                     alert('Address not found');
