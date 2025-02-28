@@ -1,28 +1,8 @@
 const OrderModel = require("../models/orderModel");
 const cartModel = require("../models/cartModel");
+const mongoose = require("mongoose");
 
-// const orderHistory = async (req, res) => {
-//     try {        
-//         const userId = req.session.user.id;
 
-//         // Fetch user's orders with product details
-//         const orders = await OrderModel.find({ userId })
-//             .populate("products.productId")
-//             .sort({ createdAt: -1 })  // Show latest orders first
-
-//             console.log(orders, 'kokokkok');
-
-//         if (!orders || orders.length === 0) {
-//             return res.render("user/ordersHistory", { orders: [], message: "No orders found" });
-//         }
-        
-
-//         res.render("user/ordersHistory", { orders, message: null });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).render("error", { message: "Error fetching orders" });
-//     }
-// };
 
 
 const orderHistory = async (req, res) => {
@@ -32,31 +12,29 @@ const orderHistory = async (req, res) => {
         // Fetch user's orders with product details
         const orders = await OrderModel.find({ userId })
             .populate("products.productId")
-            .sort({ createdAt: -1 }); // Show latest orders first
+            .sort({ createdAt: -1 }); 
 
         if (!orders || orders.length === 0) {
             return res.render("user/ordersHistory", { orders: [], message: "No orders found" });
         }
 
-        // Convert each product into an individual order entry
         const individualOrders = orders.flatMap(order => 
             order.products.map(product => ({
                 orderId: order._id,
                 productId: product.productId._id,
                 productName: product.productId.productName,
-                productImage: product.productId.imagePaths[0], // Adjust based on your schema
+                productImage: product.productId.imagePaths[0], 
                 quantity: product.quantity,
                 price: product.price,
                 status: product.status,
                 createdAt: order.createdAt,
                 paymentMethod: order.paymentMethod,
-                totalAmount: order.totalAmount
+                totalAmount: order.totalAmount,
+                individualOrdersId: product._id,
             }))
         );
 
-        console.log(individualOrders, 'individualOrdersindividualOrdersindividualOrdersv');
         
-
         res.render("user/ordersHistory", { orders: individualOrders, message: null });
 
     } catch (error) {
@@ -73,7 +51,7 @@ const placeOrder = async (req, res) => {
         const userId = req.session.user.id;
         const { addressId, paymentMethod, total } = req.body;
 
-        console.log(req.body, 'ppppppppppppp');
+        
         
         const cartData = await cartModel.findOne({ userId }).populate("items.productId");
 
@@ -84,7 +62,7 @@ const placeOrder = async (req, res) => {
         const products = cartData.items.map(item => ({
             productId: item.productId._id,
             quantity: item.quantity,
-            price: item.productId.price 
+            price: item.productId.price
         }));
 
         const totalPrice = total;
@@ -127,9 +105,54 @@ const orderSuccess = async (req, res) => {
         res.status(500).render("orderSuccess", { error: "Error loading order details" });
     }
 };
+const cancelOrder = async (req, res) => {
+    try {
+        const { individualOrdersId, orderId } = req.query;
+        
+
+        
+        if (!orderId || !mongoose.Types.ObjectId.isValid(orderId)) {
+            return res.status(400).json({ success: false, message: "Invalid or missing orderId" });
+        }
+
+        if (!individualOrdersId || !mongoose.Types.ObjectId.isValid(individualOrdersId)) {
+            return res.status(400).json({ success: false, message: "Invalid or missing productId" });
+        }
+
+       
+
+        // Reconnect MongoDB if disconnected
+        if (mongoose.connection.readyState === 0) {
+            await mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+        }
+
+
+        const updatedOrder = await OrderModel.findOneAndUpdate(
+            { _id: orderId, "products._id": individualOrdersId }, 
+            { $set: { "products.$.status": "Cancelled" } },
+            { new: true }
+        );
+        
+        console.log(updatedOrder, 'iaoioaiosiaois');
+        
+
+        if (!updatedOrder) {
+            return res.status(404).json({ success: false, message: "Order or product not found" });
+        }
+
+        res.redirect("/orders");
+
+    } catch (error) {
+        console.error("Error cancelling order:", error);
+        res.status(500).json({ success: false, message: "Error cancelling order" });
+    }
+};
+
+
 
 module.exports = {
     placeOrder,
     orderSuccess,
-    orderHistory
+    orderHistory,
+    cancelOrder
 };

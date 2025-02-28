@@ -49,7 +49,7 @@ const addAddress = async (req, res) => {
         if (!userId) return res.status(401).json({ success: false, message: 'User not logged in' });
 
         const { fullName, phone, street, city, state, zipCode, isDefault } = req.body;
-        console.log("Request Body:", req.body); // Debugging
+        
 
 
         

@@ -9,7 +9,7 @@ const getCheckout = async (req, res) => {
         }
 
         const userId = req.session.user.id; // Ensure user ID is correctly extracted
-        console.log("Fetching checkout for user:", userId);
+        
 
         // Fetch cart and addresses
         const cartData = await cartModel.findOne({ userId }).populate("items.productId", "productName price imagePaths");
