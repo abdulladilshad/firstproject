@@ -192,3 +192,41 @@ button:hover {
 .checkout-button:hover {
     background-color: #218838;
 }
+
+.color-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.color-dot {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid #e0e0e0;
+}
+
+.color-name {
+    font-weight: 500;
+}
+
+/* Special handling for white and light colors */
+.color-name[style*="color: white"],
+.color-name[style*="color: #fff"],
+.color-name[style*="color: #ffffff"],
+.color-name[style*="color: yellow"],
+.color-name[style*="color: #ffff00"] {
+    text-shadow: 
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000;
+}
+
+/* Special handling for white color dot */
+.color-dot[style*="background-color: white"],
+.color-dot[style*="background-color: #fff"],
+.color-dot[style*="background-color: #ffffff"] {
+    border: 1px solid #e0e0e0;
+}

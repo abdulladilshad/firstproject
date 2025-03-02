@@ -309,11 +309,20 @@
                             <div class="meta-item">
                                 <span class="fw-medium">Available colors</span>
                                 <div class="variants-list">
-                                    <% product.variants.forEach(variant=> { %>
-                                        <div class="variant-item">
-                                            <%= variant.color %>
+                                    <% product.variants.forEach((variant, index) => { %>
+                                        <div class="color-radio-wrapper">
+                                            <input type="radio" 
+                                                   class="color-radio"
+                                                   name="color" 
+                                                   id="color-<%= index %>" 
+                                                   value="<%= variant.color %>"
+                                                   style="--color: <%= variant.color %>"
+                                                   <%= index === 0 ? 'checked' : '' %>>
+                                            <label for="color-<%= index %>" class="color-label">
+                                                <%= variant.color %>
+                                            </label>
                                         </div>
-                                        <% }) %>
+                                    <% }) %>
                                 </div>
                             </div>
                         </div>
@@ -424,28 +433,37 @@
 
 // Add to Cart functionality
 async function addToCart(productId) {
-        try {
-            const response = await fetch('/cart', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ productId })
-            });
+    const selectedColor = document.querySelector('input[name="color"]:checked'); 
 
-            const data = await response.json();
-            
-            if (data.success) {
-                alert('Item added to cart!');
-                updateCartUI(data.cart); // Update cart display
-            } else {
-                alert(data.message);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Something went wrong!');
-        }
+    if (!selectedColor) {
+        alert("Please select a color!");
+        return;
     }
+
+    const colorValue = selectedColor.value; // Get the selected color
+
+    try {
+        const response = await fetch('/cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ productId, color: colorValue }) // Send selected color
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('Item added to cart!');
+            updateCartUI(data.cart);
+        } else {
+            alert(data.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Something went wrong!');
+    }
+}
 
     function updateCartUI(cart) {
         const cartCount = document.getElementById('cart-count');

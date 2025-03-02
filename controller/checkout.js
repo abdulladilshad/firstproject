@@ -9,14 +9,12 @@ const getCheckout = async (req, res) => {
         }
 
         const userId = req.session.user.id; // Ensure user ID is correctly extracted
-        
 
         // Fetch cart and addresses
         const cartData = await cartModel.findOne({ userId }).populate("items.productId", "productName price imagePaths");
 
         const addresses = await addressModel.find({ userId });
 
- 
         // Transform cartData to required format
         const cart = cartData
             ? cartData.items.map(item => ({
@@ -24,12 +22,11 @@ const getCheckout = async (req, res) => {
                 productName: item.productId.productName,
                 price: item.productId.price,
                 quantity: item.quantity,
+                color: item.color, // ✅ Include color
                 image: item.productId.imagePaths?.[0] || ""
             }))
             : [];
 
-
-            
         // Select default address or first one
         const selectedAddress = addresses.find(addr => addr.isDefault) || addresses[0];
 

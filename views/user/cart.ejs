@@ -24,6 +24,7 @@
                                 <th>Price</th>
                                 <th>Quantity</th>
                                 <th>Stock</th>
+                                <th>Color</th> <!-- New column -->
                                 <th>Total</th>
                                 <th>Action</th>
                             </tr>
@@ -37,14 +38,30 @@
                                     <td>₹<%= item.price %>
                                     </td>
                                     <td>
-                                        <%= item.quantity %>
+                                        <button class="quantity-btn"
+                                            onclick="updateQuantity('<%= item.productId %>', -1)">-</button>
+                                        <span id="quantity-<%= item.productId %>">
+                                            <%= item.quantity %>
+                                        </span>
+                                        <button class="quantity-btn"
+                                            onclick="updateQuantity('<%= item.productId %>', 1)">+</button>
                                     </td>
+
                                     <td>
                                         <% if (item.stock <=0) { %>
                                             <span class="out-of-stock">Out of Stock</span>
                                             <% } else { %>
                                                 <%= item.stock && 'In stock' %>
                                                     <% } %>
+                                    </td>
+                                    <td>
+                                        <div class="color-indicator">
+                                            <span class="color-dot"
+                                                style="background-color: '<%= item.color || '#bd1212' %>"></span>
+                                            <span class="color-name"
+                                                style="color: '<%= item.color || '#bd1212' %>"></span>
+                                            <%= item.color %>
+                                        </div>
                                     </td>
                                     <td>$<%= (item.price * item.quantity).toFixed(2) %>
                                     </td>
@@ -76,7 +93,8 @@
                     </div>
                     <div class="summary-item summary-total">
                         <span>Total</span>
-                        <span>$<%= (cart.reduce((acc, item)=> acc + (item.price * item.quantity), 0) * 1.1 ).toFixed(2) %></span>
+                        <span>$<%= (cart.reduce((acc, item)=> acc + (item.price * item.quantity), 0) * 1.1 ).toFixed(2)
+                                %></span>
                     </div>
                     <a href="/checkout" class="checkout-button">
                         <i class="fas fa-lock"></i> Proceed to Checkout
@@ -100,17 +118,17 @@
         async function removeFromCart(itemId) {
             try {
                 const response = await fetch(`/cart/remove/${itemId}`, { method: 'DELETE' });
-    
+
                 const text = await response.text();
                 try {
                     var result = JSON.parse(text);
                 } catch {
                     throw new Error(text);
                 }
-    
+
                 if (response.ok) {
                     alert(result.message);
-                    
+
                     // Remove the entire row from the cart table
                     const element = document.getElementById(`cart-item-${itemId}`);
                     if (element) {
@@ -118,7 +136,7 @@
                         element.style.transition = 'opacity 0.3s ease';
                         setTimeout(() => {
                             element.remove();
-                            
+
                             // Check if cart is empty
                             const remainingItems = document.querySelectorAll('tbody tr').length;
                             if (remainingItems === 0) {
@@ -138,12 +156,41 @@
                 } else {
                     throw new Error(result.message);
                 }
-    
+
             } catch (error) {
                 alert('Error: ' + error.message);
                 console.error('Error removing item:', error);
             }
         }
+
+        async function updateQuantity(productId, change) {
+            const quantitySpan = document.getElementById(`quantity-${productId}`);
+            let currentQuantity = parseInt(quantitySpan.innerText);
+
+            if ((change === -1 && currentQuantity === 1) || (change === 1 && currentQuantity >= 5)) {
+                return; // Prevent below 1 or above 5
+            }
+
+            try {
+                const response = await fetch(`/cart/update/${productId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ change })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    quantitySpan.innerText = result.newQuantity; // Update quantity on screen
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error('Error updating quantity:', error);
+                alert('Something went wrong!');
+            }
+        }
+
     </script>
 
 

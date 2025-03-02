@@ -50,30 +50,6 @@ router.get('/getProductById/:id', async (req, res) => {
     }
 });
 
-router.post('/orders/:orderId/product/:productId/update', async (req, res) => {
-    try {
-        const { orderId, productId } = req.params;
-        const { status } = req.body;
-
-        console.log("Updating status:", { orderId, productId, status });
-
-        const updatedOrder = await OrderModel.findOneAndUpdate(
-            { _id: orderId, "products.productId": productId },
-            { $set: { "products.$.status": status } },
-            { new: true }
-        );
-
-        if (!updatedOrder) {
-            return res.status(404).json({ success: false, message: "Order or product not found" });
-        }
-
-        res.json({ success: true, message: "Status updated successfully", newStatus: status });
-
-    } catch (error) {
-        console.error("Error updating order:", error);
-        res.status(500).json({ success: false, message: "Error updating order status" });
-    }
-});
 
 
 router.get('/users', adminauth.cheksession, adminController.Loadusers);
@@ -81,12 +57,16 @@ router.put('/users/toggle-status/:user_id', adminauth.cheksession, adminControll
 
 
 router.get("/orders",orderController.adminOrders);
-router.post("/orders/:orderId/update",orderController.updateOrderStatus);
+router.post("/orders/:orderId/product/:productId/update",orderController.updateOrderStatus);
+
 
 
 //LOGOUT
 router.post('/logout',adminauth.cheksession,adminController.logout)
 
+router.get('/orders-view', orderController.orderView)
+router.get('/orders-view', orderController.a)
+router.get('/orders-view/:id/edit', orderController.b )
 
 module.exports=router
 

@@ -1,7 +1,7 @@
 const OrderModel = require("../models/orderModel");
 const cartModel = require("../models/cartModel");
 const mongoose = require("mongoose");
-
+const addressModel = require('../models/addressModel')
 
 
 
@@ -27,6 +27,7 @@ const orderHistory = async (req, res) => {
                 quantity: product.quantity,
                 price: product.price,
                 status: product.status,
+                color: product.color,
                 createdAt: order.createdAt,
                 paymentMethod: order.paymentMethod,
                 totalAmount: order.totalAmount,
@@ -49,33 +50,85 @@ const orderHistory = async (req, res) => {
 const placeOrder = async (req, res) => {
     try {
         const userId = req.session.user.id;
-        const { addressId, paymentMethod, total } = req.body;
+        const { addressId, paymentMethod, total, newAddress } = req.body;
 
-        
-        
         const cartData = await cartModel.findOne({ userId }).populate("items.productId");
 
         if (!cartData || cartData.items.length === 0) {
             return res.status(400).json({ message: "Cart is empty" });
         }
 
-        const products = cartData.items.map(item => ({
-            productId: item.productId._id,
-            quantity: item.quantity,
-            price: item.productId.price
-        }));
 
-        const totalPrice = total;
+        let selectedAddress;
+        if (addressId) {
+            
+            const address = await addressModel.findById(addressId);
+            if (!address) {
+                return res.status(400).json({ message: "Invalid address" });
+            }
+            selectedAddress = {
+                fullName: address.fullName,
+                phone: address.phone,
+                street: address.street,
+                city: address.city,
+                state: address.state,
+                zipCode: address.zipCode
+            };
+        } else if (newAddress) {
+
+            console.log("Saving new address hhhhhhhhhhhhhhhhhhhhhhhhhhh:", newAddress);
+            
+            try {
+                const savedAddress = new addressModel({ userId, ...newAddress });
+                await savedAddress.save();
+            } catch (error) {
+                console.error("Address Save Error:", error);
+                return res.status(500).json({ message: "Failed to save address", error });
+            }
+        } else {
+            return res.status(400).json({ message: "Address is required" });
+        }
+
+        const products = [];
+
+        for (let item of cartData.items) {
+            const product = item.productId;
+            const orderedColor = item.color;
+
+            // ✅ Find correct variant
+            const variantIndex = product.variants.findIndex(v => v.color === orderedColor);
+
+            if (variantIndex !== -1) {
+                if (product.variants[variantIndex].quantity < item.quantity) {
+                    return res.status(400).json({ message: `Not enough stock for ${product.productName} in ${orderedColor}` });
+                }
+                product.variants[variantIndex].quantity -= item.quantity;
+            } else {
+                return res.status(400).json({ message: `Color ${orderedColor} not found for ${product.productName}` });
+            }
+console.log(selectedAddress, 'selectedAddressselectedAddress');
+
+            await product.save();
+
+            products.push({
+                productId: product._id,
+                quantity: item.quantity,
+                price: product.price,
+                color: orderedColor
+            });
+        }
 
         const newOrder = new OrderModel({
             userId,
-            addressId,
+            address: selectedAddress || newAddress, // ✅ Store full address details
             paymentMethod,
-            totalAmount: totalPrice,
+            totalAmount: total,
             products,
             status: "Pending"
         });
 
+        console.log(newOrder, 'newwwwwwwwwwwwwww ');
+        
         await newOrder.save();
         await cartModel.deleteOne({ userId });
 

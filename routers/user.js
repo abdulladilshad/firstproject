@@ -7,6 +7,7 @@ const orderController = require('../controller/order')
 const checkoutController = require('../controller/checkout')
 const profileController = require('../controller/profile')
 const changePassword = require('../controller/changePassword')
+const forgetPaswword = require('../controller/forgetpassword')
 const auth = require('../middleware/auth')
 const uploadMiddleware = require('../middleware/multer')
 
@@ -31,6 +32,15 @@ router.post('/verify-otp', userController.postotp)
 router.get("/resend-otp", userController.ResendOtp)
 
 
+//Forget paswword 
+router.get("/forgetpassword", forgetPaswword.renderForgotPassword);
+router.post("/forgetpassword", forgetPaswword.forgotPassword);
+
+router.get("/verify-otp", forgetPaswword.renderVerifyOtp);
+router.post("/verify-otp", forgetPaswword.verifyOtp);
+
+router.get("/reset-password", forgetPaswword.renderResetPassword);
+router.post("/reset-password", forgetPaswword.resetPassword);
 
 
 router.get('/auth/google',
@@ -71,6 +81,7 @@ router.get('/cart', cartController.LoadCart);
 router.post('/cart', cartController.addCart);
 router.delete('/cart/remove/:productId', cartController.removeCart);
 router.get('/all', cartController.getCartItems);
+router.post('/cart/update/:productId', cartController.updateQuatity)
 
 router.get('/profile', profileController.getProfile);
 router.post('/profile/update', uploadMiddleware, profileController.updateProfile);

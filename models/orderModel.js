@@ -1,8 +1,14 @@
 const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
-    addressId: { type: mongoose.Schema.Types.ObjectId, ref: "Address" },
-        userId: {
+    address: {
+        fullName: String,
+        phone: String,
+        street: String,
+        city: String,
+        state: String,
+        zipCode: String
+    },        userId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
             required: true
@@ -15,6 +21,7 @@ const orderSchema = new mongoose.Schema({
             quantity: Number,
             price: Number,
             status: { type: String, default: "Pending" },
+            color: { type: String },
         }
     ]
 }, { timestamps: true });

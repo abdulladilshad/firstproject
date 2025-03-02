@@ -7,7 +7,7 @@ const otpGenerator = require('otp-generator')
 const dotenv =require ("dotenv") 
 const bcrypt = require('bcryptjs');
 
-const saltround = 10
+
 
 dotenv.config()
 

@@ -582,3 +582,70 @@ body {
 .swiper-pagination-bullet-active {
     background: #1a1a1a;
 }
+
+
+.variants-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.color-radio-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.color-radio {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid #e0e0e0;
+    outline: none;
+    cursor: pointer;
+    background-color: var(--color);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.color-radio:checked {
+    border: 2px solid #000;
+}
+
+.color-radio:checked::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--color);
+    border: 2px solid #fff;
+}
+
+.color-label {
+    font-size: 0.8rem;
+    color: #666;
+    text-align: center;
+}
+
+/* Special case for white color */
+.color-radio[style*="--color: white"],
+.color-radio[style*="--color: #fff"],
+.color-radio[style*="--color: #ffffff"] {
+    border: 2px solid #e0e0e0;
+    background-color: #fff;
+}
+
+.color-radio[style*="--color: white"]:checked,
+.color-radio[style*="--color: #fff"]:checked,
+.color-radio[style*="--color: #ffffff"]:checked {
+    border: 2px solid #000;
+}

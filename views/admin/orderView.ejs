@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <!-- Add custom styles -->
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --gold: #f1c40f;
+        }
+
+        body {
+            background-color: #f5f6fa;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .order-card {
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            border: none;
+            transition: all 0.3s ease;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .order-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+        }
+
+        .page-title {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .page-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-color), var(--gold));
+            border-radius: 2px;
+        }
+
+        .section-header {
+            background: var(--primary-color);
+            padding: 1.2rem;
+            border-bottom: 3px solid var(--gold);
+        }
+
+        .section-header h5 {
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge {
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .info-box {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent-color);
+            margin-bottom: 20px;
+        }
+
+        .product-image {
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            padding: 5px;
+            background: white;
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+        }
+
+        .product-image:hover {
+            transform: scale(1.15);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+
+        .table {
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+
+        .table tbody tr {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+
+        .table tbody tr:hover {
+            transform: translateX(5px);
+        }
+
+        .table th {
+            border: none;
+            color: var(--secondary-color);
+            font-weight: 600;
+            padding: 15px;
+        }
+
+        .table td {
+            border: none;
+            padding: 15px;
+            vertical-align: middle;
+        }
+
+        .customer-info {
+            background: linear-gradient(145deg, #ffffff, #f5f6fa);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .customer-info p {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .customer-info p:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .info-icon {
+            color: var(--accent-color);
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .order-summary-item {
+            text-align: center;
+            padding: 20px;
+            border-right: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .order-summary-item:last-child {
+            border-right: none;
+        }
+
+        .order-summary-item h6 {
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .order-summary-item p {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .order-summary-item {
+                border-right: none;
+                border-bottom: 1px solid rgba(0,0,0,0.1);
+                padding: 15px;
+            }
+
+            .order-summary-item:last-child {
+                border-bottom: none;
+            }
+        }
+
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+            position: relative;
+        }
+
+        /* Hamburger Menu */
+        .hamburger-menu {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+        }
+
+        .hamburger-menu span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background-color: var(--primary-color);
+            margin: 5px 0;
+            transition: 0.3s;
+        }
+
+        /* Overlay */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background: var(--primary-color);
+            color: white;
+            padding: 1.5rem 0;
+            position: fixed;
+            height: 100vh;
+            transition: 0.3s;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-header h2 {
+            font-family: 'Playfair Display', serif;
+            margin: 0;
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+        }
+
+        .brand-divider {
+            height: 2px;
+            background: linear-gradient(to right, transparent, #ffffff50, transparent);
+            margin: 1rem 0;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: #ffffff90;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-menu li a:hover, 
+        .sidebar-menu li a.active {
+            background: #ffffff15;
+            color: white;
+        }
+
+        .sidebar-menu li a i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            margin-left: 250px;
+            width: calc(100% - 250px);
+            transition: all 0.3s ease;
+        }
+
+        /* Container adjustments */
+        .main-content .container {
+            max-width: 100%;
+            padding: 0 15px;
+        }
+
+        .topbar {
+            background: white;
+            padding: 1.5rem 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+
+        .header-content h1 {
+            font-family: 'Playfair Display', serif;
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .subtitle {
+            color: #666;
+            margin: 0.5rem 0 1.5rem 0;
+        }
+
+        .topbar-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        /* Card and Grid Adjustments */
+        .order-card {
+            margin-bottom: 1.5rem;
+            width: 100%;
+        }
+
+        .row {
+            margin-right: -15px;
+            margin-left: -15px;
+        }
+
+        /* Table Responsiveness */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 1rem;
+        }
+
+        /* Improved Media Queries */
+        @media (max-width: 1200px) {
+            .order-summary-item {
+                padding: 15px 10px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .main-content {
+                padding: 1.5rem;
+            }
+            
+            .row > [class*='col-'] {
+                padding-right: 10px;
+                padding-left: 10px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 1rem;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .hamburger-menu {
+                display: block;
+            }
+
+            .overlay.active {
+                display: block;
+            }
+
+            .order-card {
+                margin-bottom: 1rem;
+            }
+
+            .table-responsive {
+                margin-bottom: 0.75rem;
+            }
+
+            /* Adjust card layouts for mobile */
+            .col-md-6 {
+                margin-bottom: 1rem;
+            }
+
+            /* Improve table display on mobile */
+            .table td, .table th {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+
+            /* Adjust status badge for mobile */
+            .status-badge {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+
+            /* Better spacing for customer info on mobile */
+            .customer-info p {
+                margin-bottom: 10px;
+                padding-bottom: 10px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 0.75rem;
+            }
+
+            .page-title {
+                font-size: 1.8rem;
+            }
+
+            .card-header {
+                padding: 0.75rem;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+
+            /* Adjust order summary for very small screens */
+            .order-summary-item {
+                border-right: none;
+                border-bottom: 1px solid rgba(0,0,0,0.1);
+                padding: 10px;
+            }
+
+            /* Make table scroll horizontally on very small screens */
+            .table-responsive {
+                margin: 0 -15px;
+                padding: 0 15px;
+            }
+
+            .product-image {
+                width: 60px;
+                height: 60px;
+            }
+
+            /* Improve text readability on small screens */
+            .customer-info p {
+                font-size: 0.9rem;
+            }
+
+            .section-header h5 {
+                font-size: 1rem;
+            }
+        }
+
+        /* Fix for iOS Safari momentum scrolling */
+        .table-responsive {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Ensure content doesn't overflow */
+        * {
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Add Playfair Display font -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <div class="dashboard-container">
+        <button id="hamburger" class="hamburger-menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <div class="overlay" id="overlay"></div>
+        
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>ADMIN PANEL</h2>
+                <div class="brand-divider"></div>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="/admin/dashboard">
+                    <i class="fas fa-home"></i> Dashboard
+                </a></li>
+                <li><a href="/admin/products">
+                    <i class="fas fa-box"></i> Products
+                </a></li>
+                <li><a href="/admin/orders" class="active">
+                    <i class="fas fa-shopping-cart"></i> Orders
+                </a></li>
+                <li><a href="/admin/users">
+                    <i class="fas fa-users"></i> Users
+                </a></li>
+                <li><a href="/admin/categories">
+                    <i class="fas fa-tags"></i> Categories
+                </a></li>
+                <li><a href="/admin/offers">
+                    <i class="fas fa-gift"></i> Offers
+                </a></li>
+                <li><a href="/admin/settings">
+                    <i class="fas fa-cog"></i> Settings
+                </a></li>
+                <li><a href="/logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a></li>
+            </ul>
+        </aside>
+
+        <div class="main-content">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <h1 class="mb-4 text-center fw-bold">Order Details</h1>
+                        
+                        <!-- Order Summary Card -->
+                        <div class="card order-card mb-4">
+                            <div class="card-header section-header text-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Order #<%= orders[0]._id %></h5>
+                                    <span class="status-badge <%= product.status === 'Delivered' ? 'bg-success' : (product.status == 'Processing' ? 'bg-warning' : 'bg-info') %>">
+                                        <%= product.status %>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-4">
+                                    <div class="col-md-3">
+                                        <div class="border-end pe-3">
+                                            <h6 class="text-muted">Order Date</h6>
+                                            <p class="fw-bold"><%= orders[0].createdAt ? new Date(orders[0].createdAt).toLocaleString() : 'N/A' %></p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="border-end pe-3">
+                                            <h6 class="text-muted">Payment Method</h6>
+                                            <p class="fw-bold"><%= orders[0].paymentMethod %></p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="border-end pe-3">
+                                            <h6 class="text-muted">Total Amount</h6>
+                                            <p class="fw-bold text-primary">$<%= product.price %></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Customer Information -->
+                            <div class="col-md-6 mb-4">
+                                <div class="card order-card h-100">
+                                    <div class="card-header section-header text-white">
+                                        <h5 class="mb-0"><i class="fas fa-user me-2"></i>Customer Information</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="customer-info">
+                                            <p><i class="fas fa-user-circle me-2"></i><strong>Name:</strong> <%= orders[0].userId.name %></p>
+                                            <p><i class="fas fa-envelope me-2"></i><strong>Email:</strong> <%= orders[0].userId.email %></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Shipping Address -->
+                            <div class="col-md-6 mb-4">
+                                <div class="card order-card h-100">
+                                    <div class="card-header section-header text-white">
+                                        <h5 class="mb-0"><i class="fas fa-shipping-fast me-2"></i>Shipping Address</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="customer-info">
+                                            <p><i class="fas fa-map-marker-alt me-2"></i><strong>Street:</strong> <%= orders[0].address?.street %></p>
+                                            <p><i class="fas fa-city me-2"></i><strong>City:</strong> <%= orders[0].address?.city %></p>
+                                            <p><i class="fas fa-flag me-2"></i><strong>State:</strong> <%= orders[0].address?.state %></p>
+                                            <p><i class="fas fa-phone me-2"></i><strong>Phone:</strong> <%= orders[0].address?.phone %></p>
+                                            <p><i class="fas fa-map-pin me-2"></i><strong>Zip Code:</strong> <%= orders[0].address?.zipCode %></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order Items -->
+                        <div class="card order-card mb-4">
+                            <div class="card-header section-header text-white">
+                                <h5 class="mb-0"><i class="fas fa-box-open me-2"></i>Order Items</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Product</th>
+                                                <th>Image</th>
+                                                <th>Price</th>
+                                                <th>Quantity</th>
+                                                <th>Color</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <h6 class="mb-0"><%= productSchema.productName %></h6>
+                                                </td>
+                                                <td>
+                                                    <img src="/<%= productSchema.imagePaths[0] %>" 
+                                                        alt="<%= productSchema.productName %>" 
+                                                        class="product-image"
+                                                        width="60">
+                                                </td>
+                                                <td class="text-primary fw-bold">$<%= product.price %></td>
+                                                <td><%= product.quantity %></td>
+                                                <td><span class="badge bg-secondary"><%= product.color%></span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('hamburger').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.add('active');
+            document.getElementById('overlay').classList.add('active');
+        });
+
+        document.getElementById('overlay').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+        });
+    </script>
+</body>
+
+</html> 

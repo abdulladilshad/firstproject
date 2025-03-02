@@ -13,17 +13,18 @@ const LoadCart = async (req, res) => {
             return res.render('user/cart', { cart: [] });
         }
 
-        // Extract product details with variants
+        // Extract product details with selected color
         const cartItems = cart.items.map(item => {
             const product = item.productId;
             if (!product) return null;
 
             return {
                 productId: product._id,
-                name: product.productName, // Product Name
+                name: product.productName, 
                 price: product.price,
+                color: item.color, // ✅ Pass the selected color
                 stock: product.variants?.length > 0 ? product.variants[0].quantity : 0,
-                quantity: item.quantity, // Cart quantity
+                quantity: item.quantity, 
             };
         }).filter(item => item !== null);
 
@@ -36,40 +37,56 @@ const LoadCart = async (req, res) => {
 };
 
 
+
 const addCart = async (req, res) => {
     try {
         const userId = req.session.user?.id;
-        
         if (!userId) return res.status(401).json({ message: 'User not logged in' });
 
-        const { productId } = req.body;
+        const { productId, color } = req.body;
+        console.log(color, 'Selected Color');
+
+        if (!color) return res.status(400).json({ message: 'Color is required' });
+
         const product = await productModel.findById(productId);
         if (!product) return res.status(404).json({ message: 'Product not found' });
 
         let cart = await cartModel.findOne({ userId });
+
         if (!cart) {
-            cart = new cartModel({ userId, items: [{ productId, quantity: 1 }] });
+            // Create a new cart if the user doesn't have one
+            cart = new cartModel({ 
+                userId, 
+                items: [{ productId, color, quantity: 1 }] 
+            });
         } else {
-            const existingItem = cart.items.find(item => item.productId.equals(productId));
+            // Check if the exact product with the same color exists
+            const existingItem = cart.items.find(item => 
+                item.productId.equals(productId) && item.color === color
+            );
+
             if (existingItem) {
-                existingItem.quantity += 1;
+                existingItem.quantity += 1; // Increase quantity if same color exists
             } else {
-                cart.items.push({ productId, quantity: 1 });
+                // Add new item separately if color is different
+                cart.items.push({ productId, color, quantity: 1 });
             }
         }
 
         await cart.save();
-
         res.json({ success: true, message: 'Item added to cart', cart });
 
     } catch (error) {
         console.error('Error adding to cart:', error);
         res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
-}
+};
+
 
 const removeCart = async (req, res) => {
     try {
+        console.log("remov3e acratfhvdhwikv");
+        
         const userId = req.session.user?.id;
         if (!userId) return res.status(401).json({ message: 'User not logged in' });
 
@@ -108,12 +125,37 @@ const getCartItems = async (req, res) => {
 };
 
 
+const updateQuatity =  async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const { change } = req.body;
+        const userId = req.session.user.id;
+
+        const cart = await cartModel.findOne({ userId });
+        if (!cart) return res.status(404).json({ message: 'Cart not found' });
+
+        const item = cart.items.find(i => i.productId.equals(productId));
+        if (!item) return res.status(404).json({ message: 'Product not in cart' });
+
+        let newQuantity = item.quantity + change;
+        if (newQuantity < 1) newQuantity = 1;
+        if (newQuantity > 5) newQuantity = 5;
+
+        item.quantity = newQuantity;
+        await cart.save();
+
+        res.json({ success: true, newQuantity });
+    } catch (error) {
+        console.error('Error updating cart:', error);
+        res.status(500).json({ message: 'Error updating cart' });
+    }
+}
 
 
 module.exports = {
     LoadCart,
     addCart,
     removeCart,
-    getCartItems
-
+    getCartItems,
+    updateQuatity
 }
