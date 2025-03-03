@@ -531,23 +531,18 @@
                                                     <small>Qty: <%= order.quantity %></small>
                                                 </td>
                                                 <td>
-                                                    <% if (order.status==="Delivered" ) { %>
+                                                    <% if (order.status === "Delivered") { %>
                                                         <span class="delivered-text">Delivered</span>
-                                                        <% } else { %>
-                                                            <select class="status-select"
-                                                                data-order-id="<%= order.orderId %>"
-                                                                data-product-id="<%= order.productId %>">
-                                                                <option value="Pending" <%=order.status==="Pending"
-                                                                    ? "selected" : "" %>>Pending</option>
-                                                                <option value="Confirmed" <%=order.status==="Confirmed"
-                                                                    ? "selected" : "" %>>Confirmed</option>
-                                                                <option value="Shipped" <%=order.status==="Shipped"
-                                                                    ? "selected" : "" %>>Shipped</option>
-                                                                <option value="Delivered" <%=order.status==="Delivered"
-                                                                    ? "selected" : "" %>>Delivered</option>
-                                                                <option value="Cancelled" <%=order.status==="Cancelled"
-                                                                    ? "selected" : "" %>>Cancelled</option>
-                                                            </select>
+                                                    <% } else { %>
+                                                        <select class="status-select"
+                                                            data-order-id="<%= order.orderId %>"
+                                                            data-product-id="<%= order.IndividualOrderId %>">
+                                                            <option value="Pending" <%= order.status === "Pending" ? "selected" : "" %>>Pending</option>
+                                                            <option value="Confirmed" <%= order.status === "Confirmed" ? "selected" : "" %>>Confirmed</option>
+                                                            <option value="Shipped" <%= order.status === "Shipped" ? "selected" : "" %>>Shipped</option>
+                                                            <option value="Delivered" <%= order.status === "Delivered" ? "selected" : "" %>>Delivered</option>
+                                                            <option value="Cancelled" <%= order.status === "Cancelled" ? "selected" : "" %>>Cancelled</option>
+                                                        </select>
                                                             <% } %>
                                                 </td>
 
@@ -586,18 +581,21 @@
             });
         });
 
+
         document.addEventListener("DOMContentLoaded", function () {
             document.querySelectorAll(".status-select").forEach(select => {
                 select.addEventListener("change", async function () {
                     let orderId = this.getAttribute("data-order-id");
                     let productId = this.getAttribute("data-product-id");
                     let newStatus = this.value;
+                    
 
                     try {
-                        let response = await fetch(`/admin/orders/${orderId}/product/${productId}/update`, {
+                        const response = await fetch(`/admin/orders`, {
+
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ status: newStatus })
+                            body: JSON.stringify({ status: newStatus ,orderId, productId})
                         });
 
                         let data = await response.json();
@@ -606,18 +604,25 @@
                             alert("Status updated successfully!");
                         } else {
                             alert("Failed to update status.");
-                            this.value = this.getAttribute("data-previous-value"); // Reset to previous value
+                            this.value = this.getAttribute("data-previous-value"); 
+                            
                         }
+                        location.reload(); 
                     } catch (error) {
                         alert("Error updating status.");
-                        this.value = this.getAttribute("data-previous-value"); // Reset on error
+                        this.value = this.getAttribute("data-previous-value");
+                        
                     }
 
-                    this.setAttribute("data-previous-value", newStatus); // Store current value for rollback
+                    this.setAttribute("data-previous-value", newStatus); 
+                    
                 });
             });
         });
 
+
+        
+        
         document.getElementById('hamburger').addEventListener('click', function () {
             document.getElementById('sidebar').classList.add('active');
             document.getElementById('overlay').classList.add('active');

@@ -57,8 +57,7 @@ router.put('/users/toggle-status/:user_id', adminauth.cheksession, adminControll
 
 
 router.get("/orders",orderController.adminOrders);
-router.post("/orders/:orderId/product/:productId/update",orderController.updateOrderStatus);
-
+router.post("/orders", orderController.updateOrderStatus);
 
 
 //LOGOUT

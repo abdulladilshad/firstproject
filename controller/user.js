@@ -227,9 +227,13 @@ const login = async (req, res) => {
 
 
 const Loadlogin = (req, res) => {
-    const message = req.flash('error'); 
-
-    res.render('user/login', { message: Array.isArray(message) ? message : [message] });
+    const errorMessages = req.flash("error");
+    const successMessages = req.flash("success");
+    // Ensure message is always an array
+    res.render("user/login", { 
+        errorMessages: errorMessages.length > 0 ? errorMessages : null,
+        successMessages: successMessages.length > 0 ? successMessages : null
+     });                                             
 };
 
 

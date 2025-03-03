@@ -9,10 +9,12 @@
 <body>
   <div class="login-box">
     <h2>Login</h2>
-    <% if (message.length > 0) { %>
-      <% message.forEach(function(msg) { %>
-          <p style="color: red;"> <%= msg %> </p>
-      <% }); %>
+    <% if (successMessages) { %>
+          <p style="color: green;"><%= successMessages %></p>
+  <% } %>
+  
+  <% if (errorMessages) { %>
+          <p style="color: red;"><%= errorMessages %></p>
   <% } %>
   
     <form action="/login" method="post" id="form">

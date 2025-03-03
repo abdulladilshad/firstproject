@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OTP Verification</title>
+  <link rel="stylesheet" href="/styles/userlogin.css">
+</head>
+
+<body>
+  <div class="login-box">
+    <h2>OTP Verification</h2>
+    <h4 style="color:rgba(219, 210, 210, 0.982)"> <%= message %> </h4>
+    <form action="/verifyotp" method="post" id="otpForm" onsubmit="formvalidate(event)">
+      
+      <input type="hidden" name="email" value="<%= email %>" />
+      
+      <div class="user-box">
+        <input type="text" name="otp" id="otp" maxlength="6" style="color: #ffff;" required />
+        <label>Enter OTP</label>
+      </div>
+  
+      <p id="otpMessage"></p> 
+  
+      <div class="submit">
+        <button type="submit" id="verifyBtn">Verify</button>
+      </div>
+  
+      <p id="timer"></p> 
+  
+     
+      <a href="/resend-otp?email=<%= email %>" class="submitt" id="resendOtp">Resend OTP</a>
+    </form>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      document.getElementById('otpForm').addEventListener('submit', formvalidate);
+      
+      
+      const savedEndTime = localStorage.getItem('otpEndTime');
+      if (savedEndTime) {
+        const now = Date.now();
+        const timeLeft = Math.round((savedEndTime - now) / 1000);
+        
+        if (timeLeft > 0) {
+          
+          startTimer(timeLeft);
+        } else {
+         
+          startNewTimer();
+        }
+      } else {
+        
+        startNewTimer();
+      }
+    });
+
+    function startNewTimer() {
+      const duration = 60; 
+      const endTime = Date.now() + (duration * 1000);
+      localStorage.setItem('otpEndTime', endTime);
+      startTimer(duration);
+    }
+
+    function formvalidate(e) {
+      e.preventDefault();
+      var otp = document.getElementById('otp').value;
+      var messageContainer = document.getElementById('otpMessage'); 
+
+      
+      messageContainer.textContent = '';
+      messageContainer.style.color = ''; 
+
+      if (otp === "" || otp.length !== 6 || isNaN(otp)) {
+       
+        messageContainer.textContent = 'Invalid OTP. Please enter a valid 6-digit OTP.';
+        messageContainer.style.color = 'red'; 
+        return false; 
+      }
+
+      
+      e.target.submit();
+    }
+
+    function startTimer(seconds) {
+      let timerDisplay = document.getElementById('timer');
+      let resendLink = document.getElementById('resendOtp');
+      let timeLeft = seconds;
+
+      const timerInterval = setInterval(() => {
+        timerDisplay.textContent = `OTP expires in ${timeLeft} seconds`;
+        timeLeft--;
+
+        if (timeLeft < 0) {
+          clearInterval(timerInterval);
+          timerDisplay.textContent = "OTP expired. Please request a new one.";
+          resendLink.style.pointerEvents = 'auto';
+          resendLink.style.opacity = '1';
+          localStorage.removeItem('otpEndTime');
+        }
+      }, 1000);
+
+     
+      resendLink.style.pointerEvents = 'none';
+      resendLink.style.opacity = '0.5';
+    }
+  </script>
+</body>
+
+</html>

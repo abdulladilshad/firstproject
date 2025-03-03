@@ -36,8 +36,8 @@ router.get("/resend-otp", userController.ResendOtp)
 router.get("/forgetpassword", forgetPaswword.renderForgotPassword);
 router.post("/forgetpassword", forgetPaswword.forgotPassword);
 
-router.get("/verify-otp", forgetPaswword.renderVerifyOtp);
-router.post("/verify-otp", forgetPaswword.verifyOtp);
+router.get("/verifyotp", forgetPaswword.renderVerifyOtp);
+router.post("/verifyotp", forgetPaswword.verifyOtp);
 
 router.get("/reset-password", forgetPaswword.renderResetPassword);
 router.post("/reset-password", forgetPaswword.resetPassword);

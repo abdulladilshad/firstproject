@@ -5,10 +5,11 @@ const mongoose = require('mongoose');
 
 const adminOrders = async (req, res) => {
     try {
-        // Fetch all orders with populated details
-        const orders = await OrderModel.find()
-            .populate("userId", "name email") // Get user details
-            .populate("products.productId")  // Get product details
+
+
+         const orders = await OrderModel.find()
+            .populate("userId", "name email") 
+            .populate("products.productId")  
             .sort({ createdAt: -1 });
 
 
@@ -32,9 +33,10 @@ const adminOrders = async (req, res) => {
             });
         });
 
+        
 
         // Send transformed data to the view
-        res.render("admin/orderMangement", { orders: individualOrders });
+        res.render("admin/orderMangement", { orders: individualOrders ,individualOrders});
 
     } catch (error) {
         console.error("Error fetching admin orders:", error);
@@ -45,18 +47,15 @@ const adminOrders = async (req, res) => {
 
 const updateOrderStatus = async (req, res) => {
     try {
-        const { orderId, productId } = req.params;
-        const { status } = req.body;
-        console.log('ddddddddddddddddddddddddddddd',orderId);
-        
+        const { status , orderId, productId } = req.body        
 
 
         const updatedOrder = await OrderModel.findOneAndUpdate(
-            { _id: orderId, "products.productId": productId },
+            { _id: orderId, "products._id": productId },
             { $set: { "products.$.status": status } },
             { new: true }
         );
-
+        
         if (!updatedOrder) {
             return res.status(404).json({ success: false, message: "Order or product not found" });
         }

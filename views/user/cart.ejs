@@ -37,13 +37,13 @@
                                     </td>
                                     <td>₹<%= item.price %>
                                     </td>
-                                    <td>
-                                        <button class="quantity-btn"
+                                    <td class="q-b-t">
+                                        <button class="quantity-btn button-plus"
                                             onclick="updateQuantity('<%= item.productId %>', -1)">-</button>
                                         <span id="quantity-<%= item.productId %>">
                                             <%= item.quantity %>
                                         </span>
-                                        <button class="quantity-btn"
+                                        <button class="quantity-btn button-plus"
                                             onclick="updateQuantity('<%= item.productId %>', 1)">+</button>
                                     </td>
 
@@ -132,10 +132,10 @@
                     // Remove the entire row from the cart table
                     const element = document.getElementById(`cart-item-${itemId}`);
                     if (element) {
-                        element.style.opacity = '0';
-                        element.style.transition = 'opacity 0.3s ease';
+                        element.classList.add('cart-item-remove'); // Add slide-out animation
                         setTimeout(() => {
                             element.remove();
+                            updateCartTotals(); // Update totals after removing item
 
                             // Check if cart is empty
                             const remainingItems = document.querySelectorAll('tbody tr').length;
@@ -143,19 +143,20 @@
                                 const cartContainer = document.querySelector('.cart-container');
                                 if (cartContainer) {
                                     cartContainer.innerHTML = `
-                                        <div class="empty-cart-message" style="text-align: center; padding: 2rem;">
-                                            <h3>Your cart is empty</h3>
-                                            <p>Add some products to your cart to continue shopping.</p>
-                                            <a href="/products" class="btn btn-primary mt-3">Continue Shopping</a>
+                                        <div class="empty-cart">
+                                            <i class="fas fa-shopping-cart"></i>
+                                            <p>Your cart is empty</p>
+                                            <a href="/products" class="continue-shopping">Continue Shopping</a>
                                         </div>
                                     `;
                                 }
                             }
-                        }, 3000);
+                        }, 300); 
                     }
                 } else {
                     throw new Error(result.message);
                 }
+                location.reload();
 
             } catch (error) {
                 alert('Error: ' + error.message);
@@ -168,27 +169,103 @@
             let currentQuantity = parseInt(quantitySpan.innerText);
 
             if ((change === -1 && currentQuantity === 1) || (change === 1 && currentQuantity >= 5)) {
-                return; // Prevent below 1 or above 5
+                alert("Quantity must be between 1 and 5");
+                return;
             }
 
             try {
                 const response = await fetch(`/cart/update/${productId}`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ change })
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ change: change })
                 });
 
-                const result = await response.json();
+                let result;
+                try {
+                    result = await response.json();
+                } catch (e) {
+                    throw new Error('Invalid server response');
+                }
 
                 if (response.ok) {
-                    quantitySpan.innerText = result.newQuantity; // Update quantity on screen
+                    const newQuantity = result.newQuantity || currentQuantity + change;
+                    quantitySpan.innerText = newQuantity;
+
+                    const row = quantitySpan.closest('tr');
+                    const priceCell = row.querySelector('td:nth-child(2)');
+                    const totalCell = row.querySelector('td:nth-child(6)');
+                    
+                    if (priceCell && totalCell) {
+                        const price = parseFloat(priceCell.innerText.replace('₹', ''));
+                        const newTotal = price * newQuantity;
+                        totalCell.innerText = `₹${newTotal.toFixed(2)}`;
+                        totalCell.classList.add('price-update');
+                        setTimeout(() => totalCell.classList.remove('price-update'), 300);
+                    }
+
+                    updateCartTotals();
                 } else {
-                    alert(result.message);
+                    throw new Error(result.message || 'Failed to update quantity');
                 }
             } catch (error) {
                 console.error('Error updating quantity:', error);
-                alert('Something went wrong!');
+                alert(error.message || 'Failed to update quantity. Please try again.');
             }
+        }
+
+        function updateCartTotals() {
+            try {
+                const cartItems = document.querySelectorAll('tbody tr');
+                let subtotal = 0;
+
+                cartItems.forEach(item => {
+                    const priceText = item.querySelector('td:nth-child(2)').innerText;
+                    const price = parseFloat(priceText.replace('₹', '').trim());
+                    const quantity = parseInt(item.querySelector(`[id^="quantity-"]`).innerText.trim());
+                    
+                    if (!isNaN(price) && !isNaN(quantity)) {
+                        subtotal += price * quantity;
+                    }
+                });
+
+                const tax = subtotal * 0.1;
+                const total = subtotal + tax;
+
+                const summaryItems = document.querySelectorAll('.summary-item');
+                summaryItems.forEach(item => {
+                    const label = item.querySelector('span:first-child').innerText.toLowerCase();
+                    const valueSpan = item.querySelector('span:last-child');
+                    
+                    if (valueSpan) {
+                        let value = 0;
+                        if (label.includes('subtotal')) {
+                            value = subtotal;
+                        } else if (label.includes('tax')) {
+                            value = tax;
+                        } else if (label.includes('total') && item.classList.contains('summary-total')) {
+                            value = total;
+                        }
+
+                        valueSpan.classList.add('price-update');
+                        valueSpan.innerText = `₹${value.toFixed(2)}`;
+                        setTimeout(() => valueSpan.classList.remove('price-update'), 300);
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error updating cart totals:', error);
+            }
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                minimumFractionDigits: 2
+            }).format(amount);
         }
 
     </script>
