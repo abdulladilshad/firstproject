@@ -35,7 +35,7 @@
                                     <td>
                                         <%= item.name %>
                                     </td>
-                                    <td>₹<%= item.price %>
+                                    <td>$<%= item.price %>
                                     </td>
                                     <td class="q-b-t">
                                         <button class="quantity-btn button-plus"
@@ -135,9 +135,9 @@
                         element.classList.add('cart-item-remove'); 
                         setTimeout(() => {
                             element.remove();
-                            updateCartTotals(); // Update totals after removing item
+                            updateCartTotals(); 
 
-                            // Check if cart is empty
+                            
                             const remainingItems = document.querySelectorAll('tbody tr').length;
                             if (remainingItems === 0) {
                                 const cartContainer = document.querySelector('.cart-container');
@@ -166,6 +166,9 @@
 
         async function updateQuantity(productId, change) {
             const quantitySpan = document.getElementById(`quantity-${productId}`);
+            console.log(quantitySpan);
+            
+    
             let currentQuantity = parseInt(quantitySpan.innerText);
 
             if ((change === -1 && currentQuantity === 1) || (change === 1 && currentQuantity >= 5)) {
@@ -269,9 +272,6 @@
         }
 
     </script>
-
-
-
 </body>
 
 </html>
