@@ -4,31 +4,9 @@ const nodemailer = require('nodemailer'); // For OTP
 const otpGenerator = require('otp-generator');
 const sentOtp = require('../controller/user')
 
-// Store OTPs temporarily (or use Redis for better security)
+
 const otpStorage = {};
 
-// Send OTP function
-// const sendOTP = async (email) => {
-//     const otp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false });
-//     otpStorage[email] = otp;
-
-//     // Configure Nodemailer (Replace with real credentials)
-//     const transporter = nodemailer.createTransport({
-//         service: 'gmail',
-//         auth: { user: 'your-email@gmail.com', pass: 'your-email-password' }
-//     });
-
-//     const mailOptions = {
-//         from: 'your-email@gmail.com',
-//         to: email,
-//         subject: 'Your OTP Code',
-//         text: `Your OTP code is: ${otp}`
-//     };
-
-//     await transporter.sendMail(mailOptions);
-// };
-
-// Change Password Controller
 const changePassword = async (req, res) => {
     try {
         const userId = req.session.user?.id;
@@ -40,17 +18,17 @@ const changePassword = async (req, res) => {
         const { currentPassword, newPassword, otp } = req.body;
 
         if (user.isGoogleUser) {
-            // Google users - Check OTP
+            
             if (!otp || otp !== otpStorage[user.email]) {
                 return res.status(400).json({ success: false, message: 'Invalid OTP' });
             }
         } else {
-            // Normal users - Check current password
+            
             const isMatch = await bcrypt.compare(currentPassword, user.password);
             if (!isMatch) return res.status(400).json({ success: false, message: 'Incorrect current password' });
         }
 
-        // Update new password
+        
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         user.password = hashedPassword;
         await user.save();
@@ -62,7 +40,7 @@ const changePassword = async (req, res) => {
     }
 };
 
-// Send OTP for Google users
+
 const sendOtpForGoogleUser = async (req, res) => {
     try {
         const userId = req.session.user?.id;
@@ -82,7 +60,7 @@ const sendOtpForGoogleUser = async (req, res) => {
 const renderChangePasswordPage = async (req, res) => {
     try {
         const userId = req.session.user?.id;
-        if (!userId) return res.redirect('/login'); // Redirect if not logged in
+        if (!userId) return res.redirect('/login');
 
         const user = await userschema.findById(userId);
         if (!user) return res.redirect('/login');

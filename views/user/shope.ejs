@@ -68,11 +68,11 @@
                 </a>
                 <a href="/wishlist" class="nav-icon" title="Wishlist">
                     <i class="fas fa-heart"></i>
-                    <span class="icon-badge wishlist-count">0</span>
+                    
                 </a>
                 <a href="/cart" class="nav-icon" title="Cart">
                     <i class="fas fa-shopping-cart"></i>
-                    <span class="icon-badge cart-count">0</span>
+                    
                 </a>
                 <a href="/account" class="nav-icon" title="Account">
                     <i class="fas fa-user"></i>
@@ -108,23 +108,41 @@
             <div class="filter-section">
               <h6>Category</h6>
               <ul class="list-unstyled">
-                <li><a href="#">Men</a></li>
-                <li><a href="#">Women</a></li>
-                <li><a href="#">LIMITTED edition</a></li>
+                <li>
+                    <a href="#" class="category-filter" data-category="Men's Watch">
+                        Men's Watch
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="category-filter" data-category="Women's Watch">
+                        Women's Watch
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="category-filter" data-category="Limited Edition">
+                        Limited Edition
+                    </a>
+                </li>
               </ul>
             </div>
             <div class="filter-section">
-              <h6>Price</h6>
-              <input type="range" min="0" max="500" class="form-range">
+              <h6>Price Range</h6>
+              <input type="range" class="form-range" id="priceRange" min="0" max="100000" step="1000" value="100000">
+              <div class="d-flex justify-content-between">
+                <span>₹0</span>
+                <span id="maxPrice">₹100000</span>
+              </div>
             </div>
             <div class="filter-section">
               <h6>Sort By</h6>
-              <select class="form-select">
-                <option>Price: Low to High</option>
-                <option>Price: High to Low</option>
-                <option>Newest Arrivals</option>
+              <select class="form-select" id="sortSelect">
+                <option value="">Default</option>
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+                <option value="newest">Newest First</option>
               </select>
             </div>
+            <button class="btn btn-secondary mt-3" id="resetFilters">Reset Filters</button>
           </div>
         </div>
 

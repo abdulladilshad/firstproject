@@ -29,13 +29,13 @@ const updateProfile = async (req, res) => {
 
         const currentUser = await userModel.findById(userId);
         
-        // Handle avatar update
+     
         if (req.file) {
             currentUser.image = `/uploads/${req.file.filename}`;
             currentUser.save()
         } else if (currentUser.googleId) {
-            // If user has googleId and no new file uploaded, keep their Google profile picture
-            updateData.image = currentUser.picture; // Assuming 'picture' is where Google profile image is stored
+           
+            updateData.image = currentUser.picture; 
             
             
         }

@@ -2,7 +2,7 @@ const addressModel = require('../models/addressModel');
 
 
 
-// Get all addresses for a user
+
 const getAddresses = async (req, res) => {
     try {
         const userId = req.session.user?.id;
@@ -19,7 +19,7 @@ const getAddresses = async (req, res) => {
 const selectAddress = async (req, res) => {
     try {
         const userId = req.session.user?.id;
-        const { addressId } = req.body; // Assuming addressId is sent in the request body
+        const { addressId } = req.body; 
         
         
 
@@ -31,7 +31,7 @@ const selectAddress = async (req, res) => {
         
         if (!selectedAddress) return res.status(404).json({ success: false, message: 'Address not found' });
 
-        // Store selected address in session (or database if needed)
+        
         req.session.selectedAddress = selectedAddress;
 
         res.json({ success: true, message: 'Address selected', selectedAddress });
@@ -42,7 +42,7 @@ const selectAddress = async (req, res) => {
 };
 
 
-// Add a new address
+
 const addAddress = async (req, res) => {
     try {
         const userId = req.session.user?.id;
@@ -91,7 +91,7 @@ const updateAddress = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Invalid address ID' });
         }
 
-        // If setting new address as default, remove default from others
+        
         if (isDefault) {
             await addressModel.updateMany({ userId, isDefault: true }, { isDefault: false });
         }
@@ -114,7 +114,7 @@ const updateAddress = async (req, res) => {
 };
 
 
-// Delete an address
+
 const deleteAddress = async (req, res) => {
     try {
         const userId = req.session.user?.id;

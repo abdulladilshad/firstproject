@@ -21,15 +21,15 @@ const forgotPassword = async (req, res) => {
             return res.redirect("/forgetpassword");
         }
 
-        // Generate a 6-digit OTP
+        
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-        // Save OTP in Database
-        await Otp.deleteOne({ email }); // Remove existing OTP if any
+        
+        await Otp.deleteOne({ email }); 
         await Otp.create({
             email,
             otp,
-            expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 minutes expiration
+            expiresAt: new Date(Date.now() + 5 * 60 * 1000) 
         });
 
 
@@ -40,7 +40,7 @@ const forgotPassword = async (req, res) => {
                 pass: process.env.USER_PASS,
             },
             tls: {
-                rejectUnauthorized: false // ✅ Fix: Ignore SSL certificate errors
+                rejectUnauthorized: false 
             }
         });
 
@@ -54,7 +54,7 @@ const forgotPassword = async (req, res) => {
 
         await transporter.sendMail(mailOptions);
 
-        // Store Email in Session
+       
         req.session.resetEmail = email;
 
         res.render("user/forgetotp", { email, message: "" });
@@ -68,7 +68,7 @@ const forgotPassword = async (req, res) => {
 
 
 const renderVerifyOtp = (req, res) => {
-    const email = req.session.resetEmail;  // Retrieve email from session
+    const email = req.session.resetEmail;  
 
     if (!email) {
         req.flash("error", "Session expired, please try again.");
@@ -91,7 +91,7 @@ const verifyOtp = async (req, res) => {
 
         console.log("Verifying OTP for email:", email);
 
-        // Find OTP in database
+        
         const otpRecord = await Otp.findOne({ email, otp });
 
         if (!otpRecord) {
@@ -101,26 +101,26 @@ const verifyOtp = async (req, res) => {
 
         console.log("OTP verified successfully!");
 
-        // OTP is valid, remove it from DB
+        
         await Otp.deleteOne({ email });
 
-        // Allow user to reset password
+        
         res.render("user/resetPassword", { email, message: "" });
 
     } catch (error) {
-        console.error("Error in verifyOtp:", error); // Log the actual error
+        console.error("Error in verifyOtp:", error); 
         req.flash("error", "Something went wrong!");
         res.redirect("/forgetpassword");
     }
 };
 
 
-// 📌 Render Reset Password Page
+
 const renderResetPassword = (req, res) => {
     res.render("user/resetPassword", { message: req.flash("error") });
 };
 
-// 📌 Handle Reset Password Request
+
 const resetPassword = async (req, res) => {
     const email = req.session.resetEmail;
     const { newPassword } = req.body;
@@ -133,11 +133,11 @@ const resetPassword = async (req, res) => {
     }
 
     try {
-        // Hash the new password
+        
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         await userschema.updateOne({ email }, { password: hashedPassword });
 
-        req.session.resetEmail = null; // Clear session
+        req.session.resetEmail = null;
 
         req.flash("success", "Password reset successful! Please log in.");
         res.redirect("/login");

@@ -13,7 +13,7 @@ const LoadCart = async (req, res) => {
             return res.render('user/cart', { cart: [] });
         }
 
-        // Extract product details with selected color
+        
         const cartItems = cart.items.map(item => {
             const product = item.productId;
             if (!product) return null;
@@ -22,7 +22,7 @@ const LoadCart = async (req, res) => {
                 productId: product._id,
                 name: product.productName, 
                 price: product.price,
-                color: item.color, // ✅ Pass the selected color
+                color: item.color, 
                 stock: product.variants?.length > 0 ? product.variants[0].quantity : 0,
                 quantity: item.quantity, 
             };
@@ -54,21 +54,21 @@ const addCart = async (req, res) => {
         let cart = await cartModel.findOne({ userId });
 
         if (!cart) {
-            // Create a new cart if the user doesn't have one
+            
             cart = new cartModel({ 
                 userId, 
                 items: [{ productId, color, quantity: 1 }] 
             });
         } else {
-            // Check if the exact product with the same color exists
+            
             const existingItem = cart.items.find(item => 
                 item.productId.equals(productId) && item.color === color
             );
 
             if (existingItem) {
-                existingItem.quantity += 1; // Increase quantity if same color exists
+                existingItem.quantity += 1; 
             } else {
-                // Add new item separately if color is different
+                
                 cart.items.push({ productId, color, quantity: 1 });
             }
         }
@@ -95,13 +95,13 @@ const removeCart = async (req, res) => {
         const cart = await cartModel.findOne({ userId });
         if (!cart) return res.status(404).json({ message: 'Cart not found' });
 
-        // Check if the item exists
+        
         const itemIndex = cart.items.findIndex(item => item.productId.equals(productId));
         if (itemIndex === -1) {
-            return res.status(404).json({ message: 'Item does not exist in cart' }); // ✅ FIXED: Returning JSON
+            return res.status(404).json({ message: 'Item does not exist in cart' }); 
         }
 
-        // Remove item from cart
+        
         cart.items.splice(itemIndex, 1);
         await cart.save();
 
@@ -109,7 +109,7 @@ const removeCart = async (req, res) => {
 
     } catch (error) {
         console.error('Error removing item:', error);
-        res.status(500).json({ message: 'Internal Server Error' }); // ✅ FIXED: Always JSON response
+        res.status(500).json({ message: 'Internal Server Error' }); 
     }
 };
 

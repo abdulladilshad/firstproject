@@ -22,7 +22,7 @@ const adminOrders = async (req, res) => {
                     userId: order.userId,
                     paymentMethod: order.paymentMethod,
                     productId: product.productId._id,
-                    productName: product.productId.name, // Assuming Product model has name
+                    productName: product.productId.name,
                     quantity: product.quantity,
                     price: product.price,
                     color: product.color,
@@ -35,7 +35,7 @@ const adminOrders = async (req, res) => {
 
         
 
-        // Send transformed data to the view
+        
         res.render("admin/orderMangement", { orders: individualOrders ,individualOrders});
 
     } catch (error) {
@@ -125,7 +125,7 @@ const a = async (req, res) => {
             return res.status(404).json({ message: 'Order not found' });
         }
 
-        // Find the specific individual order inside the products array
+        
         const individualOrder = order.products.find(
             (item) => item._id.toString() === individualOrderId
         );

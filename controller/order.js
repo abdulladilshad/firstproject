@@ -9,7 +9,7 @@ const orderHistory = async (req, res) => {
     try {        
         const userId = req.session.user.id;
 
-        // Fetch user's orders with product details
+   
         const orders = await OrderModel.find({ userId })
             .populate("products.productId")
             .sort({ createdAt: -1 }); 
@@ -95,7 +95,7 @@ const placeOrder = async (req, res) => {
             const product = item.productId;
             const orderedColor = item.color;
 
-            // ✅ Find correct variant
+       
             const variantIndex = product.variants.findIndex(v => v.color === orderedColor);
 
             if (variantIndex !== -1) {
@@ -120,7 +120,7 @@ console.log(selectedAddress, 'selectedAddressselectedAddress');
 
         const newOrder = new OrderModel({
             userId,
-            address: selectedAddress || newAddress, // ✅ Store full address details
+            address: selectedAddress || newAddress, 
             paymentMethod,
             totalAmount: total,
             products,
@@ -174,7 +174,7 @@ const cancelOrder = async (req, res) => {
 
        
 
-        // Reconnect MongoDB if disconnected
+  
         if (mongoose.connection.readyState === 0) {
             await mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
         }

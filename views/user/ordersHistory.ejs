@@ -34,7 +34,9 @@
             <% } else { %>
                 <div class="orders-grid">
                     <% orders.forEach(order=> { %>
-                        <div class="order-card">
+                        <div class="order-card" 
+                             data-individual-orders-id="<%= order.individualOrdersId %>" 
+                             data-status="<%= order.status %>">
                             <div class="order-card-header">
                                 <div class="order-info">
                                     <span class="order-number">#<%= order.orderId.toString().slice(-8).toUpperCase() %>
@@ -70,7 +72,7 @@
 
 
                                 <div class="action-buttons d-flex align-items-center gap-2">
-                                    <button class="btn btn-outline-primary" onclick="showTrackingModal('<%= order.orderId %>')">
+                                    <button class="btn btn-outline-primary" onclick="showTrackingModal('<%= order.individualOrdersId %>')">
                                         <i class="fas fa-truck"></i> Track
                                     </button>
                                 
@@ -105,35 +107,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="tracking-timeline">
-                        <div class="timeline-step completed">
-                            <div class="step-icon"><i class="fas fa-box"></i></div>
-                            <div class="step-info">
-                                <h6>Order Placed</h6>
-                                <p>Your order has been placed</p>
-                            </div>
-                        </div>
-                        <div class="timeline-step active">
-                            <div class="step-icon"><i class="fas fa-check"></i></div>
-                            <div class="step-info">
-                                <h6>Confirmed</h6>
-                                <p>Order confirmed</p>
-                            </div>
-                        </div>
-                        <div class="timeline-step">
-                            <div class="step-icon"><i class="fas fa-truck"></i></div>
-                            <div class="step-info">
-                                <h6>Shipped</h6>
-                                <p>Order shipped</p>
-                            </div>
-                        </div>
-                        <div class="timeline-step">
-                            <div class="step-icon"><i class="fas fa-home"></i></div>
-                            <div class="step-info">
-                                <h6>Delivered</h6>
-                                <p>Package delivered</p>
-                            </div>
-                        </div>
+                    <div class="tracking-timeline" id="trackingTimeline">
+                        <!-- Timeline steps will be populated dynamically -->
                     </div>
                 </div>
             </div>
@@ -144,7 +119,82 @@
     <script>
         function showTrackingModal(orderId) {
             const trackingModal = new bootstrap.Modal(document.getElementById('trackingModal'));
+            const trackingTimeline = document.getElementById('trackingTimeline');
+            
+            // Define all possible steps with their order
+            const steps = [
+                { status: 'Pending', icon: 'clock', description: 'Order is pending confirmation' },
+                { status: 'Placed', icon: 'box', description: 'Your order has been placed' },
+                { status: 'Confirmed', icon: 'check', description: 'Order confirmed' },
+                { status: 'Shipped', icon: 'truck', description: 'Order shipped' },
+                { status: 'Delivered', icon: 'home', description: 'Package delivered' },
+                { status: 'Cancelled', icon: 'times', description: 'Order has been cancelled' }
+            ];
+
+            // Find the specific order's current status using individualOrdersId
+            const orderElement = document.querySelector(`[data-individual-orders-id="${orderId}"]`);
+            const currentStatus = orderElement.getAttribute('data-status');
+            
+            // Clear existing timeline
+            trackingTimeline.innerHTML = '';
+            
+            // Handle cancelled orders separately
+            if (currentStatus === 'Cancelled') {
+                const cancelledStep = `
+                    <div class="timeline-step active">
+                        <div class="step-icon"><i class="fas fa-times"></i></div>
+                        <div class="step-info">
+                            <h6>Cancelled</h6>
+                            <p>Order has been cancelled</p>
+                        </div>
+                    </div>
+                `;
+                trackingTimeline.innerHTML = cancelledStep;
+                trackingModal.show();
+                return;
+            }
+
+            // Create timeline steps for non-cancelled orders
+            steps.forEach((step) => {
+                // Skip Cancelled status for non-cancelled orders
+                if (step.status === 'Cancelled') return;
+                
+                const stepStatus = getStepStatus(currentStatus, step.status);
+                if (stepStatus !== null) {  // Only show relevant steps
+                    const stepHtml = `
+                        <div class="timeline-step ${stepStatus}">
+                            <div class="step-icon"><i class="fas fa-${step.icon}"></i></div>
+                            <div class="step-info">
+                                <h6>${step.status}</h6>
+                                <p>${step.description}</p>
+                            </div>
+                        </div>
+                    `;
+                    trackingTimeline.innerHTML += stepHtml;
+                }
+            });
+
             trackingModal.show();
+        }
+
+        function getStepStatus(currentStatus, stepStatus) {
+            const statusOrder = ['Pending', 'Placed', 'Confirmed', 'Shipped', 'Delivered'];
+            const currentIndex = statusOrder.indexOf(currentStatus);
+            const stepIndex = statusOrder.indexOf(stepStatus);
+            
+            // If either status is not in the normal flow, return null
+            if (currentIndex === -1 || stepIndex === -1) return null;
+
+            if (currentStatus === 'Delivered') {
+                if (stepStatus === 'Delivered') return 'active';
+                return 'completed';
+            }
+            
+            if (stepIndex < currentIndex) return 'completed';
+            if (stepIndex === currentIndex) return 'active';
+            if (stepIndex > currentIndex) return '';
+            
+            return null;
         }
     </script>
 </body>

@@ -342,7 +342,6 @@ const logout = (req, res) => {
 
 
 
-
 module.exports = {
     loadhome,
     loadregister,
@@ -356,6 +355,6 @@ module.exports = {
     Loadshope,
     Loadproductdeatails,
     sentOtp,
-    ResendOtp
-        
+    ResendOtp,
+    
 }

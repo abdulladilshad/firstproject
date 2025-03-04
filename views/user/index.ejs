@@ -309,17 +309,17 @@
                   <a class="nav-link" href="#">Contact</a>
                 </li>
                 <li class="nav-item">
-                  <% if (user) { %>
+                  <% if (typeof user !== 'undefined' && user) { %>
                     <a class="profile-logo" href="/profile">
                       <% if (user.image && user.image.length > 0) { %>
                         <img src="<%= user.image[0] %>" alt="Profile Picture" class="profile-logo">
                       <% } else { %>
-                        <i class="fa-solid fa-user"></i> <!-- Default user icon -->
+                        <i class="fa-solid fa-user"></i> 
                       <% } %>
                     </a>
                   <% } else { %>
-                    <a class="profile-logo" href="/">
-                      <img src="/images/default-logo.png" alt="Default Logo" class="profile-logo"> <!-- Default logo -->
+                    <a class="profile-logo" href="/profile">
+                    <i  class="fa-solid fa-user"></i> 
                     </a>
                   <% } %>
                 </li>

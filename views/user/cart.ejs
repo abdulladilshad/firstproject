@@ -24,7 +24,7 @@
                                 <th>Price</th>
                                 <th>Quantity</th>
                                 <th>Stock</th>
-                                <th>Color</th> <!-- New column -->
+                                <th>Color</th> 
                                 <th>Total</th>
                                 <th>Action</th>
                             </tr>
@@ -129,10 +129,10 @@
                 if (response.ok) {
                     alert(result.message);
 
-                    // Remove the entire row from the cart table
+                   
                     const element = document.getElementById(`cart-item-${itemId}`);
                     if (element) {
-                        element.classList.add('cart-item-remove'); // Add slide-out animation
+                        element.classList.add('cart-item-remove'); 
                         setTimeout(() => {
                             element.remove();
                             updateCartTotals(); // Update totals after removing item

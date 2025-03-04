@@ -14,7 +14,7 @@ const uploadMiddleware = require('../middleware/multer')
 
 
 router.get('/register', auth.isLogin, userController.loadregister)
-router.get('/', auth.checkSession, auth.isBan, userController.loadhome)
+router.get('/', userController.loadhome)
 router.post('/register', userController.register)
 
 
@@ -70,47 +70,48 @@ router.get('/auth/google/callback',
   }
 );
 
-router.get('/shope', auth.isBan, auth.checkSession, userController.Loadshope)
 
-router.get('/product/:id', auth.isBan, auth.checkSession, userController.Loadproductdeatails);
+
+
+router.get('/shope', userController.Loadshope);
+
+router.get('/product/:id',  userController.Loadproductdeatails);
 
 //pro
 
 
-router.get('/cart', cartController.LoadCart);
-router.post('/cart', cartController.addCart);
-router.delete('/cart/remove/:productId', cartController.removeCart);
-router.get('/all', cartController.getCartItems);
-router.post('/cart/update/:productId', cartController.updateQuatity)
+router.get('/cart', auth.isBan, auth.checkSession,cartController.LoadCart);
+router.post('/cart', auth.isBan, auth.checkSession,cartController.addCart);
+router.delete('/cart/remove/:productId', auth.isBan, auth.checkSession,cartController.removeCart);
+router.get('/all',auth.isBan, auth.checkSession, cartController.getCartItems);
+router.post('/cart/update/:productId',auth.isBan, auth.checkSession, cartController.updateQuatity)
 
-router.get('/profile', profileController.getProfile);
-router.post('/profile/update', uploadMiddleware, profileController.updateProfile);
+router.get('/profile', auth.isBan, auth.checkSession,profileController.getProfile);
+router.post('/profile/update', auth.isBan, auth.checkSession,uploadMiddleware, profileController.updateProfile);
 
-router.get("/checkout", checkoutController.getCheckout);
-
-
-router.post("/order/place", orderController.placeOrder);
-router.get('/order/success/:orderId', orderController.orderSuccess);
-router.get("/orders", orderController.orderHistory);
-router.post('/orders/cancel',orderController.cancelOrder)
+router.get("/checkout",auth.isBan, auth.checkSession, checkoutController.getCheckout);
 
 
+router.post("/order/place", auth.isBan, auth.checkSession,orderController.placeOrder);
+router.get('/order/success/:orderId',auth.isBan, auth.checkSession, orderController.orderSuccess);
+router.get("/orders",auth.isBan, auth.checkSession, orderController.orderHistory);
+router.post('/orders/cancel',auth.isBan, auth.checkSession,orderController.cancelOrder)
 
 
-router.get('/address', addressController.getAddresses);
-router.post('/addresses', addressController.addAddress);
-router.put('/addresses/:id', addressController.updateAddress);
-router.delete('/addresses/:id', addressController.deleteAddress);
-router.get('/addresses/:id', addressController.getAddress);
 
 
-router.post('/change-password', changePassword.changePassword);
-router.post('/send-otp', changePassword.sendOtpForGoogleUser);
-router.get('/change-password', changePassword.renderChangePasswordPage);
+router.get('/address',auth.isBan, auth.checkSession, addressController.getAddresses);
+router.post('/addresses',auth.isBan, auth.checkSession, addressController.addAddress);
+router.put('/addresses/:id',auth.isBan, auth.checkSession, addressController.updateAddress);
+router.delete('/addresses/:id',auth.isBan, auth.checkSession, addressController.deleteAddress);
+router.get('/addresses/:id',auth.isBan, auth.checkSession, addressController.getAddress);
 
-router.put('/select-address', addressController.selectAddress);
 
+router.post('/change-password',auth.isBan, auth.checkSession, changePassword.changePassword);
+router.post('/send-otp',auth.isBan, auth.checkSession, changePassword.sendOtpForGoogleUser);
+router.get('/change-password',auth.isBan, auth.checkSession, changePassword.renderChangePasswordPage);
 
+router.put('/select-address', auth.isBan, auth.checkSession,addressController.selectAddress);
 
 
 
