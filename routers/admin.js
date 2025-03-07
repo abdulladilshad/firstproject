@@ -1,10 +1,8 @@
 const router =require('express').Router();
 const Product =require("../models/product")
-const OrderModel = require("../models/orderModel")
-
-
 const adminController = require('../controller/admin')
 const orderController = require('../controller/adminOrderController')
+const couponController = require('../controller/coupon')
 const adminauth = require('../middleware/admin')
 
 
@@ -58,6 +56,14 @@ router.put('/users/toggle-status/:user_id', adminauth.cheksession, adminControll
 
 router.get("/orders",orderController.adminOrders);
 router.post("/orders", orderController.updateOrderStatus);
+
+
+//coupon Mangement
+router.get('/coupons', couponController.getAllCoupons);
+router.get('/coupons/add', couponController.renderAddCoupon);
+router.post('/coupons/add', couponController.addCoupon);
+router.get('/coupons/edit/:id', couponController.renderEditCoupon);
+router.post('/coupons/edit/:id', couponController.editCoupon);
 
 
 //LOGOUT

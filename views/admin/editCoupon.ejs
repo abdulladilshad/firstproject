@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Edit Coupon</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 250px;
+            background: var(--primary-color);
+            color: white;
+            padding: 1.5rem 0;
+            transition: transform 0.3s ease;
+            z-index: 999;
+            overflow-y: auto;
+        }
+
+        .close-sidebar {
+            display: none;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .hamburger-menu {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+        }
+
+        .hamburger-menu span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background-color: #333;
+            margin: 5px 0;
+            transition: 0.3s;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 998;
+        }
+
+        /* Sidebar Menu Items */
+        .sidebar-header {
+            padding: 0 1.5rem 1.5rem;
+            border-bottom: 1px solid #ffffff20;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: #ffffff90;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu li a:hover, 
+        .sidebar-menu li a.active {
+            background: #ffffff15;
+            color: white;
+            border-left-color: #3498db;
+        }
+
+        .sidebar-menu li a i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            margin-left: 250px;
+            transition: margin-left 0.3s ease;
+            padding: 20px;
+        }
+
+        /* Your existing admin container styles */
+        .admin-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .hamburger-menu {
+                display: block;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .close-sidebar {
+                display: block;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .overlay.active {
+                display: block;
+            }
+        }
+
+        .page-title {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+        .form-label {
+            font-weight: 500;
+            color: #34495e;
+        }
+        .btn-submit {
+            padding: 10px 30px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <button id="hamburger" class="hamburger-menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <div class="dashboard-container">
+        <div class="overlay" id="overlay"></div>
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>PRODUCTS</h2>
+                <button class="close-sidebar" id="closeSidebar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="/admin/dashboard">
+                    <i class="fas fa-home"></i> Dashboard
+                </a></li>
+                <li><a href="/admin/products">
+                    <i class="fas fa-box"></i> Products
+                </a></li>
+                <li><a href="/orders">
+                    <i class="fas fa-shopping-cart"></i> Orders
+                </a></li>
+                <li><a href="/admin/users">
+                    <i class="fas fa-users"></i> Users
+                </a></li>
+                <li><a href="/admin/categories">
+                    <i class="fas fa-tags"></i> Category
+                </a></li>
+                <li><a href="/offers">
+                    <i class="fas fa-gift"></i> Offers
+                </a></li>
+                <li><a href="/coupons" class="active">
+                    <i class="fas fa-ticket-alt"></i> Coupons
+                </a></li>
+                <li><a href="/settings">
+                    <i class="fas fa-cog"></i> Settings
+                </a></li>
+                <li><a href="/logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a></li>
+            </ul>
+        </aside>
+
+        <div class="main-content">
+            <div class="admin-container">
+                <h1 class="page-title">Edit Coupon</h1>
+                
+                <form action="/admin/coupons/edit/<%= coupon._id %>" method="post" class="needs-validation" novalidate>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="code" class="form-label">Coupon Code</label>
+                                <input type="text" class="form-control" id="code" name="code" 
+                                       value="<%= coupon.code %>" required>
+                                <div class="invalid-feedback">Please enter a coupon code.</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="discount" class="form-label">Discount (%)</label>
+                                <input type="number" class="form-control" id="discount" name="discount" 
+                                       min="0" max="100" value="<%= coupon.discount %>" required>
+                                <div class="invalid-feedback">Please enter a valid discount (0-100).</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="expirationDate" class="form-label">Expiration Date</label>
+                                <input type="date" class="form-control" id="expirationDate" 
+                                       name="expirationDate" value="<%= coupon.expirationDate.toISOString().split('T')[0] %>" required>
+                                <div class="invalid-feedback">Please select an expiration date.</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="minPurchase" class="form-label">Minimum Purchase Amount</label>
+                                <input type="number" class="form-control" id="minPurchase" 
+                                       name="minPurchase" value="<%= coupon.minPurchase || '' %>" placeholder="Optional">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="maxDiscount" class="form-label">Maximum Discount</label>
+                                <input type="number" class="form-control" id="maxDiscount" 
+                                       name="maxDiscount" value="<%= coupon.maxDiscount || '' %>" placeholder="Optional">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="usageLimit" class="form-label">Usage Limit</label>
+                                <input type="number" class="form-control" id="usageLimit" 
+                                       name="usageLimit" value="<%= coupon.usageLimit || '' %>" placeholder="Optional">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 text-end">
+                        <button type="submit" class="btn btn-primary btn-submit">
+                            <i class="fas fa-save me-2"></i>Update Coupon
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and Font Awesome -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/your-code-here.js"></script>
+    
+    <!-- Form validation script -->
+    <script>
+        (() => {
+            'use strict'
+            const forms = document.querySelectorAll('.needs-validation')
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+    </script>
+
+    <!-- Sidebar Toggle Script -->
+    <script>
+        document.getElementById('hamburger').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.add('active');
+            document.getElementById('overlay').classList.add('active');
+        });
+
+        document.getElementById('closeSidebar').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+        });
+
+        document.getElementById('overlay').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+        });
+    </script>
+</body>
+</html>

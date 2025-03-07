@@ -1,34 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Categories</title>
     <link rel="stylesheet" href="/styles/addcategories.css">
 </head>
+
 <body>
     <div class="dashboard-container">
 
         <!-- Add this button at the start of your dashboard-container -->
-<button id="hamburger" class="hamburger-menu">
-    <span></span>
-    <span></span>
-    <span></span>
-</button>
+        <button id="hamburger" class="hamburger-menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
 
-<div class="dashboard-container">
-    <div class="overlay" id="overlay"></div>
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h2>PRODUCTS</h2>
-            <button class="close-sidebar" id="closeSidebar">
-                <i class="fas fa-times"></i>
-            </button>
+        <div class="dashboard-container">
+            <div class="overlay" id="overlay"></div>
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <h2>PRODUCTS</h2>
+                    <button class="close-sidebar" id="closeSidebar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <!-- Rest of your sidebar content -->
+            </aside>
+            <!-- Rest of your content -->
         </div>
-        <!-- Rest of your sidebar content -->
-    </aside>
-    <!-- Rest of your content -->
-</div>
 
         <aside class="sidebar">
             <h2>Admin Panel</h2>
@@ -52,30 +54,30 @@
                     <div class="error-message" style="color: red; margin-bottom: 15px;">
                         <%= error %>
                     </div>
-                <% } %>
-                <form action="/admin/addcategories" method="post" class="add-category-form" onsubmit="return validateForm()">
-                    <div class="form-group">
-                        <label for="name">Category Name:</label>
-                        <input 
-                            type="text" 
-                            id="name" 
-                            name="name" 
-                            placeholder="Enter category name"
-                        />
-                        <small id="nameError" class="error-message" style="color: red;"></small>
-                    </div>
-                    <div class="form-group">
-                        <label for="description">Description:</label>
-                        <textarea 
-                            id="description" 
-                            name="description" 
-                            placeholder="Enter category description" 
-                            rows="4"
-                        ></textarea>
-                        <small id="descriptionError" class="error-message" style="color: red;"></small>
-                    </div>
-                    <button type="submit" class="btn-submit">Add Category</button>
-                </form>
+                    <% } %>
+                        <form action="/admin/addcategories" method="post" class="add-category-form"
+                            onsubmit="return validateForm()">
+                            <div class="form-group">
+                                <label for="name">Category Name:</label>
+                                <input type="text" id="name" name="name" placeholder="Enter category name" />
+                                <small id="nameError" class="error-message" style="color: red;"></small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="offer">Category Offer (%)</label>
+                                <input type="number" id="offer" name="offer" placeholder="Enter discount percentage"
+                                    min="0" max="100" />
+                                <small id="offerError" class="error-message" style="color: red;"></small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="description">Description:</label>
+                                <textarea id="description" name="description" placeholder="Enter category description"
+                                    rows="4"></textarea>
+                                <small id="descriptionError" class="error-message" style="color: red;"></small>
+                            </div>
+                            <button type="submit" class="btn-submit">Add Category</button>
+                        </form>
             </section>
         </main>
     </div>
@@ -86,7 +88,7 @@
             let description = document.getElementById("description").value.trim();
             let nameError = document.getElementById("nameError");
             let descriptionError = document.getElementById("descriptionError");
-            
+
             nameError.textContent = "";
             descriptionError.textContent = "";
 
@@ -108,45 +110,57 @@
                 isValid = false;
             }
 
+            // if (offer !== "") {
+            //     const offerValue = parseFloat(offer); // Convert offer to a float number
+
+            //     if (isNaN(offerValue)) {
+            //         offerError.textContent = "Offer must be a valid number.";
+            //         isValid = false;
+            //     } else if (offerValue < 0 || offerValue > 100) {
+            //         offerError.textContent = "Offer must be a percentage between 0 and 100.";
+            //         isValid = false;
+            //     }
+            // }
             return isValid;
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-    const hamburger = document.getElementById('hamburger');
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
-    const closeSidebar = document.getElementById('closeSidebar');
+        document.addEventListener('DOMContentLoaded', function () {
+            const hamburger = document.getElementById('hamburger');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            const closeSidebar = document.getElementById('closeSidebar');
 
-    function toggleSidebar() {
-        hamburger.classList.toggle('active');
-        sidebar.classList.toggle('active');
-        overlay.classList.toggle('active');
-        document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
-    }
+            function toggleSidebar() {
+                hamburger.classList.toggle('active');
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+                document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+            }
 
-    hamburger.addEventListener('click', toggleSidebar);
-    closeSidebar.addEventListener('click', toggleSidebar);
-    overlay.addEventListener('click', toggleSidebar);
+            hamburger.addEventListener('click', toggleSidebar);
+            closeSidebar.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
 
-    // Close sidebar on window resize if screen becomes larger
-    window.addEventListener('resize', function() {
-        if (window.innerWidth > 768 && sidebar.classList.contains('active')) {
-            toggleSidebar();
-        }
-    });
+            // Close sidebar on window resize if screen becomes larger
+            window.addEventListener('resize', function () {
+                if (window.innerWidth > 768 && sidebar.classList.contains('active')) {
+                    toggleSidebar();
+                }
+            });
 
-    // Add smooth hover effect for menu items
-    const menuItems = document.querySelectorAll('.sidebar-menu li a');
-    menuItems.forEach(item => {
-        item.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateX(5px)';
+            // Add smooth hover effect for menu items
+            const menuItems = document.querySelectorAll('.sidebar-menu li a');
+            menuItems.forEach(item => {
+                item.addEventListener('mouseenter', function () {
+                    this.style.transform = 'translateX(5px)';
+                });
+                item.addEventListener('mouseleave', function () {
+                    this.style.transform = 'translateX(0)';
+                });
+            });
         });
-        item.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateX(0)';
-        });
-    });
-});
 
     </script>
 </body>
+
 </html>

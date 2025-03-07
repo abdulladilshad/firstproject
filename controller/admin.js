@@ -194,20 +194,19 @@ const toggleProductStatus = async (req, res) => {
 
 
 const addProduct = async (req, res) => {
-    const { image1, image2, image3, image4, productName } = req.body;
-
-
-    if (!productName) {
-        return res.status(400).send("Product name is required.");
-    }
-
     try {
+      
+
+        const { image1, image2, image3, image4, productName, offer, stock } = req.body;
+
+        if (!productName) {
+            return res.status(400).send("Product name is required.");
+        }
 
         const productCount = await productModel.countDocuments();
         if (productCount < 2) {
             return res.status(403).send("At least 2 products must exist before adding a new one.");
         }
-
 
         const existingProduct = await productModel.findOne({
             productName: { $regex: new RegExp("^" + productName.trim() + "$", "i") }
@@ -221,19 +220,21 @@ const addProduct = async (req, res) => {
             });
         }
 
+        // ✅ Ensure `offer` is defined
+        const productOffer = offer ? Number(offer) : 0;
 
+        // ✅ Ensure `stock` is defined (convert empty string to `0`)
+        const productStock = stock && !isNaN(stock) ? Number(stock) : 0;
+
+        // ✅ Process Images (Unchanged)
         const savedImagePaths = [];
-
-
         const saveBase64ToFile = async (base64Data, filename) => {
             const matches = base64Data.match(/^data:image\/(png|jpg|jpeg);base64,(.+)$/);
             if (!matches) return false;
-
             const imageBuffer = Buffer.from(matches[2], 'base64');
             const productname = productName.trim().replace(/\s+/g, '');
             const filePath = path.join('public', 'images', productname, filename);
             const dirPath = path.dirname(filePath);
-
 
             try {
                 await fs.promises.access(dirPath);
@@ -241,45 +242,18 @@ const addProduct = async (req, res) => {
                 await fs.promises.mkdir(dirPath, { recursive: true });
             }
 
-
             await fs.promises.writeFile(filePath, imageBuffer);
-
             return `images/${productname}/${filename}`;
         };
 
-
-        if (image1) {
-            const savedPath = await saveBase64ToFile(image1, 'image1.png');
-            if (savedPath) savedImagePaths.push(savedPath);
-        }
-        if (image2) {
-            const savedPath = await saveBase64ToFile(image2, 'image2.png');
-            if (savedPath) savedImagePaths.push(savedPath);
-        }
-        if (image3) {
-            const savedPath = await saveBase64ToFile(image3, 'image3.png');
-            if (savedPath) savedImagePaths.push(savedPath);
-        }
-        if (image4) {
-            const savedPath = await saveBase64ToFile(image4, 'image4.png');
-            if (savedPath) savedImagePaths.push(savedPath);
-        }
-
-
-        delete req.body.image1;
-        delete req.body.image2;
-        delete req.body.image3;
-        delete req.body.image4;
-
+        if (image1) savedImagePaths.push(await saveBase64ToFile(image1, 'image1.png'));
+        if (image2) savedImagePaths.push(await saveBase64ToFile(image2, 'image2.png'));
+        if (image3) savedImagePaths.push(await saveBase64ToFile(image3, 'image3.png'));
+        if (image4) savedImagePaths.push(await saveBase64ToFile(image4, 'image4.png'));
 
         req.body.imagePaths = savedImagePaths;
 
-
-        if (req.body.color) {
-            req.body.color = req.body.color.split(",").map(c => c.trim());
-        }
-
-
+        // ✅ Handle Variants
         let variants;
         try {
             variants = JSON.parse(req.body.variants || '[]');
@@ -301,12 +275,15 @@ const addProduct = async (req, res) => {
             return res.status(400).send("Invalid JSON format for variants.");
         }
 
-
-
         req.body.variants = variants;
 
+        // ✅ Create Product with Offer, Stock & Variants
+        const newProduct = new productModel({
+            ...req.body,
+            offer: productOffer, // ✅ Store offer properly
+            stock: productStock, // ✅ Store stock properly
+        });
 
-        const newProduct = new productModel(req.body);
         await newProduct.save();
 
         res.redirect('/admin/products');
@@ -316,6 +293,7 @@ const addProduct = async (req, res) => {
         res.status(500).send('Error saving product');
     }
 };
+
 
 
 
@@ -343,21 +321,29 @@ const LoadCategory = async (req, res) => {
 
 const postAddCategory = async (req, res) => {
     try {
-        const { name, description } = req.body;
+        const { name, description, offer } = req.body;
 
-
+        // ✅ Ensure all required fields are provided
         if (!name || !description) {
             return res.render('admin/addcategories', { error: 'Category name and description are required' });
         }
 
-
+        // ✅ Check if the category already exists (case-insensitive)
         const existingCategory = await categoryModel.findOne({ name: { $regex: new RegExp(`^${name}$`, "i") } });
         if (existingCategory) {
             return res.render('admin/addcategories', { error: 'Category name already exists' });
         }
 
+        // ✅ Ensure `offer` is properly formatted (default to `0` if missing)
+        const categoryOffer = offer && !isNaN(offer) ? Number(offer) : 0;
 
-        const newCategory = new categoryModel({ name, description });
+        // ✅ Create and save the category
+        const newCategory = new categoryModel({ 
+            name, 
+            description, 
+            offer: categoryOffer // ✅ Save the offer value
+        });
+
         await newCategory.save();
 
         res.redirect('/admin/categories');
@@ -366,6 +352,7 @@ const postAddCategory = async (req, res) => {
         res.render('admin/addcategories', { error: 'An error occurred while adding the category.' });
     }
 };
+
 
 
 const AddCategory = async (req, res) => {
@@ -382,10 +369,12 @@ const AddCategory = async (req, res) => {
 const editCategory = async (req, res) => {
     try {
         const categoryId = req.params.id;
-        const { name, description } = req.body;
+        const { name, description, offer } = req.body;
 
+        // ✅ Ensure `offer` is properly formatted (default to `0` if missing)
+        const categoryOffer = offer && !isNaN(offer) ? Number(offer) : 0;
 
-
+        // ✅ Check if the category name already exists (excluding the current category)
         const existingCategory = await categoryModel.findOne({
             name: { $regex: new RegExp(`^${name}$`, "i") },
             _id: { $ne: categoryId }
@@ -393,26 +382,25 @@ const editCategory = async (req, res) => {
 
         if (existingCategory) {
             return res.render('admin/editcategories', {
-                category: { _id: categoryId, name, description },
+                category: { _id: categoryId, name, description, offer: categoryOffer },
                 error: 'Category name already exists.',
             });
         }
 
-
-        await categoryModel.findByIdAndUpdate(categoryId, { name, description });
-
+        // ✅ Update the category with the new name, description, and offer
+        await categoryModel.findByIdAndUpdate(categoryId, { name, description, offer: categoryOffer });
 
         res.redirect('/admin/categories?success=Category updated successfully.');
     } catch (error) {
         console.error('Error updating category:', error);
 
-
-        res.render('editCategory', {
-            category: { _id: req.params.id, name: req.body.name, description: req.body.description },
+        res.render('admin/editcategories', {
+            category: { _id: req.params.id, name: req.body.name, description: req.body.description, offer: req.body.offer },
             error: 'An error occurred while updating the category.',
         });
     }
 };
+
 
 
 const togglecategories = async (req, res) => {
@@ -487,20 +475,25 @@ const editproducts = async (req, res) => {
 }
 
 const editproducttt = async (req, res) => {
-    const { productId, image1, image2, image3, image4, productName, category, price, brand, productDescription, material } = req.body;
-
-    if (!productId) {
-        return res.status(400).send("Product ID is required.");
-    }
-
     try {
+        console.log("Request Body:", req.body); // Debugging: Check if `offer` and `stock` are present
+
+        const { productId, image1, image2, image3, image4, productName, category, price, brand, productDescription, material, offer, stock } = req.body;
+
+        if (!productId) {
+            return res.status(400).send("Product ID is required.");
+        }
 
         const product = await productModel.findById(productId);
         if (!product) {
             return res.status(404).send("Product not found.");
         }
 
+        // ✅ Ensure `offer` and `stock` are defined
+        const productOffer = offer ? Number(offer) : 0;
+        const productStock = stock && !isNaN(stock) ? Number(stock) : 0;
 
+        // ✅ Check if product name already exists
         if (productName) {
             const existingProduct = await productModel.findOne({
                 productName: { $regex: new RegExp("^" + productName.trim() + "$", "i") },
@@ -511,7 +504,7 @@ const editproducttt = async (req, res) => {
                 const categories = await categoryModel.find();
                 return res.render('admin/editproducts', {
                     errorMessage: "Product name already exists!",
-                    products: product,
+                    product,
                     categories
                 });
             }
@@ -519,8 +512,7 @@ const editproducttt = async (req, res) => {
             product.productName = productName.trim();
         }
 
-
-
+        // ✅ Process Images
         const saveBase64ToFile = async (base64Data, filename) => {
             const matches = base64Data.match(/^data:image\/(png|jpg|jpeg);base64,(.+)$/);
             if (!matches) return false;
@@ -540,30 +532,23 @@ const editproducttt = async (req, res) => {
             return `images/${productname}/${filename}`;
         };
 
-
         const savedImagePaths = [...(product.imagePaths || [])];
 
-
-        if (image1) {
-            savedImagePaths[0] = await saveBase64ToFile(image1, 'image1.png');
-        }
-        if (image2) {
-            savedImagePaths[1] = await saveBase64ToFile(image2, 'image2.png');
-        }
-        if (image3) {
-            savedImagePaths[2] = await saveBase64ToFile(image3, 'image3.png');
-        }
-        if (image4) {
-            savedImagePaths[3] = await saveBase64ToFile(image4, 'image4.png');
-        }
+        if (image1) savedImagePaths[0] = await saveBase64ToFile(image1, 'image1.png');
+        if (image2) savedImagePaths[1] = await saveBase64ToFile(image2, 'image2.png');
+        if (image3) savedImagePaths[2] = await saveBase64ToFile(image3, 'image3.png');
+        if (image4) savedImagePaths[3] = await saveBase64ToFile(image4, 'image4.png');
 
         product.imagePaths = savedImagePaths;
         product.category = category;
-        product.productDescription = productDescription
-        product.price = price
-        product.brand = brand
-        product.material = material
+        product.productDescription = productDescription;
+        product.price = price;
+        product.brand = brand;
+        product.material = material;
+        product.offer = productOffer; // ✅ Update Offer
+        product.stock = productStock; // ✅ Update Stock
 
+        // ✅ Handle Variants
         let variants;
         try {
             variants = JSON.parse(req.body.variants || '[]');
@@ -583,7 +568,6 @@ const editproducttt = async (req, res) => {
             return res.status(400).send("Invalid JSON format for variants.");
         }
 
-
         product.variants = variants;
 
         await product.save();
@@ -593,6 +577,7 @@ const editproducttt = async (req, res) => {
         res.status(500).send('Error updating product');
     }
 };
+
 
 
 

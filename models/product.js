@@ -10,12 +10,12 @@ const productSchema = new mongoose.Schema(
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Category', 
+      ref: 'Category',
       required: true,
     },
     imagePaths: {
-      type: [String],  
-      required: true,   
+      type: [String],
+      required: true,
       validate: {
         validator: function (value) {
           return Array.isArray(value) && value.every((item) => typeof item === 'string' && item.trim() !== '');
@@ -55,26 +55,36 @@ const productSchema = new mongoose.Schema(
         quantity: {
           type: Number,
           required: true,
-          min: 0, 
+          min: 0,
         },
       },
     ],
-    stock: {
-      type: Number,
-      required: true,
-      default: 0
-    },
+   
     isListed: {
       type: Boolean,
       default: true
-    }
+    },
+    offer: {
+      type: Number, 
+      min: 0,
+      max: 100,
+      default: 0, 
+    },
   },
   {
-    timestamps: true, 
+    timestamps: true,
   }
 );
 
+
+
 productSchema.plugin(mongoosePaginate);
+
+productSchema.virtual('discountedPrice').get(function () {
+  return this.price - (this.price * this.offer) / 100;
+});
+
+
 const Product = mongoose.model('Product', productSchema);
 
 module.exports = Product;

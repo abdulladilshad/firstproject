@@ -62,6 +62,21 @@
                         >
                         <small id="nameError" class="error-message" style="color: red;"></small>
                     </div>
+
+                    <div class="form-group">
+                        <label for="offer">Category Offer (%)</label>
+                        <input 
+                            type="number" 
+                            id="offer" 
+                            name="offer" 
+                            value="<%= category.offer %>"
+                            placeholder="Enter discount percentage"
+                            min="0" 
+                            max="100"
+                        />
+                        <small id="offerError" class="error-message" style="color: red;"></small>
+                    </div>
+
                     <div class="form-group">
                         <label for="description">Description</label>
                         <textarea

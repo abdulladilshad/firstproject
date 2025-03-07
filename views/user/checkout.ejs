@@ -232,9 +232,9 @@
 
             </div>
 
-            <!-- Right Section - Order Summary -->
+            
             <div class="checkout-right">
-                <!-- Payment Section -->
+                
                 <section class="payment-section">
                     <h2>Payment Method</h2>
                     <div class="payment-option">
@@ -246,7 +246,7 @@
                     <h2>Order Summary</h2>
 
 
-                    <!-- Price Details -->
+                    
                     <div class="price-details">
                         <div class="price-row">
                             <span>Subtotal</span>
@@ -308,7 +308,7 @@
 
                 if (response.ok) {
                     selectedAddressId = addressId;
-                    // Update the UI dynamically with the selected address
+                    
                     if (data.selectedAddress) {
                         document.querySelector(".current-address").innerHTML = `
                     <div class="address-card selected">
@@ -345,13 +345,13 @@
     const formData = new FormData(e.target);
     const addressData = Object.fromEntries(formData.entries());
 
-    // Simulate assigning an ID (since it's not yet saved in the backend)
+    
     addressData.id = `temp-${Date.now()}`; 
 
-    // Update the UI with the new address
+    
     updateSelectedAddressUI(addressData);
 
-    // Hide the form modal
+
     hideAddressForm();
 });
 
@@ -382,7 +382,7 @@ function updateSelectedAddressUI(address) {
 async function placeOrder() {
     console.log("🚀 placeOrder() function called!");
 
-    // Get the currently displayed address in the current-address section
+    
     const currentAddressElement = document.querySelector(".current-address .address-card");
     
     if (!currentAddressElement) {
@@ -394,11 +394,11 @@ async function placeOrder() {
         paymentMethod: 'cod'
     };
 
-    // If we have a selectedAddressId, use that
+
     if (selectedAddressId) {
         orderData.addressId = selectedAddressId;
     } else {
-        // Get the address details from the form
+        
         const newAddress = {
             fullName: document.getElementById("fullName").value,
             phone: document.getElementById("phone").value,
@@ -408,7 +408,7 @@ async function placeOrder() {
             zipCode: document.getElementById("zipCode").value
         };
 
-        // Validate the new address
+        
         if (!Object.values(newAddress).every(value => value)) {
             alert("Please fill in all address fields.");
             return;

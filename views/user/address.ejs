@@ -11,7 +11,7 @@
 
 <body>
     <div class="container">
-        <!-- Sidebar -->
+        
         <div class="sidebar">
             <a href="/profile" class="sidebar-btn">
                 <i class="fas fa-user"></i>
@@ -27,7 +27,7 @@
             </a>
         </div>
 
-        <!-- Main Content -->
+        
         <div class="main-content">
             <h1>My Addresses</h1>
             <button class="btn btn-add" onclick="openAddModal()">
@@ -67,7 +67,7 @@
         </div>
     </div>
 
-    <!-- Address Modal -->
+    
     <div id="addressModal" class="modal">
         <div class="modal-content">
             <h2 id="modalTitle">Add New Address</h2>
@@ -165,7 +165,7 @@
                 if (addressData.success) {
                     const { fullName, phone, street, city, state, zipCode, isDefault } = addressData.address;
 
-                    // Populate form fields
+                    
                     document.getElementById('fullName').value = fullName;
                     document.getElementById('phone').value = phone;
                     document.getElementById('street').value = street;
@@ -257,18 +257,18 @@
             return isValid;
         }
 
-        // Add input event listeners for real-time validation
+
         fields.forEach(field => {
             const input = document.getElementById(field);
             input.addEventListener('input', () => validateField(field));
             input.addEventListener('blur', () => validateField(field));
         });
 
-        // Form submission handler
+        
         form.onsubmit = async (e) => {
             e.preventDefault();
 
-            // Validate all fields
+            
             const isValid = fields.every(field => validateField(field));
             if (!isValid) return;
 
@@ -300,13 +300,13 @@
                     throw new Error(data.message || 'Error saving address');
                 }
             } catch (error) {
-                // Show error in form instead of alert
+                
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'form-error-message show';
                 errorDiv.textContent = error.message;kl;
                 form.insertBefore(errorDiv, form.firstChild);
 
-                // Remove error message after 5 seconds
+                
                 setTimeout(() => errorDiv.remove(), 5000);
             }
         };
