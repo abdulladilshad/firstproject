@@ -503,11 +503,9 @@
                                                     <div class="d-flex align-items-center">
                                                         <div class="ms-2">
                                                             <div class="fw-semibold">
-                                                                <%= order.userId ? order.userId.name : "Unknown" %>
+                                                                <%= order.fullname ? order.fullname : "Unknown" %>
                                                             </div>
-                                                            <small class="text-muted">
-                                                                <%= order.userId ? order.userId.email : "N/A" %>
-                                                            </small>
+                                                           
                                                         </div>
                                                     </div>
                                                 </td>
@@ -524,19 +522,14 @@
                                                     <div class="fw-semibold">$<%= order.price.toFixed(2) %>
                                                     </div>
                                                 </td>
-                                                <td>
-                                                    <div class="fw-semibold">
-                                                        <%= order.productName %>
-                                                    </div>
-                                                    <small>Qty: <%= order.quantity %></small>
-                                                </td>
+                                             
                                                 <td>
                                                     <% if (order.status === "Delivered") { %>
                                                         <span class="delivered-text">Delivered</span>
                                                     <% } else { %>
                                                         <select class="status-select"
                                                             data-order-id="<%= order.orderId %>"
-                                                            data-product-id="<%= order.IndividualOrderId %>">
+                                                            data-product-id="<%= order.individualOrdersId %>">
                                                             <option value="Pending" <%= order.status === "Pending" ? "selected" : "" %>>Pending</option>
                                                             <option value="Confirmed" <%= order.status === "Confirmed" ? "selected" : "" %>>Confirmed</option>
                                                             <option value="Shipped" <%= order.status === "Shipped" ? "selected" : "" %>>Shipped</option>
@@ -548,7 +541,7 @@
 
 
                                                 <td>
-                                                    <a href="/admin/orders-view?individualOrderId=<%= order.IndividualOrderId %>&orderId=<%= order.orderId %>"
+                                                    <a href="/admin/orders-view?individualOrderId=<%= order.individualOrdersId %>&orderId=<%= order.orderId %>"
                                                         class="action-btn btn-view">
                                                         <i class="fas fa-eye me-1"></i> View Details
                                                     </a>

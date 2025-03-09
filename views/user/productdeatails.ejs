@@ -282,7 +282,15 @@
                         <h1 class="product-title">
                             <%= product.productName %>
                         </h1>
-                        <div class="price">$<%= product.price.toFixed(2) %>
+                        <div class="price">
+                            <% if (product.offerPrice) { %>
+                                <span class="text-decoration-line-through text-muted">$<%= product.price.toFixed(2) %></span>
+                                <span class="text-danger ms-2">$<%= product.offerPrice.toFixed(2) %></span>
+                                <% const discountPercentage = Math.round((1 - product.offerPrice / product.price) * 100); %>
+                                <span class="badge bg-danger ms-2">-<%= discountPercentage %>%</span>
+                            <% } else { %>
+                                $<%= product.price.toFixed(2) %>
+                            <% } %>
                         </div>
 
                         <div class="product-meta">
@@ -331,7 +339,7 @@
 
                         <div class="d-grid gap-3">
                             <button onclick="addToCart('<%= product._id %>')" class="btn btn-dark">Add to Cart</button>
-                            <button class="btn btn-outline-dark">Add to Wishlist</button>
+                            <button onclick="addToWishlist('<%= product._id %>')" class="btn btn-outline-dark">Add to Wishlist</button>
                         </div>                        
                     </div>
                 </div>
@@ -371,7 +379,16 @@
                                 <h3 class="product-name">
                                     <a href="/product/<%= product._id %>"><%= product.productName %></a>
                                 </h3>
-                                <div class="product-price">$<%= product.price.toFixed(2) %></div>
+                                <div class="product-price">
+                                    <% if (product.offerPrice) { %>
+                                        <span class="text-decoration-line-through text-muted">$<%= product.price.toFixed(2) %></span>
+                                        <span class="text-danger ms-2">$<%= product.offerPrice.toFixed(2) %></span>
+                                        <% const discountPercentage = Math.round((1 - product.offerPrice / product.price) * 100); %>
+                                        <span class="badge bg-danger ms-2">-<%= discountPercentage %>%</span>
+                                    <% } else { %>
+                                        $<%= product.price.toFixed(2) %>
+                                    <% } %>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -467,6 +484,40 @@ async function addToCart(productId) {
         const cartCount = document.getElementById('cart-count');
         if (cartCount) {
             cartCount.textContent = cart.items.length;
+        }
+    }
+
+    // Add to Wishlist functionality
+    async function addToWishlist(productId) {
+        const selectedColor = document.querySelector('input[name="color"]:checked');
+
+        if (!selectedColor) {
+            alert("Please select a color!");
+            return;
+        }
+
+        const colorValue = selectedColor.value;
+
+        try {
+            const response = await fetch('/wishlist', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ productId, color: colorValue })
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                alert('Item added to wishlist!');
+                // You can update wishlist UI here if needed
+            } else {
+                alert(data.message || 'Failed to add to wishlist');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Something went wrong!');
         }
     }
     </script>

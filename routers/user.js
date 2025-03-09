@@ -2,9 +2,11 @@ const router = require('express').Router();
 const passport = require('passport');
 const userController = require('../controller/user')
 const cartController = require('../controller/cart')
+const wishlistController = require('../controller/wishlist')
 const addressController = require('../controller/address')
 const orderController = require('../controller/order')
 const checkoutController = require('../controller/checkout')
+const walletController = require('../controller/wallet')
 const profileController = require('../controller/profile')
 const changePassword = require('../controller/changePassword')
 const forgetPaswword = require('../controller/forgetpassword')
@@ -86,6 +88,14 @@ router.delete('/cart/remove/:productId', auth.isBan, auth.checkSession,cartContr
 router.get('/all',auth.isBan, auth.checkSession, cartController.getCartItems);
 router.post('/cart/update/:productId',auth.isBan, auth.checkSession, cartController.updateQuatity)
 
+
+
+router.get('/wishlist', wishlistController.getWishlist);
+router.post('/wishlist', wishlistController.addToWishlist);
+router.delete('/wishlist/:itemId', wishlistController.removeFromWishlist);
+
+
+
 router.get('/profile', auth.isBan, auth.checkSession,profileController.getProfile);
 router.post('/profile/update', auth.isBan, auth.checkSession,uploadMiddleware, profileController.updateProfile);
 
@@ -107,11 +117,28 @@ router.delete('/addresses/:id',auth.isBan, auth.checkSession, addressController.
 router.get('/addresses/:id',auth.isBan, auth.checkSession, addressController.getAddress);
 
 
+
+router.get('/wallet', walletController.getWallet);
+router.post('/wallet', walletController.deposit);
+
+
+
 router.post('/change-password',auth.isBan, auth.checkSession, changePassword.changePassword);
 router.post('/send-otp',auth.isBan, auth.checkSession, changePassword.sendOtpForGoogleUser);
 router.get('/change-password',auth.isBan, auth.checkSession, changePassword.renderChangePasswordPage);
 
 router.put('/select-address', auth.isBan, auth.checkSession,addressController.selectAddress);
+
+
+
+router.post('/place', orderController.placeOrders);
+
+
+router.post('/create', orderController.createRazorpayOrder);
+router.post('/verify-payment', orderController.verifyRazorpayPayment);
+
+// Order success page
+router.get('/success/:orderId', orderController.orderSuccesss);
 
 
 

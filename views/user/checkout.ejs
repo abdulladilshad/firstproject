@@ -7,6 +7,8 @@
     <title>Checkout</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/styles/checkout.css">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style></style>
 </head>
 
 <body>
@@ -234,17 +236,19 @@
 
             
             <div class="checkout-right">
-                
                 <section class="payment-section">
                     <h2>Payment Method</h2>
                     <div class="payment-option">
                         <input type="radio" name="payment" value="cod" id="cod" checked>
                         <label for="cod">Cash on Delivery</label>
                     </div>
+                    <div class="payment-option">
+                        <input type="radio" name="payment" value="razorpay" id="razorpay">
+                        <label for="razorpay">Pay Online (Razorpay)</label>
+                    </div>
                 </section>
                 <div class="order-summary">
                     <h2>Order Summary</h2>
-
 
                     
                     <div class="price-details">
@@ -381,8 +385,8 @@ function updateSelectedAddressUI(address) {
 
 async function placeOrder() {
     console.log("🚀 placeOrder() function called!");
-
     
+    // Check if address is selected
     const currentAddressElement = document.querySelector(".current-address .address-card");
     
     if (!currentAddressElement) {
@@ -390,27 +394,46 @@ async function placeOrder() {
         return;
     }
 
+    // Get selected payment method
+    const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+    console.log("Selected payment method:", paymentMethod);
+    
     let orderData = {
-        paymentMethod: 'cod'
+        paymentMethod: paymentMethod
     };
 
-
+    // Handle address
     if (selectedAddressId) {
+        console.log("Using selected address ID:", selectedAddressId);
         orderData.addressId = selectedAddressId;
-    } else {
-        
-        const newAddress = {
-            fullName: document.getElementById("fullName").value,
-            phone: document.getElementById("phone").value,
-            street: document.getElementById("street").value,
-            city: document.getElementById("city").value,
-            state: document.getElementById("state").value,
-            zipCode: document.getElementById("zipCode").value
-        };
 
+        console.log("No selected address ID, extracting from UI");
+        const newAddress = {
+            fullName: document.querySelector(".current-address .name")?.textContent.trim(),
+            phone: document.querySelector(".current-address .phone")?.textContent.replace(/[^\d]/g, '').trim(),
+            street: document.querySelector(".current-address .street")?.textContent.trim(),
+            city: document.querySelector(".current-address .location")?.textContent.split(',')[0].trim(),
+            state: document.querySelector(".current-address .location")?.textContent.split(',')[1]?.trim().split(' ')[0],
+            zipCode: document.querySelector(".current-address .location")?.textContent.split(',')[1]?.trim().split(' ')[1]
+        };
+        orderData.newAddress = newAddress;
+        console.log("Extracted address:", newAddress);
+    } else {
+        // Get address from the UI
+        console.log("No selected address ID, extracting from UI");
+        const newAddress = {
+            fullName: document.querySelector(".current-address .name")?.textContent.trim(),
+            phone: document.querySelector(".current-address .phone")?.textContent.replace(/[^\d]/g, '').trim(),
+            street: document.querySelector(".current-address .street")?.textContent.trim(),
+            city: document.querySelector(".current-address .location")?.textContent.split(',')[0].trim(),
+            state: document.querySelector(".current-address .location")?.textContent.split(',')[1]?.trim().split(' ')[0],
+            zipCode: document.querySelector(".current-address .location")?.textContent.split(',')[1]?.trim().split(' ')[1]
+        };
+        
+        console.log("Extracted address:", newAddress);
         
         if (!Object.values(newAddress).every(value => value)) {
-            alert("Please fill in all address fields.");
+            alert("Please select a valid delivery address.");
             return;
         }
 
@@ -420,22 +443,143 @@ async function placeOrder() {
     console.log("📤 Sending order data:", orderData);
 
     try {
-        const response = await fetch('/order/place', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(orderData)
-        });
+        if (paymentMethod === 'razorpay') {
+            console.log("Attempting to create Razorpay order...");
+            
+            try {
+                const razorpayResponse = await fetch('/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
+                
+                console.log("Razorpay response status:", razorpayResponse.status);
+                
+                // Parse the response data
+                let razorpayData;
+                
+                if (!razorpayResponse.ok) {
+                    // Try to get the error details from the response
+                    let errorDetails = '';
+                    try {
+                        razorpayData = await razorpayResponse.json();
+                        console.log("Response data:", razorpayData);
+                        errorDetails = razorpayData.message || razorpayData.error || JSON.stringify(razorpayData);
+                    } catch (parseError) {
+                        try {
+                            errorDetails = await razorpayResponse.text();
+                            console.log("Response text:", errorDetails);
+                        } catch (textError) {
+                            errorDetails = 'Could not parse error details';
+                        }
+                    }
+                    
+                    throw new Error(`Server error (${razorpayResponse.status}): ${errorDetails}`);
+                } else {
+                    // Success response
+                    razorpayData = await razorpayResponse.json();
+                    console.log("Response data:", razorpayData);
+                }
+                
+                // Open Razorpay payment modal
+                const options = {
+                    key: razorpayData.razorpayKeyId,
+                    amount: razorpayData.amount, // This is already in the smallest currency unit (cents/paise)
+                    currency: razorpayData.currency,
+                    name: "Your Store Name",
+                    description: "Purchase Payment",
+                    order_id: razorpayData.razorpayOrderId,
+                    handler: async function(response) {
+                        // On successful payment, verify the payment
+                        try {
+                            console.log("Payment successful, verifying...", response);
+                            
+                            const verifyData = {
+                                orderId: razorpayData.orderId,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_signature: response.razorpay_signature
+                            };
+                            
+                            console.log("Sending verification data:", verifyData);
+                            
+                            const verifyResponse = await fetch('/verify-payment', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(verifyData)
+                            });
 
-        console.log("📥 Server response:", response);
+                            const result = await verifyResponse.json();
+                            
+                            if (verifyResponse.ok) {
+                                window.location.href = `/order/success/${result.orderId}`;
+                            } else {
+                                alert(`Payment verification failed: ${result.message}`);
+                            }
+                        } catch (error) {
+                            alert('Error verifying payment: ' + error.message);
+                        }
+                    },
+                    prefill: {
+                        name: document.querySelector(".current-address .name")?.textContent.trim() || "",
+                        contact: document.querySelector(".current-address .phone")?.textContent.replace(/[^\d]/g, '') || ""
+                    },
+                    theme: {
+                        color: "#3399cc"
+                    }
+                };
 
-        if (response.ok) {
-            const result = await response.json();
-            window.location.href = `/order/success/${result.orderId}`;
+                // For display purposes - convert from smallest currency unit to standard unit
+                const displayAmount = razorpayData.amount / 100;
+
+                // Log the amount details for debugging
+                console.log("Razorpay payment details:", {
+                    originalAmount: razorpayData.originalAmount,
+                    razorpayAmount: razorpayData.amount,
+                    displayAmount: displayAmount,
+                    currency: razorpayData.currency
+                });
+
+                // Format the amount for display based on currency
+                let formattedAmount;
+                if (razorpayData.currency === 'USD') {
+                    formattedAmount = `$${displayAmount.toFixed(2)}`;
+                } else {
+                    formattedAmount = `₹${displayAmount.toFixed(2)}`;
+                    
+                    // If we have the original USD amount, show that too
+                    if (razorpayData.originalAmount) {
+                        formattedAmount += ` ($${razorpayData.originalAmount.toFixed(2)})`;
+                    }
+                }
+
+                console.log("Opening Razorpay with formatted amount:", formattedAmount);
+
+                const razorpayInstance = new Razorpay(options);
+                razorpayInstance.open();
+                
+            } catch (error) {
+                console.error("Error creating Razorpay order:", error);
+                alert('Error placing order: ' + error.message);
+            }
         } else {
-            const errorData = await response.json();
-            alert(`Error placing order: ${errorData.message}`);
+            // Regular COD order
+            const response = await fetch('/order/place', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                window.location.href = `/order/success/${result.orderId}`;
+            } else {
+                alert(`Error placing order: ${result.message}`);
+            }
         }
     } catch (error) {
+        console.error("Order placement error:", error);
         alert('Error placing order: ' + error.message);
     }
 }

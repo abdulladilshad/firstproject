@@ -43,6 +43,16 @@
     margin: 20px 0;
 }
 
+.razorpay-payment-button::before {
+    content: "$" !important; /* Force $ instead of ₹ */
+}
+button.razorpay-payment-button::before {
+    content: "$" !important;
+    font-size: 16px !important;
+    color: black !important;
+}
+
+
 .address-card { 
     
 

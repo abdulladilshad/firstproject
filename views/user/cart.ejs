@@ -24,7 +24,7 @@
                                 <th>Price</th>
                                 <th>Quantity</th>
                                 <th>Stock</th>
-                                <th>Color</th> 
+                                <th>Color</th>
                                 <th>Total</th>
                                 <th>Action</th>
                             </tr>
@@ -80,26 +80,28 @@
                     <h2>Order Summary</h2>
                     <div class="summary-item">
                         <span>Subtotal</span>
-                        <span>$<%= cart.reduce((acc, item)=> acc + (item.price * item.quantity), 0).toFixed(2) %></span>
+                        <span id="subtotal">₹<%= cart.reduce((acc, item)=> acc + (item.price * item.quantity),
+                                0).toFixed(2) %></span>
                     </div>
                     <div class="summary-item">
                         <span>Tax (10%)</span>
-                        <span>$<%= (cart.reduce((acc, item)=> acc + (item.price * item.quantity), 0) * 0.1).toFixed(2)
-                                %></span>
+                        <span id="tax">₹<%= (cart.reduce((acc, item)=> acc + (item.price * item.quantity), 0) *
+                                0.1).toFixed(2) %></span>
                     </div>
                     <div class="summary-item">
                         <span>Shipping</span>
-                        <span>$00.00</span>
+                        <span>₹00.00</span>
                     </div>
                     <div class="summary-item summary-total">
                         <span>Total</span>
-                        <span>$<%= (cart.reduce((acc, item)=> acc + (item.price * item.quantity), 0) * 1.1 ).toFixed(2)
-                                %></span>
+                        <span id="total">₹<%= (cart.reduce((acc, item)=> acc + (item.price * item.quantity), 0) *
+                                1.1).toFixed(2) %></span>
                     </div>
                     <a href="/checkout" class="checkout-button">
                         <i class="fas fa-lock"></i> Proceed to Checkout
                     </a>
                 </div>
+
             </div>
             <% } else { %>
                 <div class="empty-cart">
@@ -129,15 +131,15 @@
                 if (response.ok) {
                     alert(result.message);
 
-                   
+
                     const element = document.getElementById(`cart-item-${itemId}`);
                     if (element) {
-                        element.classList.add('cart-item-remove'); 
+                        element.classList.add('cart-item-remove');
                         setTimeout(() => {
                             element.remove();
-                            updateCartTotals(); 
+                            updateCartTotals();
 
-                            
+
                             const remainingItems = document.querySelectorAll('tbody tr').length;
                             if (remainingItems === 0) {
                                 const cartContainer = document.querySelector('.cart-container');
@@ -151,7 +153,7 @@
                                     `;
                                 }
                             }
-                        }, 300); 
+                        }, 300);
                     }
                 } else {
                     throw new Error(result.message);
@@ -166,11 +168,14 @@
 
         async function updateQuantity(productId, change) {
             const quantitySpan = document.getElementById(`quantity-${productId}`);
-            console.log(quantitySpan);
-            
-    
+            if (!quantitySpan) {
+                console.error(`Quantity span not found for product ${productId}`);
+                return;
+            }
+
             let currentQuantity = parseInt(quantitySpan.innerText);
 
+            // Quantity should be between 1 and 5
             if ((change === -1 && currentQuantity === 1) || (change === 1 && currentQuantity >= 5)) {
                 alert("Quantity must be between 1 and 5");
                 return;
@@ -194,19 +199,31 @@
                 }
 
                 if (response.ok) {
-                    const newQuantity = result.newQuantity || currentQuantity + change;
+                    // ✅ Ensure we always have a valid quantity
+                    const newQuantity = result.newQuantity !== undefined ? result.newQuantity : currentQuantity + change;
                     quantitySpan.innerText = newQuantity;
 
                     const row = quantitySpan.closest('tr');
+                    if (!row) {
+                        console.error(`Row not found for product ${productId}`);
+                        return;
+                    }
+
                     const priceCell = row.querySelector('td:nth-child(2)');
                     const totalCell = row.querySelector('td:nth-child(6)');
-                    
+
                     if (priceCell && totalCell) {
-                        const price = parseFloat(priceCell.innerText.replace('₹', ''));
-                        const newTotal = price * newQuantity;
-                        totalCell.innerText = `₹${newTotal.toFixed(2)}`;
-                        totalCell.classList.add('price-update');
-                        setTimeout(() => totalCell.classList.remove('price-update'), 300);
+                        const priceText = priceCell.innerText.replace(/[^0-9.]/g, ''); // ✅ Extract only numbers
+                        const price = parseFloat(priceText);
+
+                        if (!isNaN(price)) {
+                            const newTotal = price * newQuantity;
+                            totalCell.innerText = `₹${newTotal.toFixed(2)}`;
+                            totalCell.classList.add('price-update');
+                            setTimeout(() => totalCell.classList.remove('price-update'), 300);
+                        } else {
+                            console.error(`Invalid price detected: ${priceText}`);
+                        }
                     }
 
                     updateCartTotals();
@@ -226,38 +243,25 @@
 
                 cartItems.forEach(item => {
                     const priceText = item.querySelector('td:nth-child(2)').innerText;
-                    const price = parseFloat(priceText.replace('₹', '').trim());
-                    const quantity = parseInt(item.querySelector(`[id^="quantity-"]`).innerText.trim());
-                    
+                    const price = parseFloat(priceText.replace(/[^0-9.]/g, '').trim());
+
+                    const quantityElement = item.querySelector(`[id^="quantity-"]`);
+                    if (!quantityElement) return; // Prevents errors if quantity is missing
+
+                    const quantity = parseInt(quantityElement.innerText.trim());
+
                     if (!isNaN(price) && !isNaN(quantity)) {
                         subtotal += price * quantity;
                     }
                 });
 
-                const tax = subtotal * 0.1;
+                const tax = subtotal * 0.1; // 10% tax
                 const total = subtotal + tax;
 
-                const summaryItems = document.querySelectorAll('.summary-item');
-                summaryItems.forEach(item => {
-                    const label = item.querySelector('span:first-child').innerText.toLowerCase();
-                    const valueSpan = item.querySelector('span:last-child');
-                    
-                    if (valueSpan) {
-                        let value = 0;
-                        if (label.includes('subtotal')) {
-                            value = subtotal;
-                        } else if (label.includes('tax')) {
-                            value = tax;
-                        } else if (label.includes('total') && item.classList.contains('summary-total')) {
-                            value = total;
-                        }
-
-                        valueSpan.classList.add('price-update');
-                        valueSpan.innerText = `₹${value.toFixed(2)}`;
-                        setTimeout(() => valueSpan.classList.remove('price-update'), 300);
-                    }
-                });
-
+                // ✅ Update Order Summary
+                document.getElementById('subtotal').innerText = `₹${subtotal.toFixed(2)}`;
+                document.getElementById('tax').innerText = `₹${tax.toFixed(2)}`;
+                document.getElementById('total').innerText = `₹${total.toFixed(2)}`;
             } catch (error) {
                 console.error('Error updating cart totals:', error);
             }

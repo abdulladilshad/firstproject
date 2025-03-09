@@ -4,7 +4,7 @@ const adminController = require('../controller/admin')
 const orderController = require('../controller/adminOrderController')
 const couponController = require('../controller/coupon')
 const adminauth = require('../middleware/admin')
-
+const salesController = require('../controller/sales')
 
 //LOGIN
 router.get('/login', adminauth.isLogin, adminController.Loadlogin); 
@@ -65,7 +65,7 @@ router.post('/coupons/add', couponController.addCoupon);
 router.get('/coupons/edit/:id', couponController.renderEditCoupon);
 router.post('/coupons/edit/:id', couponController.editCoupon);
 
-
+router.get('/sales',salesController.salesController);
 //LOGOUT
 router.post('/logout',adminauth.cheksession,adminController.logout)
 

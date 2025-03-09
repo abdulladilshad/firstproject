@@ -7,47 +7,50 @@ const adminOrders = async (req, res) => {
     try {
 
 
-         const orders = await OrderModel.find()
-            .populate("userId", "name email") 
-            .populate("products.productId")  
+        const orders = await OrderModel.find()
+            .populate("userId", "name email")
+            .populate("products.productId")
             .sort({ createdAt: -1 });
 
 
-        const individualOrders = [];
 
-        orders.forEach(order => {
-            order.products.forEach(product => {
-                individualOrders.push({
+        const individualOrders = orders.flatMap(order =>
+            order.products.map(product => {
+
+                return {
                     orderId: order._id,
-                    userId: order.userId,
-                    paymentMethod: order.paymentMethod,
-                    productId: product.productId._id,
-                    productName: product.productId.name,
-                    quantity: product.quantity,
-                    price: product.price,
-                    color: product.color,
-                    status: product.status,
+                    fullname: order.address.fullName,
+                    productId: product.productId?._id || "No ID",
+                    productName: product.productId?.productName || "No Name",
+                    productImage: product.productId?.imagePaths?.[0] || "/default.jpg",
+                    quantity: product.quantity || 0,
+                    price: product.price || 0,
+                    status: product.status || "Pending",
+                    color: product.color || "N/A",
                     createdAt: order.createdAt,
-                    IndividualOrderId: product._id,
-                });
-            });
-        });
+                    paymentMethod: order.paymentMethod,
+                    totalAmount: order.totalAmount,
+                    individualOrdersId: product._id,
+                };
+            })
+        );
 
-        
 
-        
-        res.render("admin/orderMangement", { orders: individualOrders ,individualOrders});
+
+
+
+        res.render("admin/orderMangement", { orders: individualOrders, individualOrders });
 
     } catch (error) {
         console.error("Error fetching admin orders:", error);
-        res.status(500).render("error", { message: "Error fetching orders" });
+        res.status(500).redirect("/admin/orderMangement", { message: "Error fetching orders" });
     }
 };
 
 
 const updateOrderStatus = async (req, res) => {
     try {
-        const { status , orderId, productId } = req.body        
+        const { status, orderId, productId } = req.body
 
 
         const updatedOrder = await OrderModel.findOneAndUpdate(
@@ -55,7 +58,7 @@ const updateOrderStatus = async (req, res) => {
             { $set: { "products.$.status": status } },
             { new: true }
         );
-        
+
         if (!updatedOrder) {
             return res.status(404).json({ success: false, message: "Order or product not found" });
         }
@@ -71,29 +74,34 @@ const updateOrderStatus = async (req, res) => {
 
 const orderView = async (req, res) => {
     try {
-        console.log("qqqqqqqqqqqqqq" ,req.query);
-        const {individualOrderId,orderId} = req.query
+        console.log("qqqqqqqqqqqqqq", req.query);
+        const { individualOrderId, orderId } = req.query
 
-        console.log('ssssssssssssssssssss',orderId);
-        
+        console.log('ssssssssssssssssssss', orderId);
 
 
-        const orders = await OrderModel.find({_id:orderId
+
+        const orders = await OrderModel.find({
+            _id: orderId
 
         })
             .sort({ createdAt: -1 })
             .populate('userId', 'name email');
 
-            console.log(orders, 'opopopopopopo');
-
-            const order = orders[0]; 
-            const product = order?.products.find(p => p._id.toString() === individualOrderId) || null;
             
-
-            const productSchema = await productModel.findOne({ _id: new mongoose.Types.ObjectId(product.productId) });
+            const order = orders[0];
+            console.log(order.products.map(e => e), 'opopopopopopo');
             
-         console.log("lllllllllllllllllllllll",product);
-         
+        const product = order && order.products 
+        ? order.products.find(p => p._id.toString() === individualOrderId.toString()) 
+        : null;
+    
+        console.log(product, 'kkkkkkkkkkk');
+        
+        const productSchema = await productModel.findOne({ _id: new mongoose.Types.ObjectId(product.productId) });
+
+        console.log("lllllllllllllllllllllll", product);
+
 
         res.render('admin/orderView', {
             orders,
@@ -102,9 +110,9 @@ const orderView = async (req, res) => {
             title: 'Order Management'
         });
     } catch (error) {
-        console.log("inside the catch ",error);
-        
-        res.redirect('/admin/dashboard');
+        console.log("inside the catch ", error);
+
+        res.redirect('/admin/orders');
     }
 }
 
@@ -119,13 +127,13 @@ const a = async (req, res) => {
             .populate('userId', 'name email phone') // Populate user details
             .populate('products.productId', 'productName imagePaths'); // Populate product details
 
-            console.log(order, 'from erreoe');
+        console.log(order, 'from erreoe');
         if (!order) {
 
             return res.status(404).json({ message: 'Order not found' });
         }
 
-        
+
         const individualOrder = order.products.find(
             (item) => item._id.toString() === individualOrderId
         );
@@ -135,7 +143,7 @@ const a = async (req, res) => {
         if (!individualOrder) {
             return res.status(404).json({ message: 'Individual order not found' });
         }
-        
+
 
         res.json(individualOrder);
     } catch (error) {
@@ -150,7 +158,7 @@ const b = async (req, res) => {
         console.log("Fetching order details for:", req.params.id);
 
         const orders = await OrderModel.findById(req.params.id)
-            .populate('user', 'name email phone') 
+            .populate('user', 'name email phone')
             .populate('items.product', 'name price image  ');
 
         if (!order) {
@@ -160,9 +168,9 @@ const b = async (req, res) => {
 
         console.log("Order Retrieved:", order); // Debugging
 
-        res.render('admin/order-details', { 
-           orders, 
-            title: `Order #${order._id} Details` 
+        res.render('admin/order-details', {
+            orders,
+            title: `Order #${order._id} Details`
         });
     } catch (error) {
         console.error("Error fetching order:", error);
