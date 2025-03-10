@@ -1,9 +1,21 @@
-
-
-
 .navbar {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
+    height: 80px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    margin-bottom: -20px;
+}
+
+.navbar-spacer {
+    height: 15px;
+    width: 100%;
+    clear: both;
+}
+
+.container-fluid {
+    padding-top: 15px;
 }
 
 .navbar-brand {

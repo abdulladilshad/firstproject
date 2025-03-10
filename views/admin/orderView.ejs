@@ -536,9 +536,18 @@
                             <div class="card-header section-header text-white">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <h5 class="mb-0">Order #<%= orders[0]._id %></h5>
-                                    <span class="status-badge <%= product.status === 'Delivered' ? 'bg-success' : (product.status == 'Processing' ? 'bg-warning' : 'bg-info') %>">
-                                        <%= product.status %>
-                                    </span>
+                                    <div class="d-flex align-items-center">
+                                        <span class="status-badge <%= product.status === 'Delivered' ? 'bg-success' : (product.status === 'Processing' ? 'bg-warning' : (product.status === 'Return' ? 'bg-danger' : 'bg-info')) %>">
+                                            <%= product.status %>
+                                        </span>
+                                        
+                                        <% if(product.status === 'Returned') { %>
+                                        <div class="ms-3">
+                                            <button onclick="confirmApprove('<%= orders[0]._id %>', '<%= product._id %>')" class="btn btn-success btn-sm">Approve</button>
+                                            <button onclick="confirmCancel('<%= orders[0]._id %>', '<%= product._id %>')" class="btn btn-danger btn-sm ms-2">Cancel</button>
+                                        </div>
+                                        <% } %>
+                                    </div>
                                 </div>
                             </div>
                             <div class="card-body">
@@ -645,6 +654,8 @@
     <!-- Add Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <!-- Add SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.getElementById('hamburger').addEventListener('click', function() {
             document.getElementById('sidebar').classList.add('active');
@@ -655,6 +666,38 @@
             document.getElementById('sidebar').classList.remove('active');
             document.getElementById('overlay').classList.remove('active');
         });
+        
+        function confirmApprove(orderId, productId) {
+            Swal.fire({
+                title: 'Approve Return?',
+                text: "Are you sure you want to approve this return request?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, approve it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `/admin/orders/approve-return/${orderId}/${productId}`;
+                }
+            });
+        }
+        
+        function confirmCancel(orderId, productId) {
+            Swal.fire({
+                title: 'Cancel Return?',
+                text: "Are you sure you want to cancel this return request?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, cancel it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `/admin/orders/cancel-return/${orderId}/${productId}`;
+                }
+            });
+        }
     </script>
 </body>
 

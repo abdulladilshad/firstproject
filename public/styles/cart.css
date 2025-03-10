@@ -114,6 +114,14 @@ button:hover {
     background-color: #2980b9;
 }
 
+.remove-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     body {

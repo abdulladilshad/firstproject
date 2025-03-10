@@ -96,6 +96,7 @@ router.delete('/wishlist/:itemId', wishlistController.removeFromWishlist);
 
 
 
+
 router.get('/profile', auth.isBan, auth.checkSession,profileController.getProfile);
 router.post('/profile/update', auth.isBan, auth.checkSession,uploadMiddleware, profileController.updateProfile);
 
@@ -106,6 +107,7 @@ router.post("/order/place", auth.isBan, auth.checkSession,orderController.placeO
 router.get('/order/success/:orderId',auth.isBan, auth.checkSession, orderController.orderSuccess);
 router.get("/orders",auth.isBan, auth.checkSession, orderController.orderHistory);
 router.post('/orders/cancel',auth.isBan, auth.checkSession,orderController.cancelOrder)
+router.post('/return/:orderId/:productId', orderController.returnOrder);
 
 
 
@@ -141,5 +143,5 @@ router.post('/verify-payment', orderController.verifyRazorpayPayment);
 router.get('/success/:orderId', orderController.orderSuccesss);
 
 
-
+router.post('/check-stock/:productId', cartController.checkStock);
 module.exports = router;

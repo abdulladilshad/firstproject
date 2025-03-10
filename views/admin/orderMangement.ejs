@@ -526,6 +526,8 @@
                                                 <td>
                                                     <% if (order.status === "Delivered") { %>
                                                         <span class="delivered-text">Delivered</span>
+                                                    <% } else if (order.status === "Returned"||order.status === "Return Approved"||order.status === "Return Canceled") { %>
+                                                        <span class="returned-text">Returned</span>
                                                     <% } else { %>
                                                         <select class="status-select"
                                                             data-order-id="<%= order.orderId %>"
@@ -536,7 +538,7 @@
                                                             <option value="Delivered" <%= order.status === "Delivered" ? "selected" : "" %>>Delivered</option>
                                                             <option value="Cancelled" <%= order.status === "Cancelled" ? "selected" : "" %>>Cancelled</option>
                                                         </select>
-                                                            <% } %>
+                                                    <% } %>
                                                 </td>
 
 

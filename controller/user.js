@@ -319,10 +319,19 @@ const Loadproductdeatails= async (req, res) => {
         if (!product) {
             return res.status(404).send('Product not found');
         }
-
-        const sameCategoryProducts = await productModel.find({ category: product.category._id, isDelete: false }).limit(4);
+        // Find the category offer
+        const categoryOffer = await categoryModel.findById(product.category._id, 'offer').lean();
         
-        res.render('user/productdeatails', { product, sameCategoryProducts }); 
+        // Find related products in the same category
+        const sameCategoryProducts = await productModel.find({ 
+            category: product.category._id, 
+            isDelete: false,
+            _id: { $ne: productId } // Exclude current product
+        }).limit(4).lean();
+        
+        // Add category offer to the product data for template rendering
+        const categoryOfferValue = categoryOffer?.offer || 0;
+        res.render('user/productdeatails', { product, sameCategoryProducts ,categoryOfferValue}); 
     } catch (error) {
         console.error('Error fetching product:', error);
         res.status(500).send('Internal Server Error');

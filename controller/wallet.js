@@ -3,20 +3,29 @@ const Wallet = require('../models/walletModel')
 const Transaction = require('../models/transactionsModel');
 
 const getWallet = async (req, res) => {
+    try {
+        const user = await User.findOne({email: req.session.user.email});
 
-    const user = await User.findOne({email:req.session.user.email });
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
 
-    if (!user) {
-        return res.status(404).send('User not found');
+        const wallet = await Wallet.findOne({user: user._id});
+        
+        if (!wallet) {
+            return res.status(404).send('Wallet not found');
+        }
+
+        // Find transactions for this user
+        const transactions = await Transaction.find({user: user._id})
+            .sort({createdAt: -1})
+            .lean();
+
+        res.render('user/wallet', { balance: wallet.balance, transactions: transactions });
+    } catch (error) {
+        console.error('Error fetching wallet:', error);
+        res.status(500).send('Internal server error');
     }
-
-
-    const wallet= await Wallet.findOne({user:user._id})
-
-
-    res.render('user/wallet', { balance: wallet.balance, transactions: user.transactions });
-    
-    
 };
 
 

@@ -26,6 +26,7 @@ const getWishlist = async (req, res) => {
 const addToWishlist = async (req, res) => {
     try {
         const { productId, color } = req.body;
+        const userId = req.session.user.id;
         
         if (!productId) {
             return res.status(400).json({ success: false, message: 'Product ID is required' });
@@ -36,15 +37,30 @@ const addToWishlist = async (req, res) => {
         if (!product) {
             return res.status(404).json({ success: false, message: 'Product not found' });
         }
-
-        console.log('jjmjmjmjmjmjmjmjmjmjmjmjm',req.session.user.id);
+        
+        // Check if the product is already in the user's cart
+        const Cart = require('../models/cartModel');
+        const cart = await Cart.findOne({ userId });
+        
+        if (cart) {
+            const inCart = cart.items.some(item => 
+                item.productId.toString() === productId && item.color === color
+            );
+            
+            if (inCart) {
+                return res.status(200).json({ 
+                    success: false, 
+                    message: 'Item is already in your cart' 
+                });
+            }
+        }
         
         // Find user's wishlist or create a new one
-        let wishlist = await Wishlist.findOne({ user: req.session.user.id });
+        let wishlist = await Wishlist.findOne({ user: userId });
         
         if (!wishlist) {
             wishlist = new Wishlist({
-                user: req.session.user.id,
+                user: userId,
                 items: []
             });
         }

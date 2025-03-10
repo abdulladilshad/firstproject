@@ -282,14 +282,53 @@
                         <h1 class="product-title">
                             <%= product.productName %>
                         </h1>
-                        <div class="price">
-                            <% if (product.offerPrice) { %>
-                                <span class="text-decoration-line-through text-muted">$<%= product.price.toFixed(2) %></span>
-                                <span class="text-danger ms-2">$<%= product.offerPrice.toFixed(2) %></span>
-                                <% const discountPercentage = Math.round((1 - product.offerPrice / product.price) * 100); %>
-                                <span class="badge bg-danger ms-2">-<%= discountPercentage %>%</span>
+                        <div class="price-container my-4 p-3 rounded shadow-sm text-center animate__animated animate__fadeIn">
+                            <% 
+                            let effectiveOffer = 0;
+                            
+                            // Check if category offer exists and is greater than product offer
+                            if (categoryOfferValue) {
+                                effectiveOffer = categoryOfferValue
+                            }
+                           
+                            // Check if product offer exists and is greater than current effective offer
+                            if (product.offer && product.offer > effectiveOffer) {
+                                effectiveOffer = product.offer;
+                            }
+                            
+                            // Calculate the discounted price if there's an offer
+                            const discountedPrice = effectiveOffer > 0 
+                                ? product.price - (product.price * (effectiveOffer / 100))
+                                : product.price;
+                            %>
+
+                       
+
+                            <% if (effectiveOffer > 0) { %>
+                                <div class="price-wrapper d-flex align-items-center justify-content-center">
+                                    <div class="pricing-info">
+                                        <span class="original-price text-decoration-line-through text-muted fs-5">$<%= product.price.toFixed(2) %></span>
+                                        <span class="sale-price fs-2 fw-bold ms-2 text-primary">$<%= discountedPrice.toFixed(2) %></span>
+                                    </div>
+                                    <div class="discount-badge ms-3">
+                                        <span class="badge bg-danger p-2 fs-6 rounded-pill animate__animated animate__pulse">-<%= effectiveOffer.toFixed(0) %>% OFF</span>
+                                    </div>
+                                </div>
                             <% } else { %>
-                                $<%= product.price.toFixed(2) %>
+                                <div class="price-wrapper d-flex justify-content-center">
+                                    <span class="regular-price fs-2 fw-bold text-dark">$<%= product.price.toFixed(2) %></span>
+                                </div>
+                            <% } %>
+                            <% if (product.stock <= 10 && product.stock > 0) { %>
+                                <div class="stock-warning mt-2 d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-exclamation-circle text-danger me-2"></i>
+                                    <span class="text-danger fw-medium animate__animated animate__flash">Only <%= product.stock %> left in stock - order soon!</span>
+                                </div>
+                            <% } else if (product.stock > 10) { %>
+                                <div class="stock-status mt-2 d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <span class="text-success fw-medium">In Stock</span>
+                                </div>
                             <% } %>
                         </div>
 
@@ -397,6 +436,9 @@
            
         </div>
     </section>
+ 
+        <!-- Add this line -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         const mainImage = document.querySelector('.main-image img');
         const magnifyingGlass = document.querySelector('.magnifying-glass');
@@ -451,32 +493,81 @@ async function addToCart(productId) {
     const selectedColor = document.querySelector('input[name="color"]:checked'); 
 
     if (!selectedColor) {
-        alert("Please select a color!");
+        Swal.fire({
+            title: 'Color Required',
+            text: 'Please select a color!',
+            icon: 'warning',
+            confirmButtonColor: '#3085d6'
+        });
         return;
     }
 
-    const colorValue = selectedColor.value; // Get the selected color
+    const colorValue = selectedColor.value;
 
     try {
+        // First, check current cart quantity and available stock
+        const stockCheckResponse = await fetch(`/check-stock/${productId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ color: colorValue })
+        });
+
+        const stockData = await stockCheckResponse.json();
+
+        if (!stockCheckResponse.ok) {
+            throw new Error(stockData.message || 'Error checking stock');
+        }
+
+        const { availableStock, currentCartQuantity } = stockData;
+        const remainingStock = availableStock - currentCartQuantity;
+
+        if (remainingStock <= 0) {
+            Swal.fire({
+                title: 'Out of Stock',
+                text: 'Sorry, this item is already at maximum quantity in your cart',
+                icon: 'error',
+                confirmButtonColor: '#3085d6'
+            });
+            return;
+        }
+
+        // Proceed with adding to cart
         const response = await fetch('/cart', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ productId, color: colorValue }) // Send selected color
+            body: JSON.stringify({ productId, color: colorValue })
         });
 
         const data = await response.json();
         
         if (data.success) {
-            alert('Item added to cart!');
+            // Show success message with remaining stock info
+            Swal.fire({
+                title: 'Added to Cart!',
+                text: remainingStock === 1 
+                    ? 'Last item in stock!' 
+                    : `${remainingStock - 1} items remaining in stock`,
+                icon: 'success',
+                confirmButtonColor: '#3085d6',
+                timer: 2000,
+                showConfirmButton: false
+            });
             updateCartUI(data.cart);
         } else {
-            alert(data.message);
+            throw new Error(data.message || 'Failed to add to cart');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Something went wrong!');
+        Swal.fire({
+            title: 'Error',
+            text: error.message || 'Something went wrong!',
+            icon: 'error',
+            confirmButtonColor: '#3085d6'
+        });
     }
 }
 

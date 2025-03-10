@@ -1,5 +1,6 @@
 const addressModel = require("../models/addressModel");
 const cartModel = require("../models/cartModel");
+const walletModel = require("../models/walletModel");
 const crypto = require('crypto');
 const OrderModel = require("../models/orderModel");
 const Product = require("../models/product");
@@ -12,34 +13,51 @@ const getCheckout = async (req, res) => {
         }
 
         const userId = req.session.user.id; 
-
-        
-        const cartData = await cartModel.findOne({ userId }).populate("items.productId", "productName price imagePaths");
-
+        const wallet = await walletModel.findOne({user:userId})
+        const cartData = await cartModel.findOne({ userId }).populate("items.productId", "productName price offer imagePaths");
         const addresses = await addressModel.find({ userId });
 
-        
         const cart = cartData
-            ? cartData.items.map(item => ({
-                cartId: item._id,
-                productName: item.productId.productName,
-                price: item.productId.price,
-                quantity: item.quantity,
-                color: item.color, 
-                image: item.productId.imagePaths?.[0] || ""
-            }))
+            ? cartData.items.map(item => {
+                const originalPrice = item.productId.price;
+                const discountedPrice = item.productId.offer 
+                    ? originalPrice - (originalPrice * item.productId.offer / 100)
+                    : originalPrice;
+
+                return {
+                    cartId: item._id,
+                    productName: item.productId.productName,
+                    price: originalPrice,
+                    discountedPrice: discountedPrice,
+                    offer: item.productId.offer || 0,
+                    quantity: item.quantity,
+                    color: item.color,
+                    image: item.productId.imagePaths?.[0] || ""
+                };
+            })
             : [];
 
-        
         const selectedAddress = addresses.find(addr => addr.isDefault) || addresses[0];
 
-
+        // Calculate totals with discounts
         const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-        const tax = subtotal * 0.1;
-        const total = subtotal + tax;
+        const totalDiscount = cart.reduce((acc, item) => 
+            acc + ((item.price - item.discountedPrice) * item.quantity), 0);
+        const discountedSubtotal = subtotal - totalDiscount;
+        const tax = discountedSubtotal * 0.1;
+        const total = discountedSubtotal + tax;
 
-        
-        res.render("user/checkout", { cart, addresses, subtotal, tax, total, selectedAddress });
+        res.render("user/checkout", { 
+            cart, 
+            addresses, 
+            subtotal, 
+            totalDiscount,
+            discountedSubtotal,
+            tax, 
+            total, 
+            selectedAddress, 
+            wallet
+        });
 
     } catch (error) {
         console.error("Error in getCheckout:", error);

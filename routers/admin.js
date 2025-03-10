@@ -70,8 +70,8 @@ router.get('/sales',salesController.salesController);
 router.post('/logout',adminauth.cheksession,adminController.logout)
 
 router.get('/orders-view', orderController.orderView)
-router.get('/orders-view', orderController.a)
-router.get('/orders-view/:id/edit', orderController.b )
 
+router.get("/orders/approve-return/:orderId/:productId",orderController.approveReturn);
+router.get("/orders/cancel-return/:orderId/:productId", orderController.cancelReturn);
 module.exports=router
 

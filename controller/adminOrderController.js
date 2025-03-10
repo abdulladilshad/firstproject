@@ -1,6 +1,9 @@
 const OrderModel = require("../models/orderModel");
 const productModel = require("../models/product")
+const UserModel = require('../models/usermodel')
 const mongoose = require('mongoose');
+const WalletModel = require('../models/walletModel')
+const TransactionModel = require("../models/transactionsModel");
 
 
 const adminOrders = async (req, res) => {
@@ -116,71 +119,148 @@ const orderView = async (req, res) => {
     }
 }
 
-const a = async (req, res) => {
-    console.log("wwwwwwwwwwwwww");
 
-    const { orderId, individualOrderId } = req.query;
 
+
+
+const approveReturn = async (req, res) => {
     try {
-        // Find the order using orderId
-        const order = await OrderModel.findById(orderId)
-            .populate('userId', 'name email phone') // Populate user details
-            .populate('products.productId', 'productName imagePaths'); // Populate product details
+        const { orderId, productId } = req.params;
 
-        console.log(order, 'from erreoe');
+        // Find the order
+        const order = await OrderModel.findById(orderId);
         if (!order) {
-
-            return res.status(404).json({ message: 'Order not found' });
+            return res.status(404).json({ message: "Order not found" });
         }
 
+        console.log("Order Found:", order);
 
-        const individualOrder = order.products.find(
-            (item) => item._id.toString() === individualOrderId
-        );
-        console.log(individualOrder, 'from erreoe');
-
-
-        if (!individualOrder) {
-            return res.status(404).json({ message: 'Individual order not found' });
+        // Find the product inside the order
+        const product = order.products.find(p => p._id.toString() === productId);
+        if (!product) {
+            return res.status(404).json({ message: "Product not found in order" });
         }
 
+        console.log("Product Found in Order:", product);
 
-        res.json(individualOrder);
+        // Check if the product is eligible for return approval
+        if (product.status !== "Returned") {
+            return res.status(400).json({ message: "Return request not found or already processed" });
+        }
+
+        // Ensure order.userId is correctly formatted
+        if (!mongoose.Types.ObjectId.isValid(order.userId)) {
+            return res.status(400).json({ message: "Invalid User ID" });
+        }
+
+        console.log("User ID:", order.userId);
+
+        // Find or create the user's wallet
+        let wallet = await WalletModel.findOne({ user: order.userId });
+        if (!wallet) {
+            wallet = new WalletModel({
+                user: order.userId,
+                balance: 0,
+            });
+        }
+
+        console.log("Wallet Found:", wallet);
+
+        // Calculate refund amount
+        const refundAmount = product.price * product.quantity;
+
+        // Update wallet balance
+        wallet.balance += refundAmount;
+
+        console.log("Updated Wallet Balance:", wallet.balance);
+
+        // Save the updated wallet balance
+        await wallet.save();
+
+        // Create a new transaction for the refund
+        const transaction = new TransactionModel({
+            user: order.userId,
+            wallet: wallet._id,
+            type: "returnedFund",
+            amount: refundAmount,
+            status: "completed",
+        });
+
+        await transaction.save();
+
+        console.log("Transaction Created:", transaction);
+
+        // Find the original product in ProductModel and increase the correct variant's stock
+        const productInDB = await productModel.findById(product.productId);
+        if (productInDB) {
+            // Find the correct variant by color
+            const variantIndex = productInDB.variants.findIndex(
+                (variant) => variant.color === product.color
+            );
+
+            if (variantIndex !== -1) {
+                // Increase the stock for the returned variant
+                productInDB.variants[variantIndex].quantity += product.quantity;
+                await productInDB.save();
+                console.log(`Stock updated: ${productInDB.variants[variantIndex].quantity} units available for color ${product.color}.`);
+            } else {
+                console.log("Variant not found in database.");
+            }
+        } else {
+            console.log("Product not found in database.");
+        }
+
+        // Update product status to "Return Approved"
+        product.status = "Return Approved";
+        await order.save();
+
+        console.log("Return Approved Successfully");
+
+        res.redirect("/admin/orders"); // Redirect to admin orders page
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        console.error("Error processing return approval:", error);
+        res.status(500).json({ message: "Error processing return approval" });
     }
-
 };
 
-const b = async (req, res) => {
+
+
+
+const cancelReturn = async (req, res) => {
     try {
-        console.log("Fetching order details for:", req.params.id);
+        const { orderId, productId } = req.params;
 
-        const orders = await OrderModel.findById(req.params.id)
-            .populate('user', 'name email phone')
-            .populate('items.product', 'name price image  ');
-
+        // Find the order
+        const order = await OrderModel.findById(orderId);
         if (!order) {
-            req.flash('error', 'Order not found');
-            return res.redirect('/admin/orders');
+            return res.status(404).json({ message: "Order not found" });
         }
 
-        console.log("Order Retrieved:", order); // Debugging
+        // Find the product inside the order
+        const product = order.products.find(p => p._id.toString() === productId);
+        if (!product) {
+            return res.status(404).json({ message: "Product not found in order" });
+        }
 
-        res.render('admin/order-details', {
-            orders,
-            title: `Order #${order._id} Details`
-        });
+        // Check if the product is eligible for return cancellation
+        if (product.status !== "Returned") {
+            return res.status(400).json({ message: "Return request not found or already processed" });
+        }
+
+        // Update product status to "Return Canceled"
+        product.status = "Return Canceled";
+        await order.save();
+
+        res.redirect("/admin/orders"); // Redirect to admin orders page
     } catch (error) {
-        console.error("Error fetching order:", error);
-        req.flash('error', 'Error fetching order: ' + error.message);
-        res.redirect('/admin/orders');
+        console.error(error);
+        res.status(500).json({ message: "Error processing return cancellation" });
     }
-}
+};
 
 module.exports = {
     adminOrders,
     updateOrderStatus, orderView,
-    a, b
+    approveReturn,
+    cancelReturn
 };

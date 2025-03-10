@@ -8,9 +8,354 @@
     <!-- Add Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/styles/cart.css">
+    <!-- Add Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 80px; /* Add padding for fixed navbar */
+        }
+        
+        /* Navbar Styles */
+        .navbar {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            height: 80px;
+        }
+
+        .navbar-brand {
+            font-family: 'Marcellus', serif;
+            font-size: 1.8rem;
+            color: #1a1a1a;
+            position: relative;
+        }
+
+        .brand-dot {
+            position: absolute;
+            right: -12px;
+            bottom: 8px;
+            width: 8px;
+            height: 8px;
+            background: #1a1a1a;
+            border-radius: 50%;
+        }
+
+        .navbar-nav .nav-link {
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 0.5rem 1.2rem !important;
+            position: relative;
+        }
+
+        .navbar-nav .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: #1a1a1a;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .navbar-nav .nav-link:hover::after,
+        .navbar-nav .nav-link.active::after {
+            width: 80%;
+        }
+
+        .nav-icons {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-icon {
+            color: #1a1a1a;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-icon:hover {
+            color: #666;
+            transform: translateY(-2px);
+        }
+
+        .icon-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #1a1a1a;
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 50%;
+            min-width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Custom Toggler */
+        .navbar-toggler {
+            border: none;
+            padding: 0;
+            width: 30px;
+            height: 20px;
+            position: relative;
+        }
+
+        .toggler-icon {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: #1a1a1a;
+            transition: all 0.3s ease;
+        }
+
+        .toggler-icon::before,
+        .toggler-icon::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: #1a1a1a;
+            transition: all 0.3s ease;
+        }
+
+        .toggler-icon::before {
+            top: -6px;
+        }
+
+        .toggler-icon::after {
+            bottom: -6px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 991px) {
+            .navbar-collapse {
+                padding: 1rem;
+                margin-top: 0.5rem;
+            }
+
+            .nav-icons {
+                margin-top: 1rem;
+                justify-content: center;
+            }
+
+            .navbar-nav {
+                text-align: center;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -1000px 0;
+            }
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        /* Wishlist Styles */
+        .wishlist-container {
+            padding: 30px 0;
+        }
+        .wishlist-header {
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+        .wishlist-item {
+            display: flex;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .wishlist-item-image {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            margin-right: 20px;
+        }
+        .wishlist-item-details {
+            flex-grow: 1;
+        }
+        .wishlist-item-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .empty-wishlist {
+            text-align: center;
+            padding: 50px 0;
+        }
+        .empty-wishlist i {
+            font-size: 50px;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+        .color-circle {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        /* Improved Quantity Button Styles */
+        .q-b-t {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .quantity-btn {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 50%;
+            color: #1a1a1a;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .quantity-btn:hover {
+            background-color: #1a1a1a;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .quantity-btn:active {
+            transform: translateY(0);
+        }
+        
+        .q-b-t span {
+            min-width: 30px;
+            text-align: center;
+            font-weight: 500;
+            font-size: 16px;
+        }
+        
+        /* Animation for quantity changes */
+        @keyframes quantityPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .quantity-changed {
+            animation: quantityPulse 0.3s ease;
+            color: #1a1a1a;
+        }
+
+        /* New CSS for smooth animations */
+        .value-updated {
+            background-color: rgba(255, 255, 0, 0.2);
+            transition: background-color 0.3s ease;
+        }
+
+        @keyframes numberTransition {
+            from { opacity: 0.5; }
+            to { opacity: 1; }
+        }
+
+        .summary-item span:last-child {
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .summary-item.highlight {
+            background-color: rgba(52, 152, 219, 0.1);
+            transition: background-color 0.3s ease;
+        }
+    </style>
 </head>
 
 <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top bg-white">
+        <div class="container">
+            <!-- Brand on the left -->
+            <a class="navbar-brand" href="/">
+                LUXE TIME 
+                <span class="brand-dot"></span>
+            </a>
+
+            <!-- Toggler for mobile -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="toggler-icon"></span>
+            </button>
+
+            <!-- Main menu in the middle -->
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav mx-auto text-uppercase">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/shop">Shop</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/men">Men</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/women">Women</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/limited-edition">Limited Edition</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Icons on the right -->
+            <div class="nav-icons">
+                <a href="/search" class="nav-icon" title="Search">
+                    <i class="fas fa-search"></i>
+                </a>
+                <a href="/wishlist" class="nav-icon" title="Wishlist">
+                    <i class="fas fa-heart"></i>
+                </a>
+                <a href="/cart" class="nav-icon" title="Cart">
+                    <i class="fas fa-shopping-cart"></i>
+                </a>
+                <a href="/account" class="nav-icon" title="Account">
+                    <i class="fas fa-user"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
     <h1>Your Shopping Cart</h1>
 
     <div id="cart-container">
@@ -66,7 +411,7 @@
                                     <td>$<%= (item.price * item.quantity).toFixed(2) %>
                                     </td>
                                     <td>
-                                        <button onclick="removeFromCart('<%= item.productId %>')">
+                                        <button onclick="removeFromCart('<%= item.productId %>')" class="remove-btn">
                                             <i class="fas fa-trash"></i> Remove
                                         </button>
                                     </td>
@@ -78,29 +423,45 @@
 
                 <div class="order-summary">
                     <h2>Order Summary</h2>
+                
                     <div class="summary-item">
                         <span>Subtotal</span>
-                        <span id="subtotal">₹<%= cart.reduce((acc, item)=> acc + (item.price * item.quantity),
-                                0).toFixed(2) %></span>
+                        <span id="subtotal">₹
+                            <%= cart.reduce((acc, item) => acc + (item.discountedPrice * item.quantity), 0).toFixed(2) %>
+                        </span>
                     </div>
+                
                     <div class="summary-item">
                         <span>Tax (10%)</span>
-                        <span id="tax">₹<%= (cart.reduce((acc, item)=> acc + (item.price * item.quantity), 0) *
-                                0.1).toFixed(2) %></span>
+                        <span id="tax">₹
+                            <%= (cart.reduce((acc, item) => acc + (item.discountedPrice * item.quantity), 0) * 0.1).toFixed(2) %>
+                        </span>
                     </div>
+                
                     <div class="summary-item">
                         <span>Shipping</span>
                         <span>₹00.00</span>
                     </div>
+                
+                    <div class="summary-item">
+                        <span style="color: green;">Total Offer Discount</span>
+                        <span id="totalOfferDiscount" style="color: green;">-₹
+                            <%= totalOfferDiscount.toFixed(2) %>
+                        </span>
+                    </div>
+                
                     <div class="summary-item summary-total">
                         <span>Total</span>
-                        <span id="total">₹<%= (cart.reduce((acc, item)=> acc + (item.price * item.quantity), 0) *
-                                1.1).toFixed(2) %></span>
+                        <span id="total">₹
+                            <%= (cart.reduce((acc, item) => acc + (item.discountedPrice * item.quantity), 0) * 1.1).toFixed(2) %>
+                        </span>
                     </div>
+                
                     <a href="/checkout" class="checkout-button">
                         <i class="fas fa-lock"></i> Proceed to Checkout
                     </a>
                 </div>
+
 
             </div>
             <% } else { %>
@@ -227,6 +588,7 @@
                     }
 
                     updateCartTotals();
+                    
                 } else {
                     throw new Error(result.message || 'Failed to update quantity');
                 }
@@ -239,32 +601,95 @@
         function updateCartTotals() {
             try {
                 const cartItems = document.querySelectorAll('tbody tr');
-                let subtotal = 0;
+                let originalSubtotal = 0;
+                let discountedSubtotal = 0;
+                let totalDiscount = 0;
 
                 cartItems.forEach(item => {
-                    const priceText = item.querySelector('td:nth-child(2)').innerText;
-                    const price = parseFloat(priceText.replace(/[^0-9.]/g, '').trim());
-
+                    // Get price elements
+                    const priceCell = item.querySelector('td:nth-child(2)');
+                    const originalPriceElement = priceCell.querySelector('.text-decoration-line-through');
+                    const discountedPriceElement = priceCell.querySelector('.text-danger');
                     const quantityElement = item.querySelector(`[id^="quantity-"]`);
-                    if (!quantityElement) return; // Prevents errors if quantity is missing
-
+                    
+                    if (!quantityElement) return;
+                    
                     const quantity = parseInt(quantityElement.innerText.trim());
+                    
+                    let originalPrice, discountedPrice;
+                    
+                    if (originalPriceElement && discountedPriceElement) {
+                        // Has discount
+                        originalPrice = parseFloat(originalPriceElement.innerText.replace(/[^0-9.]/g, ''));
+                        discountedPrice = parseFloat(discountedPriceElement.innerText.replace(/[^0-9.]/g, ''));
+                    } else {
+                        // No discount
+                        originalPrice = parseFloat(priceCell.innerText.replace(/[^0-9.]/g, ''));
+                        discountedPrice = originalPrice;
+                    }
 
-                    if (!isNaN(price) && !isNaN(quantity)) {
-                        subtotal += price * quantity;
+                    if (!isNaN(originalPrice) && !isNaN(quantity)) {
+                        originalSubtotal += originalPrice * quantity;
+                        discountedSubtotal += discountedPrice * quantity;
+                        
+                        // Calculate item discount
+                        const itemDiscount = (originalPrice - discountedPrice) * quantity;
+                        totalDiscount += itemDiscount;
+
+                        // Update row total
+                        const totalCell = item.querySelector('td:nth-child(6)');
+                        if (totalCell) {
+                            totalCell.innerText = `₹${(discountedPrice * quantity).toFixed(2)}`;
+                        }
                     }
                 });
 
-                const tax = subtotal * 0.1; // 10% tax
-                const total = subtotal + tax;
+                const tax = discountedSubtotal * 0.1; // 10% tax on discounted amount
+                const finalTotal = discountedSubtotal + tax;
 
-                // ✅ Update Order Summary
-                document.getElementById('subtotal').innerText = `₹${subtotal.toFixed(2)}`;
-                document.getElementById('tax').innerText = `₹${tax.toFixed(2)}`;
-                document.getElementById('total').innerText = `₹${total.toFixed(2)}`;
+                // Update all summary values with animation
+                animateValue('subtotal', originalSubtotal);
+                animateValue('totalOfferDiscount', totalDiscount, true);
+                animateValue('tax', tax);
+                animateValue('total', finalTotal);
+
+                // Reload page after animations complete
+              
+                    window.location.reload();
+              // Wait for animations to finish
+
             } catch (error) {
                 console.error('Error updating cart totals:', error);
             }
+        }
+
+        // Function to animate value changes
+        function animateValue(elementId, newValue, isDiscount = false) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+
+            const currentValue = parseFloat(element.innerText.replace(/[^0-9.-]/g, ''));
+            const prefix = isDiscount ? '-₹' : '₹';
+
+            // Animate the change
+            const steps = 10; // Reduced steps for quicker animation
+            const stepValue = (newValue - currentValue) / steps;
+            let currentStep = 0;
+
+            const animation = setInterval(() => {
+                currentStep++;
+                const intermediateValue = currentValue + (stepValue * currentStep);
+                element.innerText = `${prefix}${intermediateValue.toFixed(2)}`;
+                
+                if (currentStep >= steps) {
+                    clearInterval(animation);
+                    element.innerText = `${prefix}${newValue.toFixed(2)}`;
+                }
+            }, 20);
+
+            // Add highlight animation
+            element.classList.add('value-updated');
+            setTimeout(() => element.classList.remove('value-updated'), 300);
         }
 
         function formatCurrency(amount) {

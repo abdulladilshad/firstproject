@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/styles/checkout.css">
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <style></style>
 </head>
 
 <body>
@@ -214,13 +213,21 @@
                                         </div>
                                         <div class="item-info">
                                             <h4><%= item.productName %></h4>
-                                            <p class="item-price">$<%= item.price %></p>
+                                            <% if (item.offer > 0) { %>
+                                                <p class="item-price">
+                                                    <span class="original-price text-decoration-line-through text-muted">₹<%= item.price.toFixed(2) %></span>
+                                                    <span class="discounted-price text-danger">₹<%= item.discountedPrice.toFixed(2) %></span>
+                                                    <span class="offer-badge">-<%= item.offer %>% OFF</span>
+                                                </p>
+                                            <% } else { %>
+                                                <p class="item-price">₹<%= item.price.toFixed(2) %></p>
+                                            <% } %>
                                             <p class="item-quantity">Quantity: <%= item.quantity %></p>
-                                            <p class="item-color">Color: <%= item.color %></p> <!-- ✅ Added color here -->
+                                            <p class="item-color">Color: <%= item.color %></p>
                                         </div>
                                     </div>
                                     <div class="item-total">
-                                        $<%= (item.price * item.quantity).toFixed(2) %>
+                                        ₹<%= (item.discountedPrice * item.quantity).toFixed(2) %>
                                     </div>
                                 </div>
                             <% }) %>
@@ -238,35 +245,52 @@
             <div class="checkout-right">
                 <section class="payment-section">
                     <h2>Payment Method</h2>
-                    <div class="payment-option">
-                        <input type="radio" name="payment" value="cod" id="cod" checked>
-                        <label for="cod">Cash on Delivery</label>
-                    </div>
-                    <div class="payment-option">
-                        <input type="radio" name="payment" value="razorpay" id="razorpay">
-                        <label for="razorpay">Pay Online (Razorpay)</label>
+                    <div class="payment-options">
+                        <div class="payment-option">
+                            <input type="radio" name="payment" value="wallet" id="wallet">
+                            <label for="wallet">Wallet (Balance: $<span id="walletBalance"><%= wallet.balance %></span>)</label>
+                            <div id="walletInfo" class="payment-details" style="display: none;">
+                                <div class="wallet-status" id="walletStatus"></div>
+                            </div>
+                        </div>
+                        <div class="payment-option">
+                            <input type="radio" name="payment" value="cod" id="cod" checked>
+                            <label for="cod">Cash on Delivery</label>
+                        </div>
+                        <div class="payment-option">
+                            <input type="radio" name="payment" value="razorpay" id="razorpay">
+                            <label for="razorpay">Pay Online (Razorpay)</label>
+                        </div>
                     </div>
                 </section>
                 <div class="order-summary">
                     <h2>Order Summary</h2>
-
-                    
                     <div class="price-details">
                         <div class="price-row">
                             <span>Subtotal</span>
-                            <span>$<%= subtotal.toFixed(2) %></span>
+                            <span>₹<%= subtotal.toFixed(2) %></span>
                         </div>
+                        
+                        <% if (totalDiscount > 0) { %>
+                        <div class="price-row discount">
+                            <span>Discount</span>
+                            <span class="text-success">-₹<%= totalDiscount.toFixed(2) %></span>
+                        </div>
+                        <% } %>
+
                         <div class="price-row">
                             <span>Tax (10%)</span>
-                            <span>$<%= tax.toFixed(2) %></span>
+                            <span>₹<%= tax.toFixed(2) %></span>
                         </div>
+
                         <div class="price-row">
                             <span>Shipping</span>
-                            <span>$0.00</span>
+                            <span>₹0.00</span>
                         </div>
+
                         <div class="price-row total">
                             <span>Total</span>
-                            <span>$<%= total.toFixed(2) %></span>
+                            <span>₹<%= total.toFixed(2) %></span>
                         </div>
                     </div>
 
@@ -398,6 +422,17 @@ async function placeOrder() {
     const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
     console.log("Selected payment method:", paymentMethod);
     
+    // Check wallet balance if wallet payment is selected
+    if (paymentMethod === 'wallet') {
+        const walletBalance = parseFloat(document.getElementById('walletBalance').textContent);
+        const orderTotal = <%= total %>;
+        
+        if (walletBalance < orderTotal) {
+            alert("Insufficient wallet balance. Please choose another payment method.");
+            return;
+        }
+    }
+    
     let orderData = {
         paymentMethod: paymentMethod
     };
@@ -406,18 +441,6 @@ async function placeOrder() {
     if (selectedAddressId) {
         console.log("Using selected address ID:", selectedAddressId);
         orderData.addressId = selectedAddressId;
-
-        console.log("No selected address ID, extracting from UI");
-        const newAddress = {
-            fullName: document.querySelector(".current-address .name")?.textContent.trim(),
-            phone: document.querySelector(".current-address .phone")?.textContent.replace(/[^\d]/g, '').trim(),
-            street: document.querySelector(".current-address .street")?.textContent.trim(),
-            city: document.querySelector(".current-address .location")?.textContent.split(',')[0].trim(),
-            state: document.querySelector(".current-address .location")?.textContent.split(',')[1]?.trim().split(' ')[0],
-            zipCode: document.querySelector(".current-address .location")?.textContent.split(',')[1]?.trim().split(' ')[1]
-        };
-        orderData.newAddress = newAddress;
-        console.log("Extracted address:", newAddress);
     } else {
         // Get address from the UI
         console.log("No selected address ID, extracting from UI");
@@ -484,29 +507,23 @@ async function placeOrder() {
                 // Open Razorpay payment modal
                 const options = {
                     key: razorpayData.razorpayKeyId,
-                    amount: razorpayData.amount, // This is already in the smallest currency unit (cents/paise)
-                    currency: razorpayData.currency,
+                    amount: razorpayData.amount, // This is in cents (USD)
+                    currency: razorpayData.currency, // This should be 'USD'
                     name: "Your Store Name",
                     description: "Purchase Payment",
                     order_id: razorpayData.razorpayOrderId,
                     handler: async function(response) {
                         // On successful payment, verify the payment
                         try {
-                            console.log("Payment successful, verifying...", response);
-                            
-                            const verifyData = {
-                                orderId: razorpayData.orderId,
-                                razorpay_payment_id: response.razorpay_payment_id,
-                                razorpay_order_id: response.razorpay_order_id,
-                                razorpay_signature: response.razorpay_signature
-                            };
-                            
-                            console.log("Sending verification data:", verifyData);
-                            
                             const verifyResponse = await fetch('/verify-payment', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(verifyData)
+                                body: JSON.stringify({
+                                    orderId: razorpayData.orderId,
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_signature: response.razorpay_signature
+                                })
                             });
 
                             const result = await verifyResponse.json();
@@ -529,31 +546,11 @@ async function placeOrder() {
                     }
                 };
 
-                // For display purposes - convert from smallest currency unit to standard unit
-                const displayAmount = razorpayData.amount / 100;
+                // For display purposes
+                const usdAmount = razorpayData.amount / 100; // Convert from cents to dollars
 
-                // Log the amount details for debugging
-                console.log("Razorpay payment details:", {
-                    originalAmount: razorpayData.originalAmount,
-                    razorpayAmount: razorpayData.amount,
-                    displayAmount: displayAmount,
-                    currency: razorpayData.currency
-                });
-
-                // Format the amount for display based on currency
-                let formattedAmount;
-                if (razorpayData.currency === 'USD') {
-                    formattedAmount = `$${displayAmount.toFixed(2)}`;
-                } else {
-                    formattedAmount = `₹${displayAmount.toFixed(2)}`;
-                    
-                    // If we have the original USD amount, show that too
-                    if (razorpayData.originalAmount) {
-                        formattedAmount += ` ($${razorpayData.originalAmount.toFixed(2)})`;
-                    }
-                }
-
-                console.log("Opening Razorpay with formatted amount:", formattedAmount);
+                console.log("Opening Razorpay with options:", options);
+                console.log("Amount in USD:", usdAmount.toFixed(2));
 
                 const razorpayInstance = new Razorpay(options);
                 razorpayInstance.open();
@@ -563,7 +560,7 @@ async function placeOrder() {
                 alert('Error placing order: ' + error.message);
             }
         } else {
-            // Regular COD order
+            // Regular COD or wallet order
             const response = await fetch('/order/place', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -584,6 +581,62 @@ async function placeOrder() {
     }
 }
 
+// Add this function to fetch wallet balance
+async function fetchWalletBalance() {
+    try {
+        const response = await fetch('/api/wallet/balance');
+        const data = await response.json();
+        
+        if (response.ok) {
+            document.getElementById('walletBalance').textContent = data.balance.toFixed(2);
+            
+            // Check if wallet payment is selected and update status
+            if (document.getElementById('wallet').checked) {
+                checkWalletBalance();
+            }
+        } else {
+            console.error('Error fetching wallet balance:', data.message);
+        }
+    } catch (error) {
+        console.error('Error fetching wallet balance:', error);
+    }
+}
+
+// Add this function to check wallet balance against order total
+function checkWalletBalance() {
+    const walletBalance = parseFloat(document.getElementById('walletBalance').textContent);
+    const orderTotal = <%= total %>;
+    const walletStatus = document.getElementById('walletStatus');
+    
+    if (walletBalance >= orderTotal) {
+        walletStatus.textContent = 'You have sufficient balance to complete this purchase.';
+        walletStatus.className = 'wallet-status success';
+    } else {
+        walletStatus.textContent = `Insufficient balance. You need $${(orderTotal - walletBalance).toFixed(2)} more.`;
+        walletStatus.className = 'wallet-status error';
+    }
+}
+
+// Add event listeners for payment method selection
+document.addEventListener('DOMContentLoaded', function() {
+    // Fetch wallet balance when page loads
+    fetchWalletBalance();
+    
+    // Show/hide wallet info when payment method changes
+    const paymentMethods = document.querySelectorAll('input[name="payment"]');
+    paymentMethods.forEach(method => {
+        method.addEventListener('change', function() {
+            const walletInfo = document.getElementById('walletInfo');
+            
+            if (this.value === 'wallet') {
+                walletInfo.style.display = 'block';
+                checkWalletBalance();
+            } else {
+                walletInfo.style.display = 'none';
+            }
+        });
+    });
+});
 
     </script>
 </body>

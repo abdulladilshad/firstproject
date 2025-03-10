@@ -8,29 +8,315 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/styles/ordersHistory.css">
+    <style>
+        
+        body {
+            padding-top: 80px; /* Add padding for fixed navbar */
+        }
+        
+        /* Navbar Styles */
+        .navbar {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            height: 80px;
+        }
+
+        .navbar-brand {
+            font-family: 'Marcellus', serif;
+            font-size: 1.8rem;
+            color: #1a1a1a;
+            position: relative;
+        }
+
+        .brand-dot {
+            position: absolute;
+            right: -12px;
+            bottom: 8px;
+            width: 8px;
+            height: 8px;
+            background: #1a1a1a;
+            border-radius: 50%;
+        }
+
+        .navbar-nav .nav-link {
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 0.5rem 1.2rem !important;
+            position: relative;
+        }
+
+        .navbar-nav .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: #1a1a1a;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .navbar-nav .nav-link:hover::after,
+        .navbar-nav .nav-link.active::after {
+            width: 80%;
+        }
+
+        .nav-icons {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-icon {
+            color: #1a1a1a;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-icon:hover {
+            color: #666;
+            transform: translateY(-2px);
+        }
+
+        .icon-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #1a1a1a;
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 50%;
+            min-width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Custom Toggler */
+        .navbar-toggler {
+            border: none;
+            padding: 0;
+            width: 30px;
+            height: 20px;
+            position: relative;
+        }
+
+        .toggler-icon {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: #1a1a1a;
+            transition: all 0.3s ease;
+        }
+
+        .toggler-icon::before,
+        .toggler-icon::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: #1a1a1a;
+            transition: all 0.3s ease;
+        }
+
+        .toggler-icon::before {
+            top: -6px;
+        }
+
+        .toggler-icon::after {
+            bottom: -6px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 991px) {
+            .navbar-collapse {
+                padding: 1rem;
+                margin-top: 0.5rem;
+            }
+
+            .nav-icons {
+                margin-top: 1rem;
+                justify-content: center;
+            }
+
+            .navbar-nav {
+                text-align: center;
+            }
+        }
+
+        /* Sidebar Styles */
+        .container {
+            display: flex;
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            flex: 0 0 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .sidebar-btn {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #333;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-btn:hover {
+            background: #f0f0f0;
+            transform: translateX(5px);
+        }
+
+        .sidebar-btn.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .sidebar-btn i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            flex: 1;
+        }
+
+        /* Updated Header Styles */
+        .content-header {
+            margin-bottom: 2rem;
+        }
+
+        .content-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .content-header p {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin: 0;
+        }
+
+        /* Remove old header styles */
+        .dashboard-header {
+            display: none;
+        }
+
+        /* Adjust existing styles */
+        .main-container {
+            padding: 0;
+        }
+    </style>
 </head>
 
 <body>
-    <div class="dashboard-header">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
         <div class="container">
-            <h1 class="dashboard-title">My Orders</h1>
-            <p class="subtitle">View and manage your order history</p>
-        </div>
-    </div>
+            <a class="navbar-brand" href="/">
+                LUXE TIME
+                <span class="brand-dot"></span>
+            </a>
 
-    <div class="container main-container">
-        <% if (!orders || orders.length===0) { %>
-            <div class="empty-state">
-                <div class="empty-state-icon">
-                    <i class="fas fa-shopping-bag"></i>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/shop">Shop</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/men">Men</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/women">Women</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/limited-edition">Limited Edition</a>
+                    </li>
+                </ul>
+
+                <div class="nav-icons">
+                    <a href="/search" class="nav-icon">
+                        <i class="fas fa-search"></i>
+                    </a>
+                    <a href="/wishlist" class="nav-icon">
+                        <i class="fas fa-heart"></i>
+                    </a>
+                    <a href="/cart" class="nav-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </a>
+                    <a href="/profile" class="nav-icon">
+                        <i class="fas fa-user"></i>
+                    </a>
                 </div>
-                <h3>No Orders Yet</h3>
-                <p>Looks like you haven't made any orders yet</p>
-                <a href="/products" class="btn btn-primary">
-                    Start Shopping <i class="fas fa-arrow-right ms-2"></i>
-                </a>
             </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <a href="/profile" class="sidebar-btn">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+            <a href="/address" class="sidebar-btn">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>Addresses</span>
+            </a>
+            <a href="/orders" class="sidebar-btn active">
+                <i class="fas fa-shopping-bag"></i>
+                <span>Orders</span>
+            </a>
+            <a href="/wallet" class="sidebar-btn">
+                <i class="fas fa-wallet"></i>
+                <span>Wallet</span>
+            </a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="content-header">
+                <h1>My Orders</h1>
+                <p class="text-muted">View and manage your order history</p>
+            </div>
+
+            <% if (!orders || orders.length===0) { %>
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-shopping-bag"></i>
+                    </div>
+                    <h3>No Orders Yet</h3>
+                    <p>Looks like you haven't made any orders yet</p>
+                    <a href="/products" class="btn btn-primary">
+                        Start Shopping <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
             <% } else { %>
                 <div class="orders-grid">
                     <% orders.forEach(order=> { %>
@@ -69,18 +355,14 @@
                             </div>
 
                             <div class="order-card-footer">
-
-
                                 <div class="action-buttons d-flex align-items-center gap-2">
                                     <button class="btn btn-outline-primary" onclick="showTrackingModal('<%= order.individualOrdersId %>')">
                                         <i class="fas fa-truck"></i> Track
                                     </button>
-                                
                                     <button class="btn btn-outline-secondary">
                                         <i class="fas fa-download"></i> Invoice
                                     </button>
-                                
-                                    <% if (order.status !== 'Delivered' && order.status !== 'Cancelled') { %>
+                                    <% if (order.status !== 'Delivered' && order.status !== 'Cancelled' && order.status !== 'Returned' && order.status !== 'Return Approved' && order.status !== 'Return Canceled') { %>
                                         <form action="/orders/cancel?individualOrdersId=<%= order.individualOrdersId %>&orderId=<%= order.orderId %>"
                                             method="POST" class="d-inline">
                                             <button type="submit" class="btn btn-outline-danger"
@@ -89,13 +371,18 @@
                                             </button>
                                         </form>
                                     <% } %>
+                                    <% if (order.status === 'Delivered') { %>
+                                        <button class="btn btn-outline-warning" onclick="returnOrder('<%= order.orderId %>', '<%= order.productId %>')">
+                                            <i class="fas fa-undo"></i> Return
+                                        </button>
+                                    <% } %>
                                 </div>
-                                
                             </div>
                         </div>
                         <% }); %>
                 </div>
                 <% } %>
+        </div>
     </div>
 
 
@@ -195,6 +482,31 @@
             if (stepIndex > currentIndex) return '';
             
             return null;
+        }
+
+        // Return order function
+        function returnOrder(orderId, productId) {
+            if (confirm('Are you sure you want to return this product?')) {
+                fetch(`/return/${orderId}/${productId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Return request submitted successfully');
+                        location.reload();
+                    } else {
+                        alert(data.message || 'Error processing return request');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while processing your request');
+                });
+            }
         }
     </script>
 </body>
