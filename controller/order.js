@@ -309,7 +309,9 @@ const createRazorpayOrder = async (req, res) => {
         const userId = req.session.user.id;
         console.log("Creating order for user:", userId);
 
-        const { paymentMethod, addressId, newAddress } = req.body;
+        const { paymentMethod, addressId, newAddress, cartTotal } = req.body;
+        console.log(req.body , 'oheofuiouehf');
+        
 
         // Get user's cart
         const cart = await cartModel.findOne({ userId }).populate('items.productId');
@@ -317,13 +319,8 @@ const createRazorpayOrder = async (req, res) => {
             return res.status(400).json({ message: 'Your cart is empty' });
         }
 
-        // Calculate order totals
-        const subtotal = cart.items.reduce((total, item) => {
-            return total + (item.productId.price * item.quantity);
-        }, 0);
+     
 
-        const tax = subtotal * 0.10; // 10% tax
-        const total = subtotal + tax;
 
         // Handle address
         let selectedAddress;
@@ -362,7 +359,7 @@ const createRazorpayOrder = async (req, res) => {
             userId: userId, // Make sure userId is explicitly set
             address: selectedAddress,
             paymentMethod,
-            totalAmount: total,
+            totalAmount: cartTotal,
             products
         });
 
@@ -370,7 +367,7 @@ const createRazorpayOrder = async (req, res) => {
 
         // Create Razorpay order
         const razorpayOrder = await razorpay.orders.create({
-            amount: Math.round(total * 100), // Razorpay expects amount in smallest currency unit (paise)
+            amount: Math.round(cartTotal * 100), // Razorpay expects amount in smallest currency unit (paise)
             currency: 'INR', // Change as needed
             receipt: order._id.toString(),
             payment_capture: 1

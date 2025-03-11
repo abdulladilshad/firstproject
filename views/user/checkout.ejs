@@ -712,7 +712,9 @@ async function placeOrder() {
 
     const currentAddressElement = document.querySelector(".current-address .address-card");
     const cartTotalElement = document.getElementById('cart-total');
-    const cartTotalUSD = parseFloat(cartTotalElement.textContent.replace(/[^\d.]/g, ''));
+    const cartTotal = parseFloat(cartTotalElement.textContent.trim().replace('₹', '').replace(',', ''));
+
+console.log(cartTotal, "cartTotal");
 
     if (!currentAddressElement) {
         alert("Please select or add a delivery address before placing the order.");
@@ -724,7 +726,7 @@ async function placeOrder() {
 
     let orderData = {
         paymentMethod: paymentMethod,
-        cartTotal: cartTotalUSD // Default in USD for non-Razorpay payments
+        cartTotal: cartTotal // Default in USD for non-Razorpay payments
     };
 
     if (selectedAddressId) {
@@ -760,8 +762,7 @@ async function placeOrder() {
     try {
         if (paymentMethod === 'razorpay') {
             // Convert USD to INR for Razorpay
-            const cartTotalINR = cartTotalUSD * 85;
-            orderData.cartTotal = cartTotalINR; // Razorpay requires INR
+            orderData.cartTotal = cartTotal; // Razorpay requires INR
 
             const razorpayResponse = await fetch('/create', {
                 method: 'POST',
@@ -773,7 +774,7 @@ async function placeOrder() {
 
             const options = {
                 key: razorpayData.razorpayKeyId,
-                amount: Math.round(cartTotalINR * 100), // Razorpay requires amount in **paise**
+                amount: Math.round(cartTotal * 100),
                 currency: 'INR',
                 name: "Your Store Name",
                 description: "Purchase Payment",
