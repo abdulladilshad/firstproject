@@ -8,20 +8,29 @@ const orderSchema = new mongoose.Schema({
         city: String,
         state: String,
         zipCode: String
-    },        userId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-            required: true
-        },
+    },
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    couponCode: {
+        type: String,
+        default:"0"
+    },
     paymentMethod: String,
     totalAmount: Number,
+    offer: {
+        type: Number,
+        default: 0
+    },
     products: [
         {
             productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
             quantity: Number,
             price: Number,
             status: { type: String, default: "Pending" },
-            color: { type: String },
+            color: { type: String }
         }
     ]
 }, { timestamps: true });

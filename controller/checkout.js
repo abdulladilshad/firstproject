@@ -4,6 +4,10 @@ const walletModel = require("../models/walletModel");
 const crypto = require('crypto');
 const OrderModel = require("../models/orderModel");
 const Product = require("../models/product");
+const categoryModel = require('../models/categories');
+const couponModel =require("../models/couponModel")
+const Coupon = require("../models/couponModel");
+const mongoose = require('mongoose');
 
 const getCheckout = async (req, res) => {
     try {
@@ -14,31 +18,38 @@ const getCheckout = async (req, res) => {
 
         const userId = req.session.user.id; 
         const wallet = await walletModel.findOne({user:userId})
-        const cartData = await cartModel.findOne({ userId }).populate("items.productId", "productName price offer imagePaths");
+        const cartData = await cartModel.findOne({ userId }).populate("items.productId", "productName price offer imagePaths category");
         const addresses = await addressModel.find({ userId });
 
-        const cart = cartData
-            ? cartData.items.map(item => {
+        const cart = [];
+        if (cartData) {
+            for (const item of cartData.items) {
                 const originalPrice = item.productId.price;
-                const discountedPrice = item.productId.offer 
-                    ? originalPrice - (originalPrice * item.productId.offer / 100)
-                    : originalPrice;
+                
+                // Get category offer
+                const category = await categoryModel.findById(item.productId.category);
+                const categoryOffer = category ? category.offer || 0 : 0;
+                const productOffer = item.productId.offer || 0;
 
-                return {
+                // Use the greater of category or product offer
+                const applicableOffer = Math.max(categoryOffer, productOffer);
+                const discountedPrice = originalPrice - (originalPrice * applicableOffer / 100);
+
+                cart.push({
                     cartId: item._id,
                     productName: item.productId.productName,
                     price: originalPrice,
                     discountedPrice: discountedPrice,
-                    offer: item.productId.offer || 0,
+                    offer: applicableOffer,
                     quantity: item.quantity,
                     color: item.color,
                     image: item.productId.imagePaths?.[0] || ""
-                };
-            })
-            : [];
+                });
+            }
+        }
 
         const selectedAddress = addresses.find(addr => addr.isDefault) || addresses[0];
-
+        const coupons = await couponModel.find({})
         // Calculate totals with discounts
         const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
         const totalDiscount = cart.reduce((acc, item) => 
@@ -56,7 +67,8 @@ const getCheckout = async (req, res) => {
             tax, 
             total, 
             selectedAddress, 
-            wallet
+            wallet,
+            coupons
         });
 
     } catch (error) {
@@ -120,7 +132,60 @@ const verifyRazorpayPayment = async (req, res) => {
     }
 };
 
+const applyCoupon = async (req, res) => {
+    try {
+        const { couponCode, subtotal } = req.body;
+        const userId = req.session.user.id;
+
+        const coupon = await Coupon.findOne({ 
+            code: couponCode.toUpperCase(),
+            isActive: true,
+            expirationDate: { $gt: new Date() }
+        });
+
+        if (!coupon) {
+            return res.status(400).json({ message: 'Invalid or expired coupon code' });
+        }
+
+        if (subtotal < coupon.minPurchase) {
+            return res.status(400).json({ 
+                message: `Minimum purchase amount of ₹${coupon.minPurchase} required`
+            });
+        }
+
+        // Calculate discount
+        let discountAmount = (subtotal * coupon.discount) / 100;
+        if (coupon.maxDiscount) {
+            discountAmount = Math.min(discountAmount, coupon.maxDiscount);
+        }
+
+        // Calculate new total
+        const newSubtotal = subtotal - discountAmount;
+        const newTax = newSubtotal * 0.1;
+        const newTotal = newSubtotal + newTax;
+
+        // Store coupon info in session for order placement
+        req.session.appliedCoupon = {
+            code: coupon.code,
+            discountAmount: discountAmount
+        };
+
+        res.json({
+            success: true,
+            discountAmount,
+            totalDiscount: discountAmount,
+            newTotal,
+            message: 'Coupon applied successfully'
+        });
+
+    } catch (error) {
+        console.error('Error applying coupon:', error);
+        res.status(500).json({ message: 'Error applying coupon' });
+    }
+};
+
 module.exports = {
     getCheckout,
-    verifyRazorpayPayment
+    verifyRazorpayPayment,
+    applyCoupon
 };

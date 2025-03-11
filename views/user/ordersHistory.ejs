@@ -341,15 +341,14 @@
                                 <div class="product-card">
                                     <img src="<%= order.productImage %>" alt="<%= order.productName %>">
                                     <div class="product-details">
-                                        <h4>
-                                            <%= order.productName %>
-                                        </h4>
-                                        <p class="color">Color: <%= order.color %>
-                                        </p>
-                                        <p class="quantity">Qty: <%= order.quantity %>
-                                        </p>
-                                        <p class="price">$<%= (order.quantity * order.price).toFixed(2) %>
-                                        </p>
+                                        <h4><%= order.productName %></h4>
+                                        <p class="color">Color: <%= order.color %></p>
+                                        <p class="quantity">Qty: <%= order.quantity %></p>
+                                        
+                                 
+                                        
+                                        <p class="price">$<%= order.totalAmount?.toFixed(2) %></p>
+
                                     </div>
                                 </div>
                             </div>

@@ -96,7 +96,7 @@ const salesController = async (req, res) => {
             date: order.createdAt.toISOString().split('T')[0], 
             customerName: order.address?.fullName || 'Guest',
             productCount: order.products?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0,
-            totalAmount: order.products?.reduce((sum, item) => sum + ((item.price * item.quantity) || 0), 0) || 0,
+            totalAmount: order.totalAmount,
             status: order.products?.map(product => product.status).join(', ') || 'Pending'
         }));
 

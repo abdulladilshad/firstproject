@@ -101,6 +101,7 @@ router.get('/profile', auth.isBan, auth.checkSession,profileController.getProfil
 router.post('/profile/update', auth.isBan, auth.checkSession,uploadMiddleware, profileController.updateProfile);
 
 router.get("/checkout",auth.isBan, auth.checkSession, checkoutController.getCheckout);
+router.post("/apply-coupon", auth.isBan, auth.checkSession, checkoutController.applyCoupon);
 
 
 router.post("/order/place", auth.isBan, auth.checkSession,orderController.placeOrder);

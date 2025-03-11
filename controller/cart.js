@@ -1,6 +1,7 @@
 const productModel = require('../models/product')
 const cartModel = require('../models/cartModel')
 const Wishlist = require('../models/wishlistModel');
+const categoryModel = require('../models/categories');
 
 const LoadCart = async (req, res) => {
     try {
@@ -13,26 +14,36 @@ const LoadCart = async (req, res) => {
             return res.render('user/cart', { cart: [], totalOfferDiscount: 0 });
         }
 
-        let totalOfferDiscount = 0; // Initialize total discount amount
+        let totalOfferDiscount = 0;
 
-        const cartItems = cart.items.map(item => {
+        const cartItems = await Promise.all(cart.items.map(async item => {
             const product = item.productId;
             if (!product) return null;
 
-            const discountedPrice = product.price - (product.price * product.offer) / 100;
+            // Get category offer
+            const category = await categoryModel.findById(product.category);
+            const categoryOffer = category ? category.offer || 0 : 0;
+            const productOffer = product.offer || 0;
+
+            // Use the greater of category or product offer
+            const applicableOffer = Math.max(categoryOffer, productOffer);
+
+            const discountedPrice = product.price - (product.price * applicableOffer) / 100;
             const itemDiscount = (product.price - discountedPrice) * item.quantity;
-            totalOfferDiscount += itemDiscount; // Add discount per item to total
+            totalOfferDiscount += itemDiscount;
 
             return {
                 productId: product._id,
                 name: product.productName,
-                price: product.price,  // Original price
-                discountedPrice: discountedPrice,  // Offer price
+                price: product.price,
+                discountedPrice: discountedPrice,
                 color: item.color,
                 stock: product.variants?.length > 0 ? product.variants[0].quantity : 0,
                 quantity: item.quantity,
+                appliedOffer: applicableOffer,
+                offerType: applicableOffer === categoryOffer ? 'Category Offer' : 'Product Offer'
             };
-        }).filter(item => item !== null);
+        })).then(items => items.filter(item => item !== null));
 
         res.render('user/cart', { cart: cartItems, totalOfferDiscount });
 

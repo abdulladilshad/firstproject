@@ -4,8 +4,11 @@ const mongoose = require("mongoose");
 const addressModel = require('../models/addressModel')
 const User = require('../models/usermodel');
 const Product = require('../models/product');
+const Coupon = require('../models/couponModel');
+const categoryModel = require('../models/categories');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
+
 
 
 
@@ -39,7 +42,8 @@ const orderHistory = async (req, res) => {
                     paymentMethod: order.paymentMethod,
                     totalAmount: order.totalAmount,
                     individualOrdersId: product._id,
-                    canReturn: product.status === "Delivered" ? true : false
+                    canReturn: product.status === "Delivered" ? true : false,
+                    offer: order.offer
                 };
             })
         );
@@ -90,21 +94,28 @@ const returnOrder = async (req, res) => {
 
 
 
+
 const placeOrder = async (req, res) => {
     try {
         const userId = req.session.user.id;
-        const { addressId, paymentMethod, total, newAddress } = req.body;
+        const { addressId, paymentMethod, newAddress, couponCode, cartTotal } = req.body;
+        
+        
+        console.log(cartTotal, "cartttttaaf");
+        console.log(couponCode, "couponCode");
+        console.log(req.body, "body");
+        
+        
 
         const cartData = await cartModel.findOne({ userId }).populate("items.productId");
 
         if (!cartData || cartData.items.length === 0) {
             return res.status(400).json({ message: "Cart is empty" });
         }
-
+        
 
         let selectedAddress;
         if (addressId) {
-
             const address = await addressModel.findById(addressId);
             if (!address) {
                 return res.status(400).json({ message: "Invalid address" });
@@ -118,40 +129,54 @@ const placeOrder = async (req, res) => {
                 zipCode: address.zipCode
             };
         } else if (newAddress) {
-
-            console.log("Saving new address hhhhhhhhhhhhhhhhhhhhhhhhhhh:", newAddress);
-
-            try {
-                const savedAddress = new addressModel({ userId, ...newAddress });
-                await savedAddress.save();
-            } catch (error) {
-                console.error("Address Save Error:", error);
-                return res.status(500).json({ message: "Failed to save address", error });
-            }
+            const savedAddress = new addressModel({ userId, ...newAddress });
+            await savedAddress.save();
         } else {
             return res.status(400).json({ message: "Address is required" });
         }
 
         const products = [];
+        let totalAmount = 0;
+        let totalDiscount = 0;
 
         for (let item of cartData.items) {
-            const product = item.productId;
+            const product = await Product.findById(item.productId);
+
+            if (!product) {
+                return res.status(400).json({ message: `Product not found` });
+            }
+
             const orderedColor = item.color;
-
-
             const variantIndex = product.variants.findIndex(v => v.color === orderedColor);
 
             if (variantIndex !== -1) {
                 if (product.variants[variantIndex].quantity < item.quantity) {
-                    return res.status(400).json({ message: `Not enough stock for ${product.productName} in ${orderedColor}` });
+                    return res.status(400).json({
+                        message: `Not enough stock for ${product.productName} in ${orderedColor}`
+                    });
                 }
                 product.variants[variantIndex].quantity -= item.quantity;
             } else {
-                return res.status(400).json({ message: `Color ${orderedColor} not found for ${product.productName}` });
+                return res.status(400).json({
+                    message: `Color ${orderedColor} not found for ${product.productName}`
+                });
             }
-            console.log(selectedAddress, 'selectedAddressselectedAddress');
 
             await product.save();
+
+            // Get category offer
+            const category = await categoryModel.findById(product.category);
+            const categoryOffer = category ? category.offer || 0 : 0;
+            const productOffer = product.offer || 0;
+
+            // Use the greater of category or product offer
+            const applicableOffer = Math.max(categoryOffer, productOffer);
+            
+            const productTotal = product.price * item.quantity;
+            const discountAmount = (productTotal * applicableOffer) / 100;
+
+            totalAmount += productTotal;        // Calculate total before discount
+            totalDiscount += discountAmount;    // Accumulate total discount
 
             products.push({
                 productId: product._id,
@@ -161,16 +186,36 @@ const placeOrder = async (req, res) => {
             });
         }
 
+        // Calculate tax (10%)
+        const tax = totalAmount * 0.10;
+
+        // Check for coupon discount
+        let couponDiscount = 0;
+        if (couponCode) {
+            const coupon = await Coupon.findOne({ code: couponCode });
+            if (coupon) {
+                couponDiscount = (totalAmount * coupon.discount) / 100;
+                if (couponDiscount > coupon.maxDiscount) {
+                    couponDiscount = coupon.maxDiscount;
+                }
+            }
+        }
+
+        // Calculate final total with tax and all discounts
+        const finalTotal = totalAmount + tax - totalDiscount - couponDiscount;
+
         const newOrder = new OrderModel({
             userId,
             address: selectedAddress || newAddress,
             paymentMethod,
-            totalAmount: total,
+            totalAmount: cartTotal,
+            tax,
+            offer: totalDiscount,
+            couponDiscount,
             products,
-            status: "Pending"
+            status: "Pending",
+            couponCode
         });
-
-        console.log(newOrder, 'newwwwwwwwwwwwwww ');
 
         await newOrder.save();
         await cartModel.deleteOne({ userId });
@@ -181,6 +226,8 @@ const placeOrder = async (req, res) => {
         res.status(500).json({ message: "Error placing order" });
     }
 };
+
+
 
 const orderSuccess = async (req, res) => {
     try {
@@ -409,21 +456,35 @@ const verifyRazorpayPayment = async (req, res) => {
 const placeOrders = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { paymentMethod, addressId, newAddress } = req.body;
+        const { paymentMethod, addressId, newAddress, couponCode } = req.body;
 
         // Get user's cart
         const cart = await cartModel.findOne({ user: userId }).populate('items.product');
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({ message: 'Your cart is empty' });
         }
-
+        console.log(couponCode, 'couponCode');
         // Calculate order totals
         const subtotal = cart.items.reduce((total, item) => {
             return total + (item.product.price * item.quantity);
         }, 0);
 
+        let discountAmount = 0;
+        // Check if coupon is applied
+        if (couponCode) {
+            const coupon = await Coupon.findOne({ code: couponCode });
+            if (coupon) {
+                // Calculate discount amount
+                discountAmount = (subtotal * coupon.discount) / 100;
+                // Apply maximum discount limit
+                if (discountAmount > coupon.maxDiscount) {
+                    discountAmount = coupon.maxDiscount;
+                }
+            }
+        }
+
         const tax = subtotal * 0.10; // 10% tax
-        const total = subtotal + tax;
+        const total = subtotal + tax - discountAmount;
 
         // Handle address
         let shippingAddress;
@@ -463,7 +524,9 @@ const placeOrders = async (req, res) => {
             shippingAddress: shippingAddress._id,
             subtotal,
             tax,
+            discountAmount,
             total,
+            couponCode,
             paymentMethod,
             status: paymentMethod === 'cod' ? 'processing' : 'pending',
             paymentStatus: paymentMethod === 'cod' ? 'pending' : 'pending'

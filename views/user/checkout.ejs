@@ -8,6 +8,274 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/styles/checkout.css">
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        .available-coupons-section {
+            margin-top: 20px;
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            background: #fff;
+        }
+
+        .available-coupons-section h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #2c2c2c;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .available-coupons-section h3:after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: #1976d2;
+            border-radius: 2px;
+        }
+
+        .coupon-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .coupon-item {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .coupon-item:hover {
+            border-color: #1976d2;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .coupon-item::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 50%;
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 50%;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .coupon-item::after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: 50%;
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 50%;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .coupon-radio {
+            display: flex;
+            align-items: center;
+            padding: 16px 25px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            position: relative;
+            background: linear-gradient(to right, #ffffff, #f8f9fa);
+        }
+
+        .coupon-radio:hover {
+            background: linear-gradient(to right, #f8f9fa, #f1f3f4);
+        }
+
+        .coupon-radio input[type="radio"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border: 2px solid #e0e0e0;
+            border-radius: 50%;
+            margin-right: 20px;
+            position: relative;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .coupon-radio input[type="radio"]:before {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #1976d2;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 0.2s ease;
+        }
+
+        .coupon-radio input[type="radio"]:checked {
+            border-color: #1976d2;
+        }
+
+        .coupon-radio input[type="radio"]:checked:before {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .coupon-radio input[type="radio"]:hover {
+            border-color: #1976d2;
+        }
+
+        .coupon-radio input[type="radio"]:focus {
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2);
+        }
+
+        .coupon-radio input[type="radio"]:active {
+            transform: scale(0.9);
+        }
+
+        .coupon-details {
+            flex: 1;
+            position: relative;
+        }
+
+        .coupon-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #e0e0e0;
+        }
+
+        .coupon-discount {
+            font-weight: 700;
+            color: #d32f2f;
+            font-size: 18px;
+            background: #fff0f0;
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .coupon-code {
+            color: #1976d2;
+            font-weight: 600;
+            font-size: 16px;
+            padding: 4px 12px;
+            background: #e3f2fd;
+            border-radius: 4px;
+            letter-spacing: 1px;
+        }
+
+        .coupon-terms {
+            font-size: 14px;
+            color: #555;
+            display: grid;
+            gap: 6px;
+        }
+
+        .coupon-terms p {
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .coupon-terms p:before {
+            content: '•';
+            margin-right: 8px;
+            color: #1976d2;
+        }
+
+        .expiry {
+            color: #666;
+            font-size: 13px;
+            font-style: italic;
+            margin-top: 8px !important;
+            padding-top: 8px;
+            border-top: 1px dashed #e0e0e0;
+        }
+
+        .expiry:before {
+            content: '⏰' !important;
+            margin-right: 8px;
+        }
+
+        .coupon-message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .coupon-message.success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .coupon-message.error {
+            background-color: #ffebee;
+            color: #c62828;
+            border-left: 4px solid #c62828;
+        }
+
+        /* Animation for when coupon is selected */
+        .coupon-radio input[type="radio"]:checked + .coupon-details {
+            animation: pulse 0.3s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .coupon-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .coupon-radio {
+                padding: 12px 15px;
+            }
+            
+            .coupon-discount {
+                font-size: 16px;
+            }
+            
+            .coupon-code {
+                font-size: 14px;
+            }
+        }
+
+        .price-row.coupon-discount {
+            color: #1976d2;
+            font-weight: 500;
+        }
+
+        .applied-coupon-code {
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
 </head>
 
 <body>
@@ -232,6 +500,36 @@
                                 </div>
                             <% }) %>
                         </div>
+
+                        <!-- Add this new coupon section right after order items -->
+                        <div class="available-coupons-section">
+                            <h3>Available Coupons</h3>
+                            <div class="coupon-list">
+                                <% coupons.forEach(coupon => { %>
+                                    <div class="coupon-item">
+                                        <label class="coupon-radio">
+                                            <input type="radio" name="coupon" value="<%= coupon.code %>">
+                                            <div class="coupon-details">
+                                                <div class="coupon-header">
+                                                    <span class="coupon-discount"><%= coupon.discount %>% OFF</span>
+                                                    <span class="coupon-code"><%= coupon.code %></span>
+                                                </div>
+                                                <div class="coupon-terms">
+                                                    <% if (coupon.minPurchase) { %>
+                                                        <p>Min. Purchase: ₹<%= coupon.minPurchase %></p>
+                                                    <% } %>
+                                                    <% if (coupon.maxDiscount) { %>
+                                                        <p>Max Discount: ₹<%= coupon.maxDiscount %></p>
+                                                    <% } %>
+                                                    <p class="expiry">Expires: <%= new Date(coupon.expirationDate).toLocaleDateString() %></p>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                <% }); %>
+                            </div>
+                            <div id="couponMessage" class="coupon-message"></div>
+                        </div>
                     </section>
                 <% } else { %>
                     <p>No items in the cart.</p>
@@ -245,6 +543,8 @@
             <div class="checkout-right">
                 <section class="payment-section">
                     <h2>Payment Method</h2>
+
+
                     <div class="payment-options">
                         <div class="payment-option">
                             <input type="radio" name="payment" value="wallet" id="wallet">
@@ -266,31 +566,29 @@
                 <div class="order-summary">
                     <h2>Order Summary</h2>
                     <div class="price-details">
-                        <div class="price-row">
+                        <div class="price-row subtotal">
                             <span>Subtotal</span>
                             <span>₹<%= subtotal.toFixed(2) %></span>
                         </div>
-                        
-                        <% if (totalDiscount > 0) { %>
                         <div class="price-row discount">
-                            <span>Discount</span>
-                            <span class="text-success">-₹<%= totalDiscount.toFixed(2) %></span>
+                            <span>Product Discount</span>
+                            <span>-₹<%= totalDiscount.toFixed(2) %></span>
                         </div>
-                        <% } %>
-
-                        <div class="price-row">
+                        <div class="price-row coupon-discount" style="display: none;">
+                            <span>Coupon Discount (<span class="applied-coupon-code"></span>)</span>
+                            <span>-₹0.00</span>
+                        </div>
+                        <div class="price-row tax">
                             <span>Tax (10%)</span>
                             <span>₹<%= tax.toFixed(2) %></span>
                         </div>
-
-                        <div class="price-row">
+                        <div class="price-row shipping">
                             <span>Shipping</span>
                             <span>₹0.00</span>
                         </div>
-
                         <div class="price-row total">
                             <span>Total</span>
-                            <span>₹<%= total.toFixed(2) %></span>
+                            <span id="cart-total">₹<%= total.toFixed(2) %></span>
                         </div>
                     </div>
 
@@ -407,43 +705,32 @@ function updateSelectedAddressUI(address) {
 
  
 
+
+
 async function placeOrder() {
     console.log("🚀 placeOrder() function called!");
-    
-    // Check if address is selected
+
     const currentAddressElement = document.querySelector(".current-address .address-card");
-    
+    const cartTotalElement = document.getElementById('cart-total');
+    const cartTotalUSD = parseFloat(cartTotalElement.textContent.replace(/[^\d.]/g, ''));
+
     if (!currentAddressElement) {
         alert("Please select or add a delivery address before placing the order.");
         return;
     }
 
-    // Get selected payment method
     const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
     console.log("Selected payment method:", paymentMethod);
-    
-    // Check wallet balance if wallet payment is selected
-    if (paymentMethod === 'wallet') {
-        const walletBalance = parseFloat(document.getElementById('walletBalance').textContent);
-        const orderTotal = <%= total %>;
-        
-        if (walletBalance < orderTotal) {
-            alert("Insufficient wallet balance. Please choose another payment method.");
-            return;
-        }
-    }
-    
+
     let orderData = {
-        paymentMethod: paymentMethod
+        paymentMethod: paymentMethod,
+        cartTotal: cartTotalUSD // Default in USD for non-Razorpay payments
     };
 
-    // Handle address
     if (selectedAddressId) {
         console.log("Using selected address ID:", selectedAddressId);
         orderData.addressId = selectedAddressId;
     } else {
-        // Get address from the UI
-        console.log("No selected address ID, extracting from UI");
         const newAddress = {
             fullName: document.querySelector(".current-address .name")?.textContent.trim(),
             phone: document.querySelector(".current-address .phone")?.textContent.replace(/[^\d]/g, '').trim(),
@@ -452,9 +739,9 @@ async function placeOrder() {
             state: document.querySelector(".current-address .location")?.textContent.split(',')[1]?.trim().split(' ')[0],
             zipCode: document.querySelector(".current-address .location")?.textContent.split(',')[1]?.trim().split(' ')[1]
         };
-        
+
         console.log("Extracted address:", newAddress);
-        
+
         if (!Object.values(newAddress).every(value => value)) {
             alert("Please select a valid delivery address.");
             return;
@@ -463,104 +750,67 @@ async function placeOrder() {
         orderData.newAddress = newAddress;
     }
 
+    const selectedCoupon = document.querySelector('input[name="coupon"]:checked');
+    if (selectedCoupon) {
+        orderData.couponCode = selectedCoupon.value;
+    }
+
     console.log("📤 Sending order data:", orderData);
 
     try {
         if (paymentMethod === 'razorpay') {
-            console.log("Attempting to create Razorpay order...");
-            
-            try {
-                const razorpayResponse = await fetch('/create', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(orderData)
-                });
-                
-                console.log("Razorpay response status:", razorpayResponse.status);
-                
-                // Parse the response data
-                let razorpayData;
-                
-                if (!razorpayResponse.ok) {
-                    // Try to get the error details from the response
-                    let errorDetails = '';
-                    try {
-                        razorpayData = await razorpayResponse.json();
-                        console.log("Response data:", razorpayData);
-                        errorDetails = razorpayData.message || razorpayData.error || JSON.stringify(razorpayData);
-                    } catch (parseError) {
-                        try {
-                            errorDetails = await razorpayResponse.text();
-                            console.log("Response text:", errorDetails);
-                        } catch (textError) {
-                            errorDetails = 'Could not parse error details';
-                        }
+            // Convert USD to INR for Razorpay
+            const cartTotalINR = cartTotalUSD * 85;
+            orderData.cartTotal = cartTotalINR; // Razorpay requires INR
+
+            const razorpayResponse = await fetch('/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData)
+            });
+
+            const razorpayData = await razorpayResponse.json();
+
+            const options = {
+                key: razorpayData.razorpayKeyId,
+                amount: Math.round(cartTotalINR * 100), // Razorpay requires amount in **paise**
+                currency: 'INR',
+                name: "Your Store Name",
+                description: "Purchase Payment",
+                order_id: razorpayData.razorpayOrderId,
+                handler: async function(response) {
+                    const verifyResponse = await fetch('/verify-payment', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            orderId: razorpayData.orderId,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_signature: response.razorpay_signature
+                        })
+                    });
+
+                    const result = await verifyResponse.json();
+
+                    if (verifyResponse.ok) {
+                        window.location.href = `/order/success/${result.orderId}`;
+                    } else {
+                        alert(`Payment verification failed: ${result.message}`);
                     }
-                    
-                    throw new Error(`Server error (${razorpayResponse.status}): ${errorDetails}`);
-                } else {
-                    // Success response
-                    razorpayData = await razorpayResponse.json();
-                    console.log("Response data:", razorpayData);
+                },
+                prefill: {
+                    name: document.querySelector(".current-address .name")?.textContent.trim() || "",
+                    contact: document.querySelector(".current-address .phone")?.textContent.replace(/[^\d]/g, '') || ""
+                },
+                theme: {
+                    color: "#3399cc"
                 }
-                
-                // Open Razorpay payment modal
-                const options = {
-                    key: razorpayData.razorpayKeyId,
-                    amount: razorpayData.amount, // This is in cents (USD)
-                    currency: razorpayData.currency, // This should be 'USD'
-                    name: "Your Store Name",
-                    description: "Purchase Payment",
-                    order_id: razorpayData.razorpayOrderId,
-                    handler: async function(response) {
-                        // On successful payment, verify the payment
-                        try {
-                            const verifyResponse = await fetch('/verify-payment', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    orderId: razorpayData.orderId,
-                                    razorpay_payment_id: response.razorpay_payment_id,
-                                    razorpay_order_id: response.razorpay_order_id,
-                                    razorpay_signature: response.razorpay_signature
-                                })
-                            });
+            };
 
-                            const result = await verifyResponse.json();
-                            
-                            if (verifyResponse.ok) {
-                                window.location.href = `/order/success/${result.orderId}`;
-                            } else {
-                                alert(`Payment verification failed: ${result.message}`);
-                            }
-                        } catch (error) {
-                            alert('Error verifying payment: ' + error.message);
-                        }
-                    },
-                    prefill: {
-                        name: document.querySelector(".current-address .name")?.textContent.trim() || "",
-                        contact: document.querySelector(".current-address .phone")?.textContent.replace(/[^\d]/g, '') || ""
-                    },
-                    theme: {
-                        color: "#3399cc"
-                    }
-                };
+            const razorpayInstance = new Razorpay(options);
+            razorpayInstance.open();
 
-                // For display purposes
-                const usdAmount = razorpayData.amount / 100; // Convert from cents to dollars
-
-                console.log("Opening Razorpay with options:", options);
-                console.log("Amount in USD:", usdAmount.toFixed(2));
-
-                const razorpayInstance = new Razorpay(options);
-                razorpayInstance.open();
-                
-            } catch (error) {
-                console.error("Error creating Razorpay order:", error);
-                alert('Error placing order: ' + error.message);
-            }
         } else {
-            // Regular COD or wallet order
             const response = await fetch('/order/place', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -581,7 +831,7 @@ async function placeOrder() {
     }
 }
 
-// Add this function to fetch wallet balance
+
 async function fetchWalletBalance() {
     try {
         const response = await fetch('/api/wallet/balance');
@@ -637,6 +887,118 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+async function applyCoupon() {
+    const couponCode = document.getElementById('couponCode').value;
+    const messageDiv = document.getElementById('couponMessage');
+    
+    try {
+        const response = await fetch('/apply-coupon', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                couponCode,
+                subtotal: <%= subtotal %> 
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            messageDiv.innerHTML = `<span class="success">Coupon applied! You saved ₹${data.discountAmount}</span>`;
+            // Update the order summary
+            document.querySelector('.price-row.discount span:last-child').textContent = 
+                `-₹${(parseFloat(data.totalDiscount)).toFixed(2)}`;
+            document.querySelector('.price-row.total span:last-child').textContent = 
+                `₹${data.newTotal.toFixed(2)}`;
+        } else {
+            messageDiv.innerHTML = `<span class="error">${data.message}</span>`;
+        }
+    } catch (error) {
+        messageDiv.innerHTML = '<span class="error">Error applying coupon</span>';
+    }
+}
+
+document.querySelectorAll('input[name="coupon"]').forEach(radio => {
+    radio.addEventListener('change', async function() {
+        if (this.checked) {
+            const couponCode = this.value;
+            const messageDiv = document.getElementById('couponMessage');
+            
+            try {
+                const response = await fetch('/apply-coupon', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        couponCode,
+                        subtotal: <%= subtotal %> 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    messageDiv.className = 'coupon-message success';
+                    messageDiv.textContent = `Coupon applied! You saved ₹${data.discountAmount}`;
+                    
+                    // Add coupon discount to existing product discount
+                    const existingDiscount = <%= totalDiscount %>;
+                    const totalDiscountAmount = existingDiscount + data.discountAmount;
+                    document.querySelector('.price-row.discount span:last-child').textContent = 
+                        `-₹${totalDiscountAmount.toFixed(2)}`;
+
+                    // Update final total
+                    const newTotal = <%= subtotal %> - totalDiscountAmount + <%= tax %>;
+                    document.querySelector('.price-row.total span:last-child').textContent = 
+                        `₹${newTotal.toFixed(2)}`;
+                } else {
+                    messageDiv.className = 'coupon-message error';
+                    messageDiv.textContent = data.message;
+                    this.checked = false;
+                    
+                    // Reset discount to original product discount
+                    document.querySelector('.price-row.discount span:last-child').textContent = 
+                        `-₹${<%= totalDiscount.toFixed(2) %>}`;
+                    // Reset total to original
+                    document.querySelector('.price-row.total span:last-child').textContent = 
+                        `₹${<%= total.toFixed(2) %>}`;
+                }
+            } catch (error) {
+                messageDiv.className = 'coupon-message error';
+                messageDiv.textContent = 'Error applying coupon';
+                this.checked = false;
+                
+                // Reset discount to original product discount
+                document.querySelector('.price-row.discount span:last-child').textContent = 
+                    `-₹${<%= totalDiscount.toFixed(2) %>}`;
+                // Reset total to original
+                document.querySelector('.price-row.total span:last-child').textContent = 
+                    `₹${<%= total.toFixed(2) %>}`;
+            }
+        }
+    });
+});
+
+// Add function to remove coupon
+function removeCoupon() {
+    const couponInputs = document.querySelectorAll('input[name="coupon"]');
+    couponInputs.forEach(input => input.checked = false);
+    
+    // Reset discount to original product discount
+    document.querySelector('.price-row.discount span:last-child').textContent = 
+        `-₹${<%= totalDiscount.toFixed(2) %>}`;
+    // Reset total to original
+    document.querySelector('.price-row.total span:last-child').textContent = 
+        `₹${<%= total.toFixed(2) %>}`;
+    
+    const messageDiv = document.getElementById('couponMessage');
+    messageDiv.textContent = '';
+    messageDiv.className = 'coupon-message';
+}
 
     </script>
 </body>
