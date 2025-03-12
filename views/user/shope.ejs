@@ -166,11 +166,10 @@
                     </h5>
                     <div class="price mb-3">₹<%= product.price.toFixed(2) %>
                     </div>
-                    <!-- Add color selection with safety checks -->
-                    <!-- Add color selection with safety checks -->
+                    
                     <div class="color-options mb-3">
                       <% if (product.colors && Array.isArray(product.colors) && product.colors.length> 0) { %>
-                        <% let defaultColor=product.colors[0]; %> <!-- Set default to first available color -->
+                        <% let defaultColor=product.colors[0]; %> 
 
                           <% product.colors.forEach((color, index)=> { %>
                             <label class="color-radio">
@@ -180,7 +179,7 @@
                             </label>
                             <% }) %>
                               <% } else { %>
-                                <!-- Default color when no colors are specified -->
+                                
                                 <label class="color-radio">
                                   <input type="radio" name="color_<%= product._id %>" value="default" checked>
                                   <span class="color-label" style="background-color: #000"></span>
@@ -188,7 +187,7 @@
                                 <% } %>
                     </div>
 
-                    <!-- Add buttons -->
+                    
                     <div class="product-buttons">
                       <button class="btn btn-primary btn-sm" onclick="addToCart('<%= product._id %>')">
                         Add to Cart
@@ -202,19 +201,19 @@
               </div>
               <% }) %>
           </div>
-          <!-- Pagination -->
+          
           <div class="pagination-container mt-5">
             <% if (totalPages> 1) { %>
               <nav aria-label="Product pagination" class="d-flex justify-content-center">
                 <ul class="pagination pagination-lg">
-                  <!-- Previous Button -->
+               
                   <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
                     <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
                       <span aria-hidden="true">‹</span>
                     </a>
                   </li>
 
-                  <!-- First Page -->
+                 
                   <% if (currentPage> 2) { %>
                     <li class="page-item">
                       <a class="page-link" href="?page=1">1</a>
@@ -226,7 +225,7 @@
                       <% } %>
                         <% } %>
 
-                          <!-- Page Numbers -->
+                          
                           <% for(let i=Math.max(1, currentPage - 1); i <=Math.min(totalPages, currentPage + 1); i++) {
                             %>
                             <li class="page-item <%= currentPage === i ? 'active' : '' %>">
@@ -236,7 +235,7 @@
                             </li>
                             <% } %>
 
-                              <!-- Last Page -->
+                            
                               <% if (currentPage < totalPages - 1) { %>
                                 <% if (currentPage < totalPages - 2) { %>
                                   <li class="page-item disabled">
@@ -250,7 +249,7 @@
                                     </li>
                                     <% } %>
 
-                                      <!-- Next Button -->
+                                      
                                       <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
                                         <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
                                           <span aria-hidden="true">›</span>
@@ -266,9 +265,9 @@
     </div>
   </section>
 
-  <!-- Include the same footer as the homepage -->
+  
   <footer id="footer" class="mt-5">
-    <!-- Same footer content as the homepage -->
+   
   </footer>
 
   <script src="/js/jquery.min.js"></script>
@@ -343,7 +342,7 @@
 
         if (data.success) {
           alert('Item added to wishlist!');
-          // You can update wishlist UI here if needed
+         
         } else {
           alert(data.message || 'Failed to add to wishlist');
         }

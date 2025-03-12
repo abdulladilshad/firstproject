@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shopping Cart</title>
-    <!-- Add Font Awesome for icons -->
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/styles/cart.css">
-    <!-- Add Bootstrap CSS -->
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
@@ -304,21 +304,20 @@
 </head>
 
 <body>
-    <!-- Navbar -->
+ 
     <nav class="navbar navbar-expand-lg fixed-top bg-white">
         <div class="container">
-            <!-- Brand on the left -->
+          
             <a class="navbar-brand" href="/">
                 LUXE TIME 
                 <span class="brand-dot"></span>
             </a>
 
-            <!-- Toggler for mobile -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
                 <span class="toggler-icon"></span>
             </button>
 
-            <!-- Main menu in the middle -->
+            
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav mx-auto text-uppercase">
                     <li class="nav-item">
@@ -339,7 +338,6 @@
                 </ul>
             </div>
 
-            <!-- Icons on the right -->
             <div class="nav-icons">
                 <a href="/search" class="nav-icon" title="Search">
                     <i class="fas fa-search"></i>
@@ -481,7 +479,7 @@
     <script>
         async function removeFromCart(itemId) {
             try {
-                // Show confirmation dialog
+             
                 const result = await Swal.fire({
                     title: 'Are you sure?',
                     text: "Do you want to remove this item from cart?",
@@ -528,7 +526,7 @@
 
             let currentQuantity = parseInt(quantitySpan.innerText);
 
-            // Quantity validation
+           
             if ((change === -1 && currentQuantity === 1) || (change === 1 && currentQuantity >= 5)) {
                 Swal.fire({
                     icon: 'warning',
@@ -573,7 +571,7 @@
                 let totalDiscount = 0;
 
                 cartItems.forEach(item => {
-                    // Get price elements
+                  
                     const priceCell = item.querySelector('td:nth-child(2)');
                     const originalPriceElement = priceCell.querySelector('.text-decoration-line-through');
                     const discountedPriceElement = priceCell.querySelector('.text-danger');
@@ -586,11 +584,11 @@
                     let originalPrice, discountedPrice;
                     
                     if (originalPriceElement && discountedPriceElement) {
-                        // Has discount
+                       
                         originalPrice = parseFloat(originalPriceElement.innerText.replace(/[^0-9.]/g, ''));
                         discountedPrice = parseFloat(discountedPriceElement.innerText.replace(/[^0-9.]/g, ''));
                     } else {
-                        // No discount
+                     
                         originalPrice = parseFloat(priceCell.innerText.replace(/[^0-9.]/g, ''));
                         discountedPrice = originalPrice;
                     }
@@ -599,11 +597,11 @@
                         originalSubtotal += originalPrice * quantity;
                         discountedSubtotal += discountedPrice * quantity;
                         
-                        // Calculate item discount
+                        
                         const itemDiscount = (originalPrice - discountedPrice) * quantity;
                         totalDiscount += itemDiscount;
 
-                        // Update row total
+                       
                         const totalCell = item.querySelector('td:nth-child(6)');
                         if (totalCell) {
                             totalCell.innerText = `₹${(discountedPrice * quantity).toFixed(2)}`;
@@ -611,26 +609,26 @@
                     }
                 });
 
-                const tax = discountedSubtotal * 0.1; // 10% tax on discounted amount
+                const tax = discountedSubtotal * 0.1;
                 const finalTotal = discountedSubtotal + tax;
 
-                // Update all summary values with animation
+                
                 animateValue('subtotal', originalSubtotal);
                 animateValue('totalOfferDiscount', totalDiscount, true);
                 animateValue('tax', tax);
                 animateValue('total', finalTotal);
 
-                // Reload page after animations complete
+                
               
                     window.location.reload();
-              // Wait for animations to finish
+              
 
             } catch (error) {
                 console.error('Error updating cart totals:', error);
             }
         }
 
-        // Function to animate value changes
+        
         function animateValue(elementId, newValue, isDiscount = false) {
             const element = document.getElementById(elementId);
             if (!element) return;
@@ -638,8 +636,8 @@
             const currentValue = parseFloat(element.innerText.replace(/[^0-9.-]/g, ''));
             const prefix = isDiscount ? '-₹' : '₹';
 
-            // Animate the change
-            const steps = 10; // Reduced steps for quicker animation
+          
+            const steps = 10; 
             const stepValue = (newValue - currentValue) / steps;
             let currentStep = 0;
 
@@ -654,7 +652,7 @@
                 }
             }, 20);
 
-            // Add highlight animation
+            
             element.classList.add('value-updated');
             setTimeout(() => element.classList.remove('value-updated'), 300);
         }

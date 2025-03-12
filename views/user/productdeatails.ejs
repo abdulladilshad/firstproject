@@ -207,7 +207,7 @@
    
     <nav class="navbar navbar-expand-lg fixed-top bg-white">
         <div class="container fle">
-            <!-- Brand -->
+           
             <div class="nav-icons">
                 <a href="/search" class="nav-icon" title="Search">
                     <i class="fas fa-search"></i>
@@ -230,7 +230,7 @@
     
            
             <div class="collapse navbar-collapse" id="navbarContent">
-                <!-- Main Menu -->
+           
                 <ul class="navbar-nav mx-auto text-uppercase">
                     <li class="nav-item">
                         <a class="nav-link" href="/">Home</a>
@@ -437,7 +437,7 @@
         </div>
     </section>
  
-        <!-- Add this line -->
+     
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         const mainImage = document.querySelector('.main-image img');
@@ -488,7 +488,7 @@
     });
 });
 
-// Add to Cart functionality
+
 async function addToCart(productId) {
     const selectedColor = document.querySelector('input[name="color"]:checked'); 
 
@@ -505,7 +505,7 @@ async function addToCart(productId) {
     const colorValue = selectedColor.value;
 
     try {
-        // First, check current cart quantity and available stock
+     
         const stockCheckResponse = await fetch(`/check-stock/${productId}`, {
             method: 'POST',
             headers: {
@@ -523,7 +523,7 @@ async function addToCart(productId) {
         const { availableStock, currentCartQuantity } = stockData;
         const remainingStock = availableStock - currentCartQuantity;
 
-        // Check if adding one more would exceed the maximum limit of 5
+        
         if (currentCartQuantity >= 5) {
             Swal.fire({
                 title: 'Limit Reached',
@@ -544,7 +544,7 @@ async function addToCart(productId) {
             return;
         }
 
-        // Proceed with adding to cart
+      
         const response = await fetch('/cart', {
             method: 'POST',
             headers: {
@@ -556,7 +556,7 @@ async function addToCart(productId) {
         const data = await response.json();
         
         if (data.success) {
-            // Show success message with remaining stock info
+       
             Swal.fire({
                 title: 'Added to Cart!',
                 text: remainingStock === 1 
@@ -589,7 +589,7 @@ async function addToCart(productId) {
         }
     }
 
-    // Add to Wishlist functionality
+    
     async function addToWishlist(productId) {
         const selectedColor = document.querySelector('input[name="color"]:checked');
 
@@ -625,7 +625,7 @@ async function addToCart(productId) {
                     timer: 2000,
                     showConfirmButton: false
                 });
-                // You can update wishlist UI here if needed
+             
             } else {
                 Swal.fire({
                     title: 'Error',

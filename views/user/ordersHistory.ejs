@@ -259,7 +259,7 @@
 </head>
 
 <body>
-    <!-- Navbar -->
+
     <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
         <div class="container">
             <a class="navbar-brand" href="/">
@@ -309,7 +309,7 @@
     </nav>
 
     <div class="container">
-        <!-- Sidebar -->
+     
         <div class="sidebar">
             <a href="/profile" class="sidebar-btn">
                 <i class="fas fa-user"></i>
@@ -329,7 +329,7 @@
             </a>
         </div>
 
-        <!-- Main Content -->
+      
         <div class="main-content">
             <div class="content-header">
                 <h1>My Orders</h1>
@@ -409,23 +409,23 @@
                 </div>
                 <% } %>
 
-            <!-- Add this after your orders list -->
+          
             <% if (totalPages > 0) { %>
                 <nav aria-label="Page navigation" class="mt-4">
                     <ul class="pagination justify-content-center">
-                        <!-- Previous button -->
+                        
                         <li class="page-item <%= !hasPrevPage ? 'disabled' : '' %>">
                             <a class="page-link" href="/orders?page=<%= currentPage - 1 %>" tabindex="-1">Previous</a>
                         </li>
 
-                        <!-- Page numbers -->
+                     
                         <% for(let i = 1; i <= totalPages; i++) { %>
                             <li class="page-item <%= currentPage === i ? 'active' : '' %>">
                                 <a class="page-link" href="/orders?page=<%= i %>"><%= i %></a>
                             </li>
                         <% } %>
 
-                        <!-- Next button -->
+                     
                         <li class="page-item <%= !hasNextPage ? 'disabled' : '' %>">
                             <a class="page-link" href="/orders?page=<%= currentPage + 1 %>">Next</a>
                         </li>

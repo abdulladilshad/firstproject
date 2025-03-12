@@ -327,7 +327,7 @@
     </nav>
 
     <div class="container">
-        <!-- Sidebar -->
+        
         <div class="sidebar">
             <a href="/profile" class="sidebar-btn">
                 <i class="fas fa-user"></i>
@@ -347,7 +347,7 @@
             </a>
         </div>
 
-        <!-- Main Content -->
+        
         <div class="main-content">
             <div class="wallet-card">
                 <div class="balance-label">Your Balance</div>
@@ -361,7 +361,7 @@
             
             <button class="transaction-btn" onclick="openTransactionModal()">View Transaction History</button>
 
-            <!-- Transaction History Modal -->
+           
             <div id="transactionModal" class="modal">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -399,20 +399,20 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Get the modal
+    
         const modal = document.getElementById("transactionModal");
         
-        // Open the modal
+      
         function openTransactionModal() {
             modal.style.display = "block";
         }
         
-        // Close the modal
+       
         function closeTransactionModal() {
             modal.style.display = "none";
         }
         
-        // Close the modal if clicked outside
+       
         window.onclick = function(event) {
             if (event.target == modal) {
                 modal.style.display = "none";
