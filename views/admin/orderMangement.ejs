@@ -531,6 +531,10 @@
                         placeholder="Search orders by ID, customer name or status...">
                 </div>
 
+<<<<<<< HEAD
+=======
+                <!-- Add this right after the search box and before the orders table -->
+>>>>>>> 5540b74 (after 10th overoll complited)
                 <div class="status-filter mb-4">
                     <div class="btn-group" role="group" aria-label="Status filter">
                         <a href="?status=all" class="btn <%= statusFilter === 'all' ? 'btn-primary' : 'btn-outline-primary' %>">
@@ -557,7 +561,11 @@
                     </div>
                 </div>
 
+<<<<<<< HEAD
                
+=======
+                <!-- Orders Table -->
+>>>>>>> 5540b74 (after 10th overoll complited)
                 <div class="orders-table">
                     <% if (orders.length===0) { %>
                         <div class="empty-state">
@@ -644,7 +652,11 @@
                             <% } %>
                 </div>
 
+<<<<<<< HEAD
                
+=======
+                <!-- Add this after your orders table -->
+>>>>>>> 5540b74 (after 10th overoll complited)
                 <div class="d-flex justify-content-between align-items-center mt-4">
                     <div>
                         <span class="text-muted">
@@ -653,14 +665,22 @@
                     </div>
                     <nav aria-label="Page navigation">
                         <ul class="pagination mb-0">
+<<<<<<< HEAD
                           
+=======
+                            <!-- Previous Page -->
+>>>>>>> 5540b74 (after 10th overoll complited)
                             <li class="page-item <%= !hasPrevPage ? 'disabled' : '' %>">
                                 <a class="page-link" href="?page=<%= prevPage %>" aria-label="Previous">
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
                             </li>
 
+<<<<<<< HEAD
                           
+=======
+                            <!-- First Page -->
+>>>>>>> 5540b74 (after 10th overoll complited)
                             <% if(currentPage > 2) { %>
                                 <li class="page-item">
                                     <a class="page-link" href="?page=1">1</a>
@@ -670,13 +690,21 @@
                                 <% } %>
                             <% } %>
 
+<<<<<<< HEAD
+=======
+                            <!-- Page Numbers -->
+>>>>>>> 5540b74 (after 10th overoll complited)
                             <% for(let i = Math.max(1, currentPage - 1); i <= Math.min(totalPages, currentPage + 1); i++) { %>
                                 <li class="page-item <%= currentPage === i ? 'active' : '' %>">
                                     <a class="page-link" href="?page=<%= i %>"><%= i %></a>
                                 </li>
                             <% } %>
 
+<<<<<<< HEAD
                          
+=======
+                            <!-- Last Page -->
+>>>>>>> 5540b74 (after 10th overoll complited)
                             <% if(currentPage < totalPages - 1) { %>
                                 <% if(currentPage < totalPages - 2) { %>
                                     <li class="page-item disabled"><span class="page-link">...</span></li>
@@ -686,7 +714,11 @@
                                 </li>
                             <% } %>
 
+<<<<<<< HEAD
                             
+=======
+                            <!-- Next Page -->
+>>>>>>> 5540b74 (after 10th overoll complited)
                             <li class="page-item <%= !hasNextPage ? 'disabled' : '' %>">
                                 <a class="page-link" href="?page=<%= nextPage %>" aria-label="Next">
                                     <span aria-hidden="true">&raquo;</span>
@@ -785,10 +817,18 @@
                         const url = new URL(this.href);
                         const params = new URLSearchParams(url.search);
                         
+<<<<<<< HEAD
                         const currentStatus = new URLSearchParams(window.location.search).get('status') || 'all';
                         params.set('status', currentStatus);
                         
                         
+=======
+                        // Get current status filter
+                        const currentStatus = new URLSearchParams(window.location.search).get('status') || 'all';
+                        params.set('status', currentStatus);
+                        
+                        // Get search input value
+>>>>>>> 5540b74 (after 10th overoll complited)
                         const searchValue = document.querySelector('.search-input').value;
                         if (searchValue) {
                             params.set('search', searchValue);

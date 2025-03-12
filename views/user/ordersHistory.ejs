@@ -409,23 +409,39 @@
                 </div>
                 <% } %>
 
+<<<<<<< HEAD
           
             <% if (totalPages > 0) { %>
                 <nav aria-label="Page navigation" class="mt-4">
                     <ul class="pagination justify-content-center">
                         
+=======
+            <!-- Add this after your orders list -->
+            <% if (totalPages > 0) { %>
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <!-- Previous button -->
+>>>>>>> 5540b74 (after 10th overoll complited)
                         <li class="page-item <%= !hasPrevPage ? 'disabled' : '' %>">
                             <a class="page-link" href="/orders?page=<%= currentPage - 1 %>" tabindex="-1">Previous</a>
                         </li>
 
+<<<<<<< HEAD
                      
+=======
+                        <!-- Page numbers -->
+>>>>>>> 5540b74 (after 10th overoll complited)
                         <% for(let i = 1; i <= totalPages; i++) { %>
                             <li class="page-item <%= currentPage === i ? 'active' : '' %>">
                                 <a class="page-link" href="/orders?page=<%= i %>"><%= i %></a>
                             </li>
                         <% } %>
 
+<<<<<<< HEAD
                      
+=======
+                        <!-- Next button -->
+>>>>>>> 5540b74 (after 10th overoll complited)
                         <li class="page-item <%= !hasNextPage ? 'disabled' : '' %>">
                             <a class="page-link" href="/orders?page=<%= currentPage + 1 %>">Next</a>
                         </li>
