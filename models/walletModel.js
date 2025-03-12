@@ -6,7 +6,7 @@ const WalletSchema = new mongoose.Schema({
 
 });
 
-// Prevent model overwrite error
+
 const Wallet = mongoose.models.Wallet || mongoose.model('Wallet', WalletSchema);
 
 module.exports = Wallet;

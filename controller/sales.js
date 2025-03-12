@@ -4,8 +4,13 @@ const salesController = async (req, res) => {
     try {
         let query = {};
         let period = req.query.period || 'daily';
+        
+       
+        const page = parseInt(req.query.page) || 1;
+        const limit = 7; 
+        const skip = (page - 1) * limit;
 
-        // Get current date and convert to UTC
+        
         const currentDate = new Date();
         currentDate.setUTCHours(0, 0, 0, 0);
 
@@ -20,7 +25,7 @@ const salesController = async (req, res) => {
 
             case 'weekly':
                 startDate = new Date(currentDate);
-                startDate.setDate(currentDate.getDate() - 7); // Last 7 days
+                startDate.setDate(currentDate.getDate() - 7); 
                 startDate.setUTCHours(0, 0, 0, 0);
                 endDate = new Date(currentDate);
                 endDate.setUTCHours(23, 59, 59, 999);
@@ -28,7 +33,7 @@ const salesController = async (req, res) => {
 
             case 'monthly':
                 startDate = new Date(currentDate);
-                startDate.setDate(currentDate.getDate() - 30); // Last 30 days
+                startDate.setDate(currentDate.getDate() - 30); 
                 startDate.setUTCHours(0, 0, 0, 0);
                 endDate = new Date(currentDate);
                 endDate.setUTCHours(23, 59, 59, 999);
@@ -36,7 +41,7 @@ const salesController = async (req, res) => {
 
             case 'yearly':
                 startDate = new Date(currentDate);
-                startDate.setDate(currentDate.getDate() - 365); // Last 365 days
+                startDate.setDate(currentDate.getDate() - 365); 
                 startDate.setUTCHours(0, 0, 0, 0);
                 endDate = new Date(currentDate);
                 endDate.setUTCHours(23, 59, 59, 999);
@@ -62,15 +67,25 @@ const salesController = async (req, res) => {
                 }
         }
 
-        // Add date range and status to query
+       
         query.createdAt = { $gte: startDate, $lte: endDate };
 
         console.log('Querying Orders from:', startDate.toISOString(), 'to', endDate.toISOString());
 
-        const orders = await Order.find(query).sort({ createdAt: -1 }).lean();
+       
+        const totalOrders = await Order.countDocuments(query);
+        const totalPages = Math.ceil(totalOrders / limit);
+
+        
+        const orders = await Order.find(query)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .lean();
+
         console.log(`Orders Found: ${orders.length}`);
 
-        // Calculate total sales only for delivered products
+        
         const totalSales = orders.reduce((sum, order) => {
             return sum + (order.products?.reduce((itemSum, item) => {
                 if (item.status === 'Delivered') {
@@ -80,7 +95,6 @@ const salesController = async (req, res) => {
             }, 0) || 0);
         }, 0);
 
-        const totalOrders = orders.length;
         const avgOrderValue = totalOrders > 0 ? (totalSales / totalOrders).toFixed(2) : 0;
         const productsSold = orders.reduce((sum, order) => {
             return sum + (order.products?.reduce((itemSum, item) => {
@@ -108,7 +122,15 @@ const salesController = async (req, res) => {
             orders: formattedOrders,
             startDate: startDate.toISOString().split('T')[0],
             endDate: endDate.toISOString().split('T')[0],
-            selectedPeriod: period
+            selectedPeriod: period,
+            currentPage: page,
+            totalPages: totalPages,
+            hasNextPage: page < totalPages,
+            hasPrevPage: page > 1,
+            nextPage: page + 1,
+            prevPage: page - 1,
+            lastPage: totalPages,
+            limit: limit
         });
 
     } catch (error) {

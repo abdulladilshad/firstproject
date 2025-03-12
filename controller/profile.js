@@ -20,7 +20,7 @@ const getProfile = async (req, res) => {
 const updateProfile = async (req, res) => {
     try {
 
-        
+
         const userId = req.session.user?.id;
         if (!userId) return res.status(401).json({ success: false, message: 'User not logged in' });
 
@@ -28,21 +28,21 @@ const updateProfile = async (req, res) => {
         let updateData = { name, email };
 
         const currentUser = await userModel.findById(userId);
-        
-     
+
+
         if (req.file) {
             currentUser.image = `/uploads/${req.file.filename}`;
             currentUser.save()
         } else if (currentUser.googleId) {
-           
-            updateData.image = currentUser.picture; 
-            
-            
+
+            updateData.image = currentUser.picture;
+
+
         }
 
         const updatedUser = await userModel.findByIdAndUpdate(
-            userId, 
-            updateData, 
+            userId,
+            updateData,
             { new: true }
         );
 
@@ -50,11 +50,11 @@ const updateProfile = async (req, res) => {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
-        res.json({ 
-            success: true, 
-            name: updatedUser.name, 
-            email: updatedUser.email, 
-            avatar: updatedUser.avatar || updatedUser.picture 
+        res.json({
+            success: true,
+            name: updatedUser.name,
+            email: updatedUser.email,
+            avatar: updatedUser.avatar || updatedUser.picture
         });
 
     } catch (error) {
@@ -63,4 +63,7 @@ const updateProfile = async (req, res) => {
     }
 };
 
-module.exports = { getProfile, updateProfile };
+module.exports = {
+    getProfile,
+    updateProfile
+};

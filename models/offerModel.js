@@ -4,17 +4,17 @@ const offerSchema = new mongoose.Schema(
   {
     offerType: {
       type: String,
-      enum: ['product', 'category', 'referral'], // Offer applies to Product, Category, or Referral
+      enum: ['product', 'category', 'referral'], 
       required: true,
     },
     product: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Product', // Reference if it's a Product offer
+      ref: 'Product',
       default: null,
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Category', // Reference if it's a Category offer
+      ref: 'Category',
       default: null,
     },
     discountPercentage: {

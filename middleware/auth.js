@@ -1,44 +1,62 @@
-
 const { session } = require('passport');
-const usermodel = require('../models/usermodel')
+const usermodel = require('../models/usermodel');
+
 const checkSession = (req, res, next) => {
-    if (req.session && req.session.user) {
-        next()
-    } else {
-        res.redirect('/login')
+    try {
+        if (req.session && req.session.user) {
+            next();
+        } else {
+            res.redirect('/login');
+        }
+    } catch (error) {
+        console.error('Error in checkSession middleware:', error);
+        res.status(500).render('error', { message: 'Internal Server Error' });
     }
-}
+};
 
 const isLogin = (req, res, next) => {
-
-
-
-    if (req.session && req.session.user) {
-        return res.redirect('/');
-    } else {
-        return next();
+    try {
+        if (req.session && req.session.user) {
+            return res.redirect('/');
+        } else {
+            return next();
+        }
+    } catch (error) {
+        console.error('Error in isLogin middleware:', error);
+        res.status(500).render('error', { message: 'Internal Server Error' });
     }
 };
 
 const isBan = async (req, res, next) => {
-    const ID = req.session?.user?.id;
+    try {
+        const ID = req.session?.user?.id;
 
-    const user = await usermodel.findOne({ _id: ID });
-    
-    if (user?.isBlock) {
+        if (!ID) {
+            return res.redirect('/login'); 
+        }
 
-        req.session.destroy((err) => {
-            if (err) {
-                console.error('Error destroying session:', err);
-                return next(err);
-            }
-           
-            res.render('user/login', { message:['You have been Blocked'] });
-        ;
-        });
-    } else {
-        next();
+        const user = await usermodel.findOne({ _id: ID });
+
+        if (!user) {
+            console.warn(`User with ID ${ID} not found.`);
+            return res.redirect('/login'); 
+        }
+
+        if (user?.isBlock) {
+            req.session.destroy((err) => {
+                if (err) {
+                    console.error('Error destroying session:', err);
+                    return next(err); 
+                }
+                res.render('user/login', { message: ['You have been blocked'] });
+            });
+        } else {
+            next();
+        }
+    } catch (error) {
+        console.error('Error in isBan middleware:', error);
+        res.status(500).render('error', { message: 'Internal Server Error' });
     }
 };
 
-module.exports = { checkSession, isLogin, isBan } 
+module.exports = { checkSession, isLogin, isBan };

@@ -26,12 +26,12 @@ const getCheckout = async (req, res) => {
             for (const item of cartData.items) {
                 const originalPrice = item.productId.price;
                 
-                // Get category offer
+               
                 const category = await categoryModel.findById(item.productId.category);
                 const categoryOffer = category ? category.offer || 0 : 0;
                 const productOffer = item.productId.offer || 0;
 
-                // Use the greater of category or product offer
+               
                 const applicableOffer = Math.max(categoryOffer, productOffer);
                 const discountedPrice = originalPrice - (originalPrice * applicableOffer / 100);
 
@@ -50,7 +50,7 @@ const getCheckout = async (req, res) => {
 
         const selectedAddress = addresses.find(addr => addr.isDefault) || addresses[0];
         const coupons = await couponModel.find({})
-        // Calculate totals with discounts
+        
         const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
         const totalDiscount = cart.reduce((acc, item) => 
             acc + ((item.price - item.discountedPrice) * item.quantity), 0);
@@ -81,7 +81,7 @@ const verifyRazorpayPayment = async (req, res) => {
     try {
         const { orderId, razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
         
-        // Verify signature
+        
         const generatedSignature = crypto
             .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
             .update(razorpay_order_id + '|' + razorpay_payment_id)
@@ -91,20 +91,20 @@ const verifyRazorpayPayment = async (req, res) => {
             return res.status(400).json({ message: 'Invalid payment signature' });
         }
         
-        // Update order status
+        
         const order = await OrderModel.findById(orderId);
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });
         }
         
-        // Update order with payment details
+       
         order.paymentId = razorpay_payment_id;
         
-        // Update product inventory and status
+        
         for (const product of order.products) {
             product.status = "Confirmed";
             
-            // Update product inventory
+           
             const productDoc = await Product.findById(product.productId);
             if (productDoc) {
                 const variantIndex = productDoc.variants.findIndex(v => v.color === product.color);
@@ -117,7 +117,7 @@ const verifyRazorpayPayment = async (req, res) => {
         
         await order.save();
         
-        // Clear cart
+       
         await cartModel.deleteOne({ userId: order.userId });
         
         res.status(200).json({ 
@@ -132,44 +132,65 @@ const verifyRazorpayPayment = async (req, res) => {
     }
 };
 
+
 const applyCoupon = async (req, res) => {
     try {
         const { couponCode, subtotal } = req.body;
-        const userId = req.session.user.id;
+        const userId = req.session?.user?.id; 
 
-        const coupon = await Coupon.findOne({ 
+        if (!userId) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
+
+      
+        const coupon = await Coupon.findOne({
             code: couponCode.toUpperCase(),
             isActive: true,
             expirationDate: { $gt: new Date() }
         });
 
+      
         if (!coupon) {
             return res.status(400).json({ message: 'Invalid or expired coupon code' });
         }
 
+        
+        if (coupon.usedBy.includes(userId)) {
+            return res.status(400).json({ message: 'You have already used this coupon' });
+        }
+
+        
         if (subtotal < coupon.minPurchase) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 message: `Minimum purchase amount of ₹${coupon.minPurchase} required`
             });
         }
 
-        // Calculate discount
+        
         let discountAmount = (subtotal * coupon.discount) / 100;
+
         if (coupon.maxDiscount) {
             discountAmount = Math.min(discountAmount, coupon.maxDiscount);
         }
 
-        // Calculate new total
+        
         const newSubtotal = subtotal - discountAmount;
-        const newTax = newSubtotal * 0.1;
+        const newTax = newSubtotal * 0.1; 
         const newTotal = newSubtotal + newTax;
 
-        // Store coupon info in session for order placement
+        
+        coupon.usedBy.push(userId);
+        coupon.usedCount += 1;
+
+        await coupon.save();
+
+  
         req.session.appliedCoupon = {
             code: coupon.code,
             discountAmount: discountAmount
         };
 
+ 
         res.json({
             success: true,
             discountAmount,
@@ -183,7 +204,6 @@ const applyCoupon = async (req, res) => {
         res.status(500).json({ message: 'Error applying coupon' });
     }
 };
-
 module.exports = {
     getCheckout,
     verifyRazorpayPayment,

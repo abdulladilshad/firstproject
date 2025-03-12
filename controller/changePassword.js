@@ -1,6 +1,6 @@
 const userschema = require('../models/usermodel');
 const bcrypt = require('bcryptjs');
-const nodemailer = require('nodemailer'); // For OTP
+const nodemailer = require('nodemailer'); 
 const otpGenerator = require('otp-generator');
 const sentOtp = require('../controller/user')
 

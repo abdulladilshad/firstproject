@@ -7,10 +7,10 @@ const couponSchema = new mongoose.Schema(
       required: true,
       unique: true,
       trim: true,
-      uppercase: true, // Ensures coupon codes are always uppercase
+      uppercase: true,
     },
     discount: {
-      type: Number, // Percentage discount (0-100)
+      type: Number,
       required: true,
       min: 0,
       max: 100,
@@ -25,20 +25,26 @@ const couponSchema = new mongoose.Schema(
     },
     minPurchase: {
       type: Number,
-      default: 0, // Minimum amount required to apply the coupon
+      default: 0,
     },
     maxDiscount: {
-      type: Number, // Maximum discount amount
+      type: Number,
       default: null,
     },
     usageLimit: {
-      type: Number, // How many times the coupon can be used
-      default: null, // Null means unlimited
+      type: Number,
+      default: null,
     },
     usedCount: {
       type: Number,
-      default: 0, // Track how many times the coupon has been used
+      default: 0,
     },
+    usedBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User', // Assuming you have a User model
+      },
+    ],
   },
   { timestamps: true }
 );

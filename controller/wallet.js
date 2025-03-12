@@ -16,7 +16,7 @@ const getWallet = async (req, res) => {
             return res.status(404).send('Wallet not found');
         }
 
-        // Find transactions for this user
+        
         const transactions = await Transaction.find({user: user._id})
             .sort({createdAt: -1})
             .lean();
@@ -38,14 +38,14 @@ const deposit = async (req, res) => {
             return res.status(400).send('Invalid deposit amount');
         }
 
-        // Find the user
+       
         const user = await User.findOne({ email: req.session.user.email });
 
         if (!user) {
             return res.status(404).send('User not found');
         }
 
-        // Find or create the wallet
+        
         let wallet = await Wallet.findOne({ user: user._id });
 
         if (!wallet) {
@@ -55,11 +55,11 @@ const deposit = async (req, res) => {
             });
         }
 
-        // Update wallet balance
+       
         wallet.balance += depositAmount;
         await wallet.save();
 
-        // Create a transaction record
+       
         const transaction = new Transaction({
             user: user._id,
             wallet: wallet._id,

@@ -14,10 +14,10 @@ const categorySchema = new mongoose.Schema(
     },
 
     offer: {
-      type: Number, // Store offer as a percentage (0-100)
+      type: Number, 
       min: 0,
       max: 100,
-      default: 0, // Default means no discount
+      default: 0,
     },
     isdelete: {
       type: Boolean,

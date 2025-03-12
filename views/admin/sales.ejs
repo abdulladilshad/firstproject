@@ -476,10 +476,7 @@
                     </a></li>
                 <li><a href="/admin/categories">
                         <i class="fas fa-tags"></i> Category
-                    </a></li>
-                <li><a href="/offers">
-                        <i class="fas fa-gift"></i> Offers
-                    </a></li>
+                    </a></li>   
                 <li><a href="/admin/coupons">
                         <i class="fas fa-ticket-alt"></i> Coupons
                     </a></li>
@@ -500,7 +497,7 @@
             <div class="dashboard-header">
                 <h1>Dashboard</h1>
                 <div class="header-actions">
-                    <button onclick="exportToExcel()" class="export-btn excel-btn">
+                    <button type="button" class="export-btn excel-btn" onclick="downloadExcel()">
                         <i class="fas fa-file-excel"></i> Excel
                     </button>
                     <button onclick="generatePDF()" class="export-btn pdf-btn">
@@ -661,19 +658,15 @@
                         </div>
                     </div>
                     <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th><i class="fas fa-hashtag me-1"></i>Order ID</th>
-                                    <th><i class="fas fa-calendar me-1"></i>Date</th>
-                                    <th><i class="fas fa-user me-1"></i>Customer</th>
-                                    <th><i class="fas fa-box me-1"></i>Products</th>
-                                    <th><i class="fas fa-rupee-sign me-1"></i>Amount</th>
-                                    
-                                    
-                                </tr>
-                            </thead>
+                        <table class="table">
                             <tbody>
+                                <tr>
+                                    <td>#OrderID</td>
+                                    <td>Date</td>
+                                    <td>Customer Name</td>
+                                    <td>Products</td>
+                                    <td>Amount</td>
+                                </tr>
                                 <% if (typeof orders !=='undefined' && orders.length> 0) { %>
                                     <% orders.forEach(order=> { %>
                                         <tr>
@@ -709,20 +702,49 @@
                     <!-- Pagination -->
                     <div class="d-flex justify-content-between align-items-center mt-4">
                         <div>
-                            <span class="text-muted">Showing 1 to 10 of 254 entries</span>
+                            <span class="text-muted">
+                                Showing <%= ((currentPage - 1) * limit) + 1 %> to <%= Math.min(currentPage * limit, totalOrders) %> of <%= totalOrders %> entries
+                            </span>
                         </div>
                         <nav aria-label="Page navigation">
                             <ul class="pagination mb-0">
-                                <li class="page-item disabled">
-                                    <a class="page-link" href="#" aria-label="Previous">
+                                <!-- Previous Page -->
+                                <li class="page-item <%= !hasPrevPage ? 'disabled' : '' %>">
+                                    <a class="page-link" href="?page=<%= prevPage %>&period=<%= selectedPeriod %>&startDate=<%= startDate %>&endDate=<%= endDate %>" aria-label="Previous">
                                         <span aria-hidden="true">&laquo;</span>
                                     </a>
                                 </li>
-                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#" aria-label="Next">
+
+                                <!-- First Page -->
+                                <% if(currentPage > 2) { %>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1&period=<%= selectedPeriod %>&startDate=<%= startDate %>&endDate=<%= endDate %>">1</a>
+                                    </li>
+                                    <% if(currentPage > 3) { %>
+                                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                                    <% } %>
+                                <% } %>
+
+                                <!-- Page Numbers -->
+                                <% for(let i = Math.max(1, currentPage - 1); i <= Math.min(totalPages, currentPage + 1); i++) { %>
+                                    <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                        <a class="page-link" href="?page=<%= i %>&period=<%= selectedPeriod %>&startDate=<%= startDate %>&endDate=<%= endDate %>"><%= i %></a>
+                                    </li>
+                                <% } %>
+
+                                <!-- Last Page -->
+                                <% if(currentPage < totalPages - 1) { %>
+                                    <% if(currentPage < totalPages - 2) { %>
+                                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                                    <% } %>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<%= totalPages %>&period=<%= selectedPeriod %>&startDate=<%= startDate %>&endDate=<%= endDate %>"><%= totalPages %></a>
+                                    </li>
+                                <% } %>
+
+                                <!-- Next Page -->
+                                <li class="page-item <%= !hasNextPage ? 'disabled' : '' %>">
+                                    <a class="page-link" href="?page=<%= nextPage %>&period=<%= selectedPeriod %>&startDate=<%= startDate %>&endDate=<%= endDate %>" aria-label="Next">
                                         <span aria-hidden="true">&raquo;</span>
                                     </a>
                                 </li>
@@ -737,6 +759,13 @@
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Add this at the start of your script
+        if (typeof XLSX === 'undefined') {
+            console.error('XLSX library not loaded!');
+        } else {
+            console.log('XLSX library loaded successfully');
+        }
+
         // Sidebar Toggle Functionality
         document.getElementById('hamburger').addEventListener('click', function () {
             this.classList.toggle('active');
@@ -879,7 +908,7 @@
                 yPos += 10;
                 
                 // Create a hardcoded transactions table if we can't get it from the DOM
-                const transactionHeaders = [['Order ID', 'Date', 'Customer', 'Products', 'Amount', 'Status']];
+                const transactionHeaders = [['Order ID', 'Date', 'Customer', 'Products', 'Amount']];
                 
                 // Try to get actual transactions from the DOM
                 let transactionRows = [];
@@ -913,9 +942,9 @@
                 // If we couldn't get transactions from the DOM, use sample data
                 if (transactionRows.length === 0) {
                     transactionRows = [
-                        ['#ORD-001', '2023-03-01', 'John Doe', '2 items', '$120.00', 'Completed'],
-                        ['#ORD-002', '2023-03-02', 'Jane Smith', '1 item', '$85.50', 'Processing'],
-                        ['#ORD-003', '2023-03-03', 'Bob Johnson', '3 items', '$210.75', 'Completed']
+                        ['#ORD-001', '2023-03-01', 'John Doe', '2 items', '$120.00'],
+                        ['#ORD-002', '2023-03-02', 'Jane Smith', '1 item', '$85.50'],
+                        ['#ORD-003', '2023-03-03', 'Bob Johnson', '3 items', '$210.75']
                     ];
                 }
                 
@@ -960,210 +989,54 @@
             }
         }
 
-        // Add this function to export to Excel
-        function exportToExcel() {
-            // Prevent multiple downloads
-            if (isGeneratingReport) {
-                console.log('Already generating a report, please wait...');
-                return;
-            }
-            
-            isGeneratingReport = true;
+        // First, define our global variables
+        window.isGeneratingReport = false;
+
+        // Define the function globally
+        function downloadExcel() {
+            console.log('Download Excel function called');
             
             try {
-                console.log('Generating Excel report...');
-                
-                // Get table data
+                // Get the table element
                 const table = document.querySelector('.table');
-                
-                // Define headers - make sure these match your table columns exactly
-                const headers = ['Order ID', 'Date', 'Customer', 'Products', 'Amount'];
-                
-                // Get rows from table or use sample data
-                let rows = [];
-                
-                if (table) {
-                    const tableRows = table.querySelectorAll('tbody tr');
-                    console.log('Found table rows for Excel:', tableRows.length);
-                    
-                    if (tableRows && tableRows.length > 0) {
-                        tableRows.forEach((row, rowIndex) => {
-                            const rowData = {};
-                            const cells = row.querySelectorAll('td');
-                            
-                            console.log(`Row ${rowIndex} has ${cells.length} cells`);
-                            
-                            // Initialize all headers with empty values
-                            headers.forEach(header => {
-                                rowData[header] = '';
-                            });
-                            
-                            // Fill in available data
-                            if (cells && cells.length > 0) {
-                                cells.forEach((cell, index) => {
-                                    if (index < headers.length) {
-                                        let cellValue = cell.textContent.trim();
-                                        
-                                        // Format currency values
-                                        if (headers[index] === 'Amount' && !cellValue.startsWith('$')) {
-                                            cellValue = '$' + cellValue;
-                                        }
-                                        
-                                        rowData[headers[index]] = cellValue;
-                                    }
-                                });
-                                rows.push(rowData);
-                            }
-                        });
+                if (!table) {
+                    console.error('Table not found');
+                    return;
+                }
+
+                // Get all rows
+                const rows = Array.from(table.querySelectorAll('tr'));
+                const data = [];
+
+                // Process each row
+                rows.forEach(row => {
+                    const cells = Array.from(row.querySelectorAll('td'));
+                    if (cells.length > 0) {
+                        const rowData = cells.map(cell => cell.textContent.trim());
+                        data.push(rowData);
                     }
-                }
-                
-                console.log('Excel data rows:', rows);
-                
-                // If no rows found, use sample data
-                if (rows.length === 0) {
-                    console.log('No rows found, using sample data');
-                    rows = [
-                        {
-                            'Order ID': '#ORD-001',
-                            'Date': '2023-03-01',
-                            'Customer': 'John Doe',
-                            'Products': '2 items',
-                            'Amount': '$120.00'
-                        },
-                        {
-                            'Order ID': '#ORD-002',
-                            'Date': '2023-03-02',
-                            'Customer': 'Jane Smith',
-                            'Products': '1 item',
-                            'Amount': '$85.50'
-                        },
-                        {
-                            'Order ID': '#ORD-003',
-                            'Date': '2023-03-03',
-                            'Customer': 'Bob Johnson',
-                            'Products': '3 items',
-                            'Amount': '$210.75'
-                        }
-                    ];
-                }
-                
-                // Add summary data at the top
-                const summaryData = [
-                    { 'Metric': 'Total Sales', 'Value': '$43000' },
-                    { 'Metric': 'Total Orders', 'Value': '62' },
-                    { 'Metric': 'Average Order', 'Value': '$693.55' },
-                    { 'Metric': 'Products Sold', 'Value': '1' }
-                ];
-                
-                // Try to get actual values from the DOM
-                try {
-                    const statCards = document.querySelectorAll('.stat-card');
-                    if (statCards && statCards.length >= 4) {
-                        const totalSalesEl = statCards[0].querySelector('.card-text');
-                        if (totalSalesEl) {
-                            let value = totalSalesEl.textContent.trim();
-                            value = value.replace(/[^\d.,]/g, '');
-                            summaryData[0].Value = '$' + value;
-                        }
-                        
-                        const totalOrdersEl = statCards[1].querySelector('.card-text');
-                        if (totalOrdersEl) {
-                            summaryData[1].Value = totalOrdersEl.textContent.trim();
-                        }
-                        
-                        const avgOrderEl = statCards[2].querySelector('.card-text');
-                        if (avgOrderEl) {
-                            let value = avgOrderEl.textContent.trim();
-                            value = value.replace(/[^\d.,]/g, '');
-                            summaryData[2].Value = '$' + value;
-                        }
-                        
-                        const productsSoldEl = statCards[3].querySelector('.card-text');
-                        if (productsSoldEl) {
-                            summaryData[3].Value = productsSoldEl.textContent.trim();
-                        }
-                    }
-                } catch (error) {
-                    console.warn('Error getting metrics for Excel:', error);
-                    // Continue with hardcoded values
-                }
-                
-                // Create workbook
-                const workbook = XLSX.utils.book_new();
-                
-                // Create summary worksheet
-                const summaryWorksheet = XLSX.utils.json_to_sheet(summaryData);
-                XLSX.utils.book_append_sheet(workbook, summaryWorksheet, 'Summary');
-                
-                // Create transactions worksheet
-                const transactionsWorksheet = XLSX.utils.json_to_sheet(rows);
-                
-                // Add header styling (if supported by the library version)
-                try {
-                    const headerRange = XLSX.utils.decode_range(transactionsWorksheet['!ref']);
-                    for (let C = headerRange.s.c; C <= headerRange.e.c; ++C) {
-                        const address = XLSX.utils.encode_col(C) + "1";
-                        if (!transactionsWorksheet[address]) continue;
-                        transactionsWorksheet[address].s = {
-                            font: { bold: true },
-                            fill: { fgColor: { rgb: "4285F4" } },
-                            alignment: { horizontal: "center" }
-                        };
-                    }
-                } catch (error) {
-                    console.warn('Could not style Excel headers:', error);
-                }
-                
-                XLSX.utils.book_append_sheet(workbook, transactionsWorksheet, 'Transactions');
-                
-                // Generate Excel file
-                XLSX.writeFile(workbook, 'sales-report.xlsx');
-                
-                console.log('Excel file generated successfully');
+                });
+
+                // Add headers
+                data.unshift(['Order ID', 'Date', 'Customer Name', 'Products', 'Amount']);
+
+                // Create workbook and worksheet
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(data);
+
+                // Add worksheet to workbook
+                XLSX.utils.book_append_sheet(wb, ws, "Sales Data");
+
+                // Save file
+                XLSX.writeFile(wb, "sales-report.xlsx");
                 
             } catch (error) {
-                console.error('Error generating Excel:', error);
-                alert('Error generating Excel file. Check console for details.');
-            } finally {
-                // Reset the flag after a short delay
-                setTimeout(() => {
-                    isGeneratingReport = false;
-                }, 1000);
+                console.error('Error:', error);
+                alert('Error generating Excel file');
             }
         }
 
-        // Remove any existing event listeners and add new ones
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get the buttons
-            const pdfButton = document.querySelector('.pdf-btn');
-            const excelButton = document.querySelector('.excel-btn');
-            
-            // Remove all existing click event listeners
-            if (pdfButton) {
-                const pdfButtonClone = pdfButton.cloneNode(true);
-                pdfButton.parentNode.replaceChild(pdfButtonClone, pdfButton);
-                
-                // Add new click event listener
-                pdfButtonClone.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    console.log('PDF button clicked');
-                    generatePDF();
-                });
-            }
-            
-            if (excelButton) {
-                const excelButtonClone = excelButton.cloneNode(true);
-                excelButton.parentNode.replaceChild(excelButtonClone, excelButton);
-                
-                // Add new click event listener
-                excelButtonClone.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    console.log('Excel button clicked');
-                    exportToExcel();
-                });
-            }
-        });
+        // Update your Excel button HTML to use this function directly
     </script>
 </body>
 

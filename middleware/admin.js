@@ -1,19 +1,26 @@
+
 const isLogin = (req, res, next) => {
-  
-  if (req.session.admin) {
-    return res.redirect("/admin/dashboard");
+  try {
+      if (req.session && req.session.admin) {
+          return res.redirect("/admin/dashboard");
+      }
+      next(); 
+  } catch (error) {
+      console.error("Error in isLogin middleware:", error);
+      res.status(500).render("errorPage", { message: "An unexpected error occurred." });
   }
-  next(); 
 };
 
 const cheksession = (req, res, next) => {
-  if (!req.session.admin) {
-    return res.redirect("/admin/login"); 
+  try {
+      if (!req.session || !req.session.admin) {
+          return res.redirect("/admin/login"); 
+      }
+      next(); 
+  } catch (error) {
+      console.error("Error in cheksession middleware:", error);
+      res.status(500).render("errorPage", { message: "An unexpected error occurred." });
   }
-  next(); 
 };
 
-  
-  
-  module.exports = { cheksession, isLogin }; 
-  
+module.exports = { cheksession, isLogin };

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,11 +9,13 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Marcellus&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/styles/wishlist.css">
+
     <style>
         body {
-            padding-top: 80px; /* Add padding for fixed navbar */
+            padding-top: 80px;
+            /* Add padding for fixed navbar */
         }
-        
+
         /* Navbar Styles */
         .navbar {
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
@@ -59,7 +62,7 @@
         .navbar-nav .nav-link:hover::after,
         .navbar-nav .nav-link.active::after {
             width: 80%;
-            
+
         }
 
         .nav-icons {
@@ -153,6 +156,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -163,58 +167,70 @@
             0% {
                 background-position: -1000px 0;
             }
+
             100% {
                 background-position: 1000px 0;
             }
         }
 
         @keyframes float {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: translateY(0);
             }
+
             50% {
                 transform: translateY(-10px);
             }
         }
-        
+
         /* Wishlist Styles */
         .wishlist-container {
             padding: 30px 0;
         }
+
         .wishlist-header {
             margin-bottom: 30px;
             border-bottom: 1px solid #eee;
             padding-bottom: 15px;
         }
+
         .wishlist-item {
             display: flex;
             margin-bottom: 20px;
             padding-bottom: 20px;
             border-bottom: 1px solid #eee;
         }
+
         .wishlist-item-image {
             width: 120px;
             height: 120px;
             object-fit: cover;
             margin-right: 20px;
         }
+
         .wishlist-item-details {
             flex-grow: 1;
         }
+
         .wishlist-item-actions {
             display: flex;
             gap: 10px;
             margin-top: 15px;
         }
+
         .empty-wishlist {
             text-align: center;
             padding: 50px 0;
         }
+
         .empty-wishlist i {
             font-size: 50px;
             color: #ccc;
             margin-bottom: 20px;
         }
+
         .color-circle {
             display: inline-block;
             width: 20px;
@@ -223,15 +239,38 @@
             margin-left: 10px;
             vertical-align: middle;
         }
+
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .pagination a,
+        .pagination span {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        .pagination a:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
     </style>
 </head>
+
 <body>
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg fixed-top bg-white">
         <div class="container">
             <!-- Brand on the left -->
             <a class="navbar-brand" href="/">
-                LUXE TIME 
+                LUXE TIME
                 <span class="brand-dot"></span>
             </a>
 
@@ -247,7 +286,7 @@
                         <a class="nav-link" href="/">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/shop">Shop</a>
+                        <a class="nav-link" href="/shope">Shop</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/men">Men</a>
@@ -285,49 +324,76 @@
             <p>Items you've saved for later</p>
         </div>
 
-        <% if (!wishlist || wishlist.items.length === 0) { %>
+        <% if (!wishlist || wishlist.items.length===0) { %>
             <div class="empty-wishlist">
                 <i class="fas fa-heart-broken"></i>
                 <h3>Your wishlist is empty</h3>
                 <p>Add items to your wishlist to keep track of products you're interested in.</p>
-                <a href="/products" class="btn btn-primary mt-3">Continue Shopping</a>
+                <a href="/shope" class="btn btn-primary mt-3">Continue Shopping</a>
             </div>
-        <% } else { %>
-            <div class="row">
-                <% wishlist.items.forEach(item => { %>
-                    <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="card h-100">
-                            <% if (item.product.imagePaths && item.product.imagePaths.length > 0) { %>
-                                <img src="<%= item.product.imagePaths[0] %>" class="card-img-top" alt="<%= item.product.name %>">
-                            <% } else { %>
-                                <div class="text-center p-5 bg-light">No Image Available</div>
-                            <% } %>
-                            <div class="card-body">
-                                <h5 class="card-title"><%= item.product.name %></h5>
-                                <p class="card-text">
-                                    <strong>Brand:</strong> <%= item.product.brand %><br>
-                                    <strong>Price:</strong> $<%= item.product.price.toFixed(2) %><br>
-                                    <strong>Color:</strong> <%= item.color %>
-                                    <span class="color-circle" style="background-color: <%= item.color %>"></span>
-                                </p>
-                                <div class="d-flex justify-content-between mt-3">
-                                    <button onclick="addToCart('<%= item.product._id %>', '<%= item.color %>')" class="btn btn-primary">
-                                        <i class="fas fa-shopping-cart"></i> Add to Cart
-                                    </button>
-                                    <button onclick="removeFromWishlist('<%= item._id %>')" class="btn btn-outline-danger">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
+            <% } else { %>
+                <div class="row">
+                    <% wishlist.items.forEach(item=> { %>
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100">
+                                <% if (item.product.imagePaths && item.product.imagePaths.length> 0) { %>
+                                    <img src="<%= item.product.imagePaths[0] %>" class="card-img-top"
+                                        alt="<%= item.product.name %>">
+                                    <% } else { %>
+                                        <div class="text-center p-5 bg-light">No Image Available</div>
+                                        <% } %>
+                                            <div class="card-body">
+                                                <h5 class="card-title">
+                                                    <%= item.product.name %>
+                                                </h5>
+                                                <p class="card-text">
+                                                    <strong>Brand:</strong>
+                                                    <%= item.product.brand %><br>
+                                                        <strong>Price:</strong> $<%= item.product.price.toFixed(2) %>
+                                                            <br>
+                                                            <strong>Color:</strong>
+                                                            <%= item.color %>
+                                                                <span class="color-circle"
+                                                                    style="background-color: <%= item.color %>"></span>
+                                                </p>
+                                                <div class="d-flex justify-content-between mt-3">
+                                                    <button
+                                                        onclick="addToCart('<%= item.product._id %>', '<%= item.color %>')"
+                                                        class="btn btn-primary">
+                                                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                                                    </button>
+                                                    <button onclick="removeFromWishlist('<%= item._id %>')"
+                                                        class="btn btn-outline-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
                             </div>
                         </div>
-                    </div>
-                <% }); %>
-            </div>
-            <div class="text-center mt-4">
-                <a href="/shope" class="btn btn-outline-primary">Continue Shopping</a>
-            </div>
-        <% } %>
+                        <% }); %>
+                </div>
+                <div class="text-center mt-4">
+                    <a href="/shope" class="btn btn-outline-primary">Continue Shopping</a>
+                </div>
+                <% } %>
     </div>
+
+    <div class="pagination">
+        <% if (currentPage> 1) { %>
+            <a href="/wishlist?page=<%= currentPage - 1 %>" class="btn btn-outline-primary">
+                <i class="fas fa-chevron-left"></i> Previous
+            </a>
+            <% } %>
+
+                <span>Page <%= currentPage %> of <%= totalPages %></span>
+
+                <% if (currentPage < totalPages) { %>
+                    <a href="/wishlist?page=<%= currentPage + 1 %>" class="btn btn-outline-primary">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                    <% } %>
+    </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -339,9 +405,9 @@
                         'Content-Type': 'application/json'
                     }
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
                     // Reload the page to show updated wishlist
                     window.location.reload();
@@ -367,9 +433,9 @@
                         quantity: 1
                     })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
                     alert('Item added to cart!');
                     // Optionally remove from wishlist after adding to cart
@@ -384,4 +450,5 @@
         }
     </script>
 </body>
+
 </html>

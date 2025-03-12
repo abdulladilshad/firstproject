@@ -9,7 +9,7 @@ const TransactionSchema = new mongoose.Schema({
     date: { type: Date, default: Date.now }
 });
 
-// Prevent model overwrite error
+
 const Transaction = mongoose.models.Transaction || mongoose.model('Transaction', TransactionSchema);
 
 module.exports = Transaction;

@@ -64,6 +64,7 @@ router.get('/coupons/add', couponController.renderAddCoupon);
 router.post('/coupons/add', couponController.addCoupon);
 router.get('/coupons/edit/:id', couponController.renderEditCoupon);
 router.post('/coupons/edit/:id', couponController.editCoupon);
+router.put('/coupon/:coupon_id/toggle-status', couponController.toggleCouponStatus);
 
 router.get('/sales',salesController.salesController);
 //LOGOUT

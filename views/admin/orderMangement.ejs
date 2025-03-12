@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
         :root {
             --admin-primary: #2c3e50;
@@ -358,7 +359,70 @@
                 display: block;
             }
         }
+
+        .pagination {
+            margin: 0;
+        }
+
+        .pagination .page-link {
+            padding: 0.5rem 0.75rem;
+            color: var(--admin-primary);
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--admin-primary);
+            border-color: var(--admin-primary);
+            color: white;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #6c757d;
+            pointer-events: none;
+            background-color: #fff;
+            border-color: #dee2e6;
+        }
+
+        .status-filter {
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 10px;
+        }
+
+        .status-filter .btn-group {
+            display: inline-flex;
+        }
+
+        .status-filter .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            border-radius: 0;
+        }
+
+        .status-filter .btn:first-child {
+            border-top-left-radius: 0.375rem;
+            border-bottom-left-radius: 0.375rem;
+        }
+
+        .status-filter .btn:last-child {
+            border-top-right-radius: 0.375rem;
+            border-bottom-right-radius: 0.375rem;
+        }
+
+        .status-filter .btn-outline-primary:hover {
+            background-color: #f8f9fa;
+            color: var(--admin-primary);
+        }
+
+        @media (max-width: 768px) {
+            .status-filter {
+                margin: 0 -1rem;
+                padding: 0 1rem;
+            }
+        }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -392,13 +456,10 @@
                 <li><a href="/admin/categories">
                         <i class="fas fa-tags"></i> Categories
                     </a></li>
-                <li><a href="/admin/offers">
-                        <i class="fas fa-gift"></i> Offers
-                    </a></li>
                 <li><a href="/admin/settings">
                         <i class="fas fa-cog"></i> Settings
                     </a></li>
-                <li><a href="/logout">
+                <li><a href="/admin/logout">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </a></li>
             </ul>
@@ -470,6 +531,33 @@
                         placeholder="Search orders by ID, customer name or status...">
                 </div>
 
+                <!-- Add this right after the search box and before the orders table -->
+                <div class="status-filter mb-4">
+                    <div class="btn-group" role="group" aria-label="Status filter">
+                        <a href="?status=all" class="btn <%= statusFilter === 'all' ? 'btn-primary' : 'btn-outline-primary' %>">
+                            All (<%= statusCounts.all %>)
+                        </a>
+                        <a href="?status=Pending" class="btn <%= statusFilter === 'Pending' ? 'btn-primary' : 'btn-outline-primary' %>">
+                            Pending (<%= statusCounts.Pending %>)
+                        </a>
+                        <a href="?status=Confirmed" class="btn <%= statusFilter === 'Confirmed' ? 'btn-primary' : 'btn-outline-primary' %>">
+                            Confirmed (<%= statusCounts.Confirmed %>)
+                        </a>
+                        <a href="?status=Shipped" class="btn <%= statusFilter === 'Shipped' ? 'btn-primary' : 'btn-outline-primary' %>">
+                            Shipped (<%= statusCounts.Shipped %>)
+                        </a>
+                        <a href="?status=Delivered" class="btn <%= statusFilter === 'Delivered' ? 'btn-primary' : 'btn-outline-primary' %>">
+                            Delivered (<%= statusCounts.Delivered %>)
+                        </a>
+                        <a href="?status=Cancelled" class="btn <%= statusFilter === 'Cancelled' ? 'btn-primary' : 'btn-outline-primary' %>">
+                            Cancelled (<%= statusCounts.Cancelled %>)
+                        </a>
+                        <a href="?status=Returned" class="btn <%= statusFilter === 'Returned' ? 'btn-primary' : 'btn-outline-primary' %>">
+                            Returned (<%= statusCounts.Returned %>)
+                        </a>
+                    </div>
+                </div>
+
                 <!-- Orders Table -->
                 <div class="orders-table">
                     <% if (orders.length===0) { %>
@@ -519,7 +607,7 @@
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <div class="fw-semibold">$<%= order.price.toFixed(2) %>
+                                                    <div class="fw-semibold">$<%= order.totalAmount.toFixed(2) %>
                                                     </div>
                                                 </td>
                                              
@@ -556,6 +644,59 @@
                             </div>
                             <% } %>
                 </div>
+
+                <!-- Add this after your orders table -->
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <div>
+                        <span class="text-muted">
+                            Showing <%= ((currentPage - 1) * 10) + 1 %> to <%= Math.min(currentPage * 10, orders.length) %> of <%= orders.length %> entries
+                        </span>
+                    </div>
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination mb-0">
+                            <!-- Previous Page -->
+                            <li class="page-item <%= !hasPrevPage ? 'disabled' : '' %>">
+                                <a class="page-link" href="?page=<%= prevPage %>" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+
+                            <!-- First Page -->
+                            <% if(currentPage > 2) { %>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1">1</a>
+                                </li>
+                                <% if(currentPage > 3) { %>
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                <% } %>
+                            <% } %>
+
+                            <!-- Page Numbers -->
+                            <% for(let i = Math.max(1, currentPage - 1); i <= Math.min(totalPages, currentPage + 1); i++) { %>
+                                <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                    <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                                </li>
+                            <% } %>
+
+                            <!-- Last Page -->
+                            <% if(currentPage < totalPages - 1) { %>
+                                <% if(currentPage < totalPages - 2) { %>
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                <% } %>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<%= totalPages %>"><%= totalPages %></a>
+                                </li>
+                            <% } %>
+
+                            <!-- Next Page -->
+                            <li class="page-item <%= !hasNextPage ? 'disabled' : '' %>">
+                                <a class="page-link" href="?page=<%= nextPage %>" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
             </div>
         </div>
     </div>
@@ -584,33 +725,42 @@
                     let productId = this.getAttribute("data-product-id");
                     let newStatus = this.value;
                     
-
                     try {
                         const response = await fetch(`/admin/orders`, {
-
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ status: newStatus ,orderId, productId})
+                            body: JSON.stringify({ status: newStatus, orderId, productId})
                         });
 
                         let data = await response.json();
 
                         if (data.success) {
-                            alert("Status updated successfully!");
+                            await Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: 'Status updated successfully',
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                            location.reload();
                         } else {
-                            alert("Failed to update status.");
-                            this.value = this.getAttribute("data-previous-value"); 
-                            
+                            await Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: 'Failed to update status'
+                            });
+                            this.value = this.getAttribute("data-previous-value");
                         }
-                        location.reload(); 
                     } catch (error) {
-                        alert("Error updating status.");
+                        await Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred while updating the status'
+                        });
                         this.value = this.getAttribute("data-previous-value");
-                        
                     }
 
-                    this.setAttribute("data-previous-value", newStatus); 
-                    
+                    this.setAttribute("data-previous-value", newStatus);
                 });
             });
         });
@@ -626,6 +776,32 @@
         document.getElementById('overlay').addEventListener('click', function () {
             document.getElementById('sidebar').classList.remove('active');
             document.getElementById('overlay').classList.remove('active');
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const paginationLinks = document.querySelectorAll('.pagination .page-link');
+            
+            paginationLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    if (!this.parentElement.classList.contains('disabled')) {
+                        e.preventDefault();
+                        const url = new URL(this.href);
+                        const params = new URLSearchParams(url.search);
+                        
+                        // Get current status filter
+                        const currentStatus = new URLSearchParams(window.location.search).get('status') || 'all';
+                        params.set('status', currentStatus);
+                        
+                        // Get search input value
+                        const searchValue = document.querySelector('.search-input').value;
+                        if (searchValue) {
+                            params.set('search', searchValue);
+                        }
+                        
+                        window.location.href = `${url.pathname}?${params.toString()}`;
+                    }
+                });
+            });
         });
     </script>
 </body>

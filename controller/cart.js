@@ -20,12 +20,12 @@ const LoadCart = async (req, res) => {
             const product = item.productId;
             if (!product) return null;
 
-            // Get category offer
+           
             const category = await categoryModel.findById(product.category);
             const categoryOffer = category ? category.offer || 0 : 0;
             const productOffer = product.offer || 0;
 
-            // Use the greater of category or product offer
+           
             const applicableOffer = Math.max(categoryOffer, productOffer);
 
             const discountedPrice = product.price - (product.price * applicableOffer) / 100;
@@ -160,23 +160,23 @@ const updateQuatity = async (req, res) => {
         const { change } = req.body;
         const userId = req.session.user.id;
 
-        console.log('Update Request:', { productId, change, userId }); // Add logging
+        console.log('Update Request:', { productId, change, userId }); 
 
-        // Find the cart and populate product details
+        
         const cart = await cartModel.findOne({ userId }).populate('items.productId');
         if (!cart) {
             console.log('Cart not found');
             return res.status(404).json({ message: 'Cart not found' });
         }
 
-        // Find the cart item
+        
         const cartItem = cart.items.find(i => i.productId._id.toString() === productId);
         if (!cartItem) {
             console.log('Product not in cart');
             return res.status(404).json({ message: 'Product not in cart' });
         }
 
-        // Get the product details
+
         const product = await productModel.findById(productId);
         if (!product) {
             console.log('Product not found');
@@ -189,7 +189,7 @@ const updateQuatity = async (req, res) => {
             cartItemColor: cartItem.color
         });
 
-        // Find the variant that matches the cart item's color
+        
         const variant = product.variants.find(v => v.color === cartItem.color);
         if (!variant) {
             console.log('Variant not found for color:', cartItem.color);
@@ -199,7 +199,7 @@ const updateQuatity = async (req, res) => {
             });
         }
 
-        // Calculate new quantity
+        
         const newQuantity = cartItem.quantity + parseInt(change);
         console.log('Quantity calculation:', {
             current: cartItem.quantity,
@@ -208,7 +208,7 @@ const updateQuatity = async (req, res) => {
             availableStock: variant.quantity
         });
 
-        // Validate minimum quantity
+        
         if (newQuantity < 1) {
             return res.status(400).json({ 
                 message: 'Quantity cannot be less than 1',
@@ -216,7 +216,7 @@ const updateQuatity = async (req, res) => {
             });
         }
 
-        // Validate against available stock
+        
         if (newQuantity > variant.quantity) {
             return res.status(400).json({ 
                 message: `Only ${variant.quantity} items available in stock`,
@@ -224,7 +224,7 @@ const updateQuatity = async (req, res) => {
             });
         }
 
-        // Update quantity
+        
         cartItem.quantity = newQuantity;
         await cart.save();
 
@@ -260,7 +260,7 @@ const checkStock = async (req, res) => {
 
         const userId = req.session.user.id;
 
-        // Get product with populated variants
+        
         const product = await productModel.findById(productId);
         if (!product) {
             return res.status(404).json({ 
@@ -269,7 +269,7 @@ const checkStock = async (req, res) => {
             });
         }
 
-        // Find the specific variant
+        
         const variant = product.variants.find(v => v.color === color);
         if (!variant) {
             return res.status(404).json({ 
@@ -278,7 +278,7 @@ const checkStock = async (req, res) => {
             });
         }
 
-        // Get current cart quantity
+        
         const cart = await cartModel.findOne({ userId });
         let currentCartQuantity = 0;
 
@@ -290,7 +290,7 @@ const checkStock = async (req, res) => {
             currentCartQuantity = cartItem ? cartItem.quantity : 0;
         }
 
-        // Get actual stock from variant
+        
         const availableStock = variant.quantity;
 
         console.log('Stock Check:', {
@@ -319,7 +319,7 @@ const checkStock = async (req, res) => {
 
 const addToCart = async (req, res) => {
     try {
-        const { productId, color, quantity = 1 } = req.body; // Default quantity to 1 if not provided
+        const { productId, color, quantity = 1 } = req.body; 
         
         if (!req.session.user) {
             return res.status(401).json({ 
@@ -330,7 +330,7 @@ const addToCart = async (req, res) => {
 
         const userId = req.session.user.id;
 
-        // Get product details
+        
         const product = await productModel.findById(productId);
         if (!product) {
             return res.status(404).json({ 
@@ -339,7 +339,7 @@ const addToCart = async (req, res) => {
             });
         }
 
-        // Find the variant
+        
         const variant = product.variants.find(v => v.color === color);
         if (!variant) {
             return res.status(404).json({ 
@@ -348,24 +348,24 @@ const addToCart = async (req, res) => {
             });
         }
 
-        // Get or create cart
+        
         let cart = await cartModel.findOne({ userId });
         if (!cart) {
             cart = new cartModel({ userId, items: [] });
         }
 
-        // Find existing item in cart
+        
         const existingItem = cart.items.find(item => 
             item.productId.toString() === productId && 
             item.color === color
         );
 
-        // Calculate new quantity
+        
         const newQuantity = existingItem 
             ? existingItem.quantity + parseInt(quantity)
             : parseInt(quantity);
 
-        // Check stock availability
+        
         if (newQuantity > variant.quantity) {
             return res.status(400).json({ 
                 success: false,
@@ -386,7 +386,7 @@ const addToCart = async (req, res) => {
 
         await cart.save();
 
-        // Get updated cart with populated product details
+        
         const updatedCart = await cartModel.findOne({ userId })
             .populate('items.productId', 'productName price imagePaths');
 

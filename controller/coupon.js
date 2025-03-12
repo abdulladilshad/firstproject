@@ -23,7 +23,7 @@ const addCoupon = async (req, res) => {
     try {
         const { code, discount, expirationDate, minPurchase, maxDiscount, usageLimit } = req.body;
 
-        // Ensure discount is between 0 and 100
+
         if (discount < 0 || discount > 100) {
             return res.render('admin/addCoupon', { error: "Discount must be between 0 and 100." });
         }
@@ -46,7 +46,7 @@ const addCoupon = async (req, res) => {
 };
 
 
- const renderEditCoupon = async (req, res) => {
+const renderEditCoupon = async (req, res) => {
     try {
         const coupon = await Coupon.findById(req.params.id);
         if (!coupon) return res.status(404).send("Coupon not found");
@@ -63,7 +63,7 @@ const editCoupon = async (req, res) => {
     try {
         const { code, discount, expirationDate, minPurchase, maxDiscount, usageLimit } = req.body;
 
-        // Ensure discount is valid
+
         if (discount < 0 || discount > 100) {
             return res.render('admin/editCoupon', { coupon: req.body, error: "Discount must be between 0 and 100." });
         }
@@ -82,13 +82,43 @@ const editCoupon = async (req, res) => {
         console.error("Error editing coupon:", error);
         res.status(500).send("Error editing coupon");
     }
+
+
+
 };
-module.exports={
+
+const toggleCouponStatus = async (req, res) => {
+    try {
+        const couponId = req.params.coupon_id;
+
+       
+        const coupon = await Coupon.findOne({ _id: couponId });
+
+        if (!coupon) {
+            return res.status(404).json({ success: false, error: 'Coupon not found' });
+        }
+
+       
+        coupon.isActive = !coupon.isActive;
+        await coupon.save();
+
+        res.status(200).json({
+            success: true,
+            message: coupon.isActive
+                ? 'Coupon is now active'
+                : 'Coupon is now inactive',
+        });
+    } catch (err) {
+        console.error('Error updating coupon status:', err);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+};
+module.exports = {
     getAllCoupons,
     renderAddCoupon,
     addCoupon,
     renderEditCoupon,
-    editCoupon
-    
+    editCoupon,
+    toggleCouponStatus
 
 }

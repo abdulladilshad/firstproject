@@ -5,50 +5,101 @@ const mongoose = require('mongoose');
 const WalletModel = require('../models/walletModel')
 const TransactionModel = require("../models/transactionsModel");
 
-
 const adminOrders = async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const skip = (page - 1) * limit;
+        const statusFilter = req.query.status || 'all'; 
 
+        
+        let query = OrderModel.find();
 
-        const orders = await OrderModel.find()
+        
+        if (statusFilter !== 'all') {
+            query = OrderModel.find({
+                "products.status": statusFilter
+            });
+        }
+
+        const orders = await query
             .populate("userId", "name email")
             .populate("products.productId")
             .sort({ createdAt: -1 });
 
-
-
         const individualOrders = orders.flatMap(order =>
-            order.products.map(product => {
-
-                return {
-                    orderId: order._id,
-                    fullname: order.address.fullName,
-                    productId: product.productId?._id || "No ID",
-                    productName: product.productId?.productName || "No Name",
-                    productImage: product.productId?.imagePaths?.[0] || "/default.jpg",
-                    quantity: product.quantity || 0,
-                    price: product.price || 0,
-                    status: product.status || "Pending",
-                    color: product.color || "N/A",
-                    createdAt: order.createdAt,
-                    paymentMethod: order.paymentMethod,
-                    totalAmount: order.totalAmount,
-                    individualOrdersId: product._id,
-                };
-            })
+            order.products.map(product => ({
+                orderId: order._id,
+                fullname: order.address.fullName,
+                productId: product.productId?._id || "No ID",
+                productName: product.productId?.productName || "No Name",
+                productImage: product.productId?.imagePaths?.[0] || "/default.jpg",
+                quantity: product.quantity || 0,
+                price: product.price || 0,
+                status: product.status || "Pending",
+                color: product.color || "N/A",
+                createdAt: order.createdAt,
+                paymentMethod: order.paymentMethod,
+                totalAmount: order.totalAmount,
+                individualOrdersId: product._id,
+            }))
         );
 
+        
+        const statusCounts = {
+            all: individualOrders.length,
+            Pending: individualOrders.filter(o => o.status === 'Pending').length,
+            Confirmed: individualOrders.filter(o => o.status === 'Confirmed').length,
+            Shipped: individualOrders.filter(o => o.status === 'Shipped').length,
+            Delivered: individualOrders.filter(o => o.status === 'Delivered').length,
+            Cancelled: individualOrders.filter(o => o.status === 'Cancelled').length,
+            Returned: individualOrders.filter(o => o.status === 'Returned').length,
+        };
 
+        const totalItems = individualOrders.length;
+        const totalPages = Math.ceil(totalItems / limit);
+        const paginatedOrders = individualOrders.slice(skip, skip + limit);
 
-
-
-        res.render("admin/orderMangement", { orders: individualOrders, individualOrders });
+        res.render("admin/orderMangement", {
+            orders: paginatedOrders,
+            individualOrders,
+            currentPage: page,
+            totalPages: totalPages,
+            hasPrevPage: page > 1,
+            hasNextPage: page < totalPages,
+            prevPage: page - 1,
+            nextPage: page + 1,
+            totalItems: totalItems,
+            statusFilter: statusFilter,
+            statusCounts: statusCounts
+        });
 
     } catch (error) {
         console.error("Error fetching admin orders:", error);
-        res.status(500).redirect("/admin/orderMangement", { message: "Error fetching orders" });
+        res.status(500).render("admin/orderMangement", {
+            message: "Error fetching orders",
+            orders: [],
+            currentPage: 1,
+            totalPages: 1,
+            hasPrevPage: false,
+            hasNextPage: false,
+            prevPage: 1,
+            nextPage: 1,
+            totalItems: 0,
+            statusFilter: 'all',
+            statusCounts: {
+                all: 0,
+                Pending: 0,
+                Confirmed: 0,
+                Shipped: 0,
+                Delivered: 0,
+                Cancelled: 0,
+                Returned: 0
+            }
+        });
     }
 };
+
 
 
 const updateOrderStatus = async (req, res) => {
@@ -127,7 +178,7 @@ const approveReturn = async (req, res) => {
     try {
         const { orderId, productId } = req.params;
 
-        // Find the order
+       
         const order = await OrderModel.findById(orderId);
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
@@ -135,7 +186,7 @@ const approveReturn = async (req, res) => {
 
         console.log("Order Found:", order);
 
-        // Find the product inside the order
+       
         const product = order.products.find(p => p._id.toString() === productId);
         if (!product) {
             return res.status(404).json({ message: "Product not found in order" });
@@ -143,19 +194,19 @@ const approveReturn = async (req, res) => {
 
         console.log("Product Found in Order:", product);
 
-        // Check if the product is eligible for return approval
+       
         if (product.status !== "Returned") {
             return res.status(400).json({ message: "Return request not found or already processed" });
         }
 
-        // Ensure order.userId is correctly formatted
+        
         if (!mongoose.Types.ObjectId.isValid(order.userId)) {
             return res.status(400).json({ message: "Invalid User ID" });
         }
 
         console.log("User ID:", order.userId);
 
-        // Find or create the user's wallet
+       
         let wallet = await WalletModel.findOne({ user: order.userId });
         if (!wallet) {
             wallet = new WalletModel({
@@ -166,18 +217,18 @@ const approveReturn = async (req, res) => {
 
         console.log("Wallet Found:", wallet);
 
-        // Calculate refund amount
-        const refundAmount = product.price * product.quantity;
+        
+        const refundAmount =order.totalAmount;
 
-        // Update wallet balance
+        
         wallet.balance += refundAmount;
 
         console.log("Updated Wallet Balance:", wallet.balance);
 
-        // Save the updated wallet balance
+        
         await wallet.save();
 
-        // Create a new transaction for the refund
+        
         const transaction = new TransactionModel({
             user: order.userId,
             wallet: wallet._id,
@@ -190,16 +241,16 @@ const approveReturn = async (req, res) => {
 
         console.log("Transaction Created:", transaction);
 
-        // Find the original product in ProductModel and increase the correct variant's stock
+        
         const productInDB = await productModel.findById(product.productId);
         if (productInDB) {
-            // Find the correct variant by color
+           
             const variantIndex = productInDB.variants.findIndex(
                 (variant) => variant.color === product.color
             );
 
             if (variantIndex !== -1) {
-                // Increase the stock for the returned variant
+               
                 productInDB.variants[variantIndex].quantity += product.quantity;
                 await productInDB.save();
                 console.log(`Stock updated: ${productInDB.variants[variantIndex].quantity} units available for color ${product.color}.`);
@@ -210,13 +261,13 @@ const approveReturn = async (req, res) => {
             console.log("Product not found in database.");
         }
 
-        // Update product status to "Return Approved"
+       
         product.status = "Return Approved";
         await order.save();
 
         console.log("Return Approved Successfully");
 
-        res.redirect("/admin/orders"); // Redirect to admin orders page
+        res.redirect("/admin/orders"); 
     } catch (error) {
         console.error("Error processing return approval:", error);
         res.status(500).json({ message: "Error processing return approval" });
@@ -230,28 +281,28 @@ const cancelReturn = async (req, res) => {
     try {
         const { orderId, productId } = req.params;
 
-        // Find the order
+        
         const order = await OrderModel.findById(orderId);
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }
 
-        // Find the product inside the order
+        
         const product = order.products.find(p => p._id.toString() === productId);
         if (!product) {
             return res.status(404).json({ message: "Product not found in order" });
         }
 
-        // Check if the product is eligible for return cancellation
+        
         if (product.status !== "Returned") {
             return res.status(400).json({ message: "Return request not found or already processed" });
         }
 
-        // Update product status to "Return Canceled"
+       
         product.status = "Return Canceled";
         await order.save();
 
-        res.redirect("/admin/orders"); // Redirect to admin orders page
+        res.redirect("/admin/orders"); 
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error processing return cancellation" });
