@@ -8,6 +8,7 @@ const Coupon = require('../models/couponModel');
 const categoryModel = require('../models/categories');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
+require('dotenv').config();
 
 
 
@@ -324,9 +325,10 @@ const cancelOrder = async (req, res) => {
 
 
 const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET
+    key_id: process.env.RAZORPAY_KEY_ID.trim(), // Trim spaces if needed
+    key_secret: process.env.RAZORPAY_KEY_SECRET.trim()
 });
+
 
 
 const createRazorpayOrder = async (req, res) => {
