@@ -479,11 +479,8 @@
     <script>
         async function removeFromCart(itemId) {
             try {
-<<<<<<< HEAD
-             
-=======
+
                 // Show confirmation dialog
->>>>>>> 5540b74 (after 10th overoll complited)
                 const result = await Swal.fire({
                     title: 'Are you sure?',
                     text: "Do you want to remove this item from cart?",
@@ -530,11 +527,8 @@
 
             let currentQuantity = parseInt(quantitySpan.innerText);
 
-<<<<<<< HEAD
-           
-=======
+
             // Quantity validation
->>>>>>> 5540b74 (after 10th overoll complited)
             if ((change === -1 && currentQuantity === 1) || (change === 1 && currentQuantity >= 5)) {
                 Swal.fire({
                     icon: 'warning',

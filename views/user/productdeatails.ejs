@@ -523,11 +523,8 @@ async function addToCart(productId) {
         const { availableStock, currentCartQuantity } = stockData;
         const remainingStock = availableStock - currentCartQuantity;
 
-<<<<<<< HEAD
-        
-=======
+
         // Check if adding one more would exceed the maximum limit of 5
->>>>>>> 5540b74 (after 10th overoll complited)
         if (currentCartQuantity >= 5) {
             Swal.fire({
                 title: 'Limit Reached',
@@ -629,11 +626,7 @@ async function addToCart(productId) {
                     timer: 2000,
                     showConfirmButton: false
                 });
-<<<<<<< HEAD
-             
-=======
-                // You can update wishlist UI here if needed
->>>>>>> 5540b74 (after 10th overoll complited)
+
             } else {
                 Swal.fire({
                     title: 'Error',

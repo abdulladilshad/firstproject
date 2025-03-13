@@ -287,11 +287,8 @@
             const email = document.getElementById('email').value;
             const avatarInput = document.getElementById('avatar');
 
-<<<<<<< HEAD
-          
-=======
+
             // Name validation
->>>>>>> 5540b74 (after 10th overoll complited)
             if (!name.trim()) {
                 Swal.fire({
                     icon: 'warning',
@@ -304,19 +301,12 @@
             formData.append('name', name);
             formData.append('email', email);
 
-<<<<<<< HEAD
-          
-            if (avatarInput && avatarInput.files[0]) {
-                const file = avatarInput.files[0];
-                
-              
-=======
+
             // Image validation
             if (avatarInput && avatarInput.files[0]) {
                 const file = avatarInput.files[0];
                 
                 // Check file type
->>>>>>> 5540b74 (after 10th overoll complited)
                 const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
                 if (!validImageTypes.includes(file.type)) {
                     Swal.fire({
@@ -327,13 +317,9 @@
                     return;
                 }
 
-<<<<<<< HEAD
-               
-                const maxSize = 5 * 1024 * 1024; 
-=======
+
                 // Check file size (max 5MB)
                 const maxSize = 5 * 1024 * 1024; // 5MB in bytes
->>>>>>> 5540b74 (after 10th overoll complited)
                 if (file.size > maxSize) {
                     Swal.fire({
                         icon: 'error',
@@ -388,11 +374,8 @@
             document.getElementById('avatar').addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (file) {
-<<<<<<< HEAD
-                   
-=======
+
                     // Validate file type
->>>>>>> 5540b74 (after 10th overoll complited)
                     const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
                     if (!validImageTypes.includes(file.type)) {
                         Swal.fire({
@@ -400,40 +383,25 @@
                             title: 'Invalid File Type',
                             text: 'Please upload only image files (JPEG, PNG, JPG, GIF)'
                         });
-<<<<<<< HEAD
-                        this.value = ''; 
-                        return;
-                    }
 
-                    
-                    const maxSize = 5 * 1024 * 1024; 
-=======
                         this.value = ''; // Clear the input
                         return;
                     }
 
                     // Validate file size
                     const maxSize = 5 * 1024 * 1024; // 5MB in bytes
->>>>>>> 5540b74 (after 10th overoll complited)
                     if (file.size > maxSize) {
                         Swal.fire({
                             icon: 'error',
                             title: 'File Too Large',
                             text: 'Image size should be less than 5MB'
                         });
-<<<<<<< HEAD
-                        this.value = ''; 
-                        return;
-                    }
 
-                    
-=======
                         this.value = ''; // Clear the input
                         return;
                     }
 
                     // If validation passes, show preview
->>>>>>> 5540b74 (after 10th overoll complited)
                     const reader = new FileReader();
                     reader.onload = function(e) {
                         document.getElementById('profilePreview').src = e.target.result;
