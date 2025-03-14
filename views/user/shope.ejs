@@ -37,7 +37,7 @@
 
       <!-- Mobile Toggle -->
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
-        <span class="toggler-icon"></span>
+        <span class="navbar-toggler-icon"></span>
       </button>
 
       <!-- Navigation Content -->
@@ -170,31 +170,19 @@
                     <div class="color-options mb-3">
                       <% if (product.colors && Array.isArray(product.colors) && product.colors.length> 0) { %>
                         <% let defaultColor=product.colors[0]; %> 
-
-                          <% product.colors.forEach((color, index)=> { %>
-                            <label class="color-radio">
-                              <input type="radio" name="color_<%= product._id %>" value="<%= color %>"
-                                <%=color===defaultColor ? 'checked' : '' %>>
-                              <span class="color-label" style="background-color: <%= color %>"></span>
-                            </label>
-                            <% }) %>
-                              <% } else { %>
-                                
-                                <label class="color-radio">
-                                  <input type="radio" name="color_<%= product._id %>" value="default" checked>
-                                  <span class="color-label" style="background-color: #000"></span>
-                                </label>
-                                <% } %>
-                    </div>
-
-                    
-                    <div class="product-buttons">
-                      <button class="btn btn-primary btn-sm" onclick="addToCart('<%= product._id %>')">
-                        Add to Cart
-                      </button>
-                      <button class="btn btn-outline-secondary btn-sm" onclick="addToWishlist('<%= product._id %>')">
-                        <i class="fas fa-heart"></i>
-                      </button>
+                        <% product.colors.forEach((color, index)=> { %>
+                          <label class="color-radio">
+                            <input type="radio" name="color_<%= product._id %>" value="<%= color %>"
+                              <%=color===defaultColor ? 'checked' : '' %>>
+                            <span class="color-label" style="background-color: <%= color %>"></span>
+                          </label>
+                        <% }) %>
+                      <% } else { %>
+                        <label class="color-radio">
+                          <input type="radio" name="color_<%= product._id %>" value="default" checked>
+                          <span class="color-label" style="background-color: #000"></span>
+                        </label>
+                      <% } %>
                     </div>
                   </div>
                 </div>
@@ -327,7 +315,7 @@
         return;
       }
 
-      const colorValue = selectedColor.value;
+        const colorValue = selectedColor.value;
 
       try {
         const response = await fetch('/wishlist', {

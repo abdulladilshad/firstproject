@@ -225,7 +225,7 @@
     
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
-                <span class="toggler-icon"></span>
+                <span class="navbar-toggler-icon"></span>
             </button>
     
            
@@ -392,48 +392,39 @@
             <div class="section-divider"></div>
             <p class="section-subtitle">More from this category</p>
         </div>
-    
-        <div class="related-products-slider swiper">
-            <div class="swiper-wrapper">
-                <% sameCategoryProducts.forEach(product => { %>
-                    <div class="swiper-slide">
-                        <div class="product-card">
-                            <div class="product-image">
-                                <img src="/<%= product.imagePaths[0] %>" alt="<%= product.productName %>">
-                                <div class="product-overlay">
-                                    <div class="product-actions">
-                                        <a href="/product/<%= product._id %>" class="action-btn" title="View">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <button class="action-btn" title="Add to Cart">
-                                            <i class="fas fa-shopping-cart"></i>
-                                        </button>
-                                        <button class="action-btn" title="Add to Wishlist">
-                                            <i class="fas fa-heart"></i>
-                                        </button>
+
+        <div class="container">
+            <div class="related-products-slider swiper">
+                <div class="swiper-wrapper">
+                    <% sameCategoryProducts.forEach(product => { %>
+                        <div class="swiper-slide">
+                            <div class="product-card">
+                                <div class="product-image">
+                                    <a href="/product/<%= product._id %>">
+                                        <img src="/<%= product.imagePaths[0] %>" alt="<%= product.productName %>" class="img-fluid">
+                                    </a>
+                                </div>
+                                <div class="product-info">
+                                    <h3 class="product-name">
+                                        <a href="/product/<%= product._id %>"><%= product.productName %></a>
+                                    </h3>
+                                    <div class="product-price">
+                                        <% if (product.offerPrice) { %>
+                                            <span class="original-price">₹<%= product.price.toFixed(2) %></span>
+                                            <span class="offer-price">₹<%= product.offerPrice.toFixed(2) %></span>
+                                            <% const discountPercentage = Math.round((1 - product.offerPrice / product.price) * 100); %>
+                                            <span class="discount-badge">-<%= discountPercentage %>%</span>
+                                        <% } else { %>
+                                            <span class="regular-price">₹<%= product.price.toFixed(2) %></span>
+                                        <% } %>
                                     </div>
                                 </div>
                             </div>
-                            <div class="product-info">
-                                <h3 class="product-name">
-                                    <a href="/product/<%= product._id %>"><%= product.productName %></a>
-                                </h3>
-                                <div class="product-price">
-                                    <% if (product.offerPrice) { %>
-                                        <span class="text-decoration-line-through text-muted">$<%= product.price.toFixed(2) %></span>
-                                        <span class="text-danger ms-2">$<%= product.offerPrice.toFixed(2) %></span>
-                                        <% const discountPercentage = Math.round((1 - product.offerPrice / product.price) * 100); %>
-                                        <span class="badge bg-danger ms-2">-<%= discountPercentage %>%</span>
-                                    <% } else { %>
-                                        $<%= product.price.toFixed(2) %>
-                                    <% } %>
-                                </div>
-                            </div>
                         </div>
-                    </div>
-                <% }) %>
+                    <% }) %>
+                </div>
+                <div class="swiper-pagination"></div>
             </div>
-           
         </div>
     </section>
  

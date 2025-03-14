@@ -63,27 +63,29 @@ const addCart = async (req, res) => {
 
         if (!color) return res.status(400).json({ message: 'Color is required' });
 
-        const product = await productModel.findById(productId);
-        if (!product) return res.status(404).json({ message: 'Product not found' });
+        
+        const product = await productModel.findOne({ 
+            _id: productId, 
+            isDelete: false 
+        });
+
+        if (!product) return res.status(404).json({ message: 'Product not found or deleted' });
 
         let cart = await cartModel.findOne({ userId });
 
         if (!cart) {
-            
-            cart = new cartModel({ 
-                userId, 
-                items: [{ productId, color, quantity: 1 }] 
+            cart = new cartModel({
+                userId,
+                items: [{ productId, color, quantity: 1 }]
             });
         } else {
-            
-            const existingItem = cart.items.find(item => 
+            const existingItem = cart.items.find(item =>
                 item.productId.equals(productId) && item.color === color
             );
 
             if (existingItem) {
-                existingItem.quantity += 1; 
+                existingItem.quantity += 1;
             } else {
-                
                 cart.items.push({ productId, color, quantity: 1 });
             }
         }
@@ -91,15 +93,13 @@ const addCart = async (req, res) => {
         await cart.save();
 
         
-      
         const wishlist = await Wishlist.findOne({ user: userId });
-        
+
         if (wishlist) {
-            
-            const itemIndex = wishlist.items.findIndex(item => 
+            const itemIndex = wishlist.items.findIndex(item =>
                 item.product.toString() === productId && item.color === color
             );
-            
+
             if (itemIndex !== -1) {
                 wishlist.items.splice(itemIndex, 1);
                 await wishlist.save();
@@ -113,6 +113,7 @@ const addCart = async (req, res) => {
         res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 };
+
 
 const removeCart = async (req, res) => {
     try {

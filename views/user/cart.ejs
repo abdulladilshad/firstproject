@@ -98,13 +98,21 @@
             justify-content: center;
         }
 
-        /* Custom Toggler */
+        /* Improved Hamburger Button Styles */
         .navbar-toggler {
             border: none;
             padding: 0;
             width: 30px;
-            height: 20px;
+            height: 24px;
             position: relative;
+            background: transparent;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .navbar-toggler:focus {
+            outline: none;
+            box-shadow: none;
         }
 
         .toggler-icon {
@@ -113,24 +121,56 @@
             height: 2px;
             background: #1a1a1a;
             transition: all 0.3s ease;
+            left: 0;
         }
 
-        .toggler-icon::before,
-        .toggler-icon::after {
+        .navbar-toggler .toggler-icon {
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .navbar-toggler .toggler-icon::before,
+        .navbar-toggler .toggler-icon::after {
             content: '';
             position: absolute;
             width: 100%;
             height: 2px;
             background: #1a1a1a;
+            left: 0;
             transition: all 0.3s ease;
         }
 
-        .toggler-icon::before {
-            top: -6px;
+        .navbar-toggler .toggler-icon::before {
+            top: -8px;
         }
 
-        .toggler-icon::after {
-            bottom: -6px;
+        .navbar-toggler .toggler-icon::after {
+            bottom: -8px;
+        }
+
+        /* Hamburger Animation */
+        .navbar-toggler[aria-expanded="true"] .toggler-icon {
+            background: transparent;
+        }
+
+        .navbar-toggler[aria-expanded="true"] .toggler-icon::before {
+            top: 0;
+            transform: rotate(45deg);
+        }
+
+        .navbar-toggler[aria-expanded="true"] .toggler-icon::after {
+            bottom: 0;
+            transform: rotate(-45deg);
+        }
+
+        @media (max-width: 991px) {
+            .navbar-toggler {
+                display: block;
+                position: absolute;
+                right: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+            }
         }
 
         /* Mobile Responsive */
@@ -300,6 +340,196 @@
             background-color: rgba(52, 152, 219, 0.1);
             transition: background-color 0.3s ease;
         }
+
+        /* Add these responsive styles */
+        @media (max-width: 768px) {
+            /* Cart Layout */
+            .cart-layout {
+                flex-direction: column;
+                padding: 10px;
+            }
+
+            /* Table Responsive */
+            .cart-table {
+                overflow-x: auto;
+            }
+
+            .cart-table table {
+                min-width: 600px; /* Ensure table can scroll horizontally */
+            }
+
+            /* Order Summary */
+            .order-summary {
+                width: 100%;
+                margin-top: 20px;
+                padding: 15px;
+            }
+
+            /* Quantity Controls */
+            .q-b-t {
+                flex-wrap: nowrap;
+                gap: 5px;
+            }
+
+            .quantity-btn {
+                width: 25px;
+                height: 25px;
+                font-size: 14px;
+            }
+
+            /* Product Details */
+            td {
+                padding: 10px 5px;
+                font-size: 14px;
+            }
+
+            /* Action Buttons */
+            .remove-btn {
+                padding: 5px 10px;
+                font-size: 12px;
+            }
+
+            /* Empty Cart */
+            .empty-cart {
+                padding: 20px;
+            }
+
+            /* Continue Shopping Button */
+            .continue-shopping {
+                margin: 20px auto;
+                display: block;
+                width: fit-content;
+            }
+        }
+
+        /* Additional styles for even smaller screens */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 24px;
+                text-align: center;
+                margin: 15px 0;
+            }
+
+            .cart-table table {
+                font-size: 12px;
+            }
+
+            .order-summary {
+                padding: 10px;
+            }
+
+            .summary-item {
+                font-size: 14px;
+            }
+
+            .checkout-button {
+                padding: 10px;
+                font-size: 14px;
+            }
+        }
+
+        /* Base styles for cart layout (add if not present) */
+        .cart-layout {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .cart-table {
+            flex: 1;
+        }
+
+        .order-summary {
+            width: 300px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Hide nav icons on mobile and show them in hamburger menu */
+        @media (max-width: 991px) {
+            .nav-icons {
+                display: none !important;
+            }
+
+            .navbar-collapse .nav-icons {
+                display: flex !important;
+                justify-content: center;
+                gap: 2rem;
+                padding: 15px 0;
+                margin-top: 15px;
+                border-top: 1px solid #eee;
+            }
+
+            .navbar-collapse {
+                position: fixed;
+                top: 80px;
+                left: 0;
+                right: 0;
+                background: white;
+                padding: 20px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                display: none;
+            }
+
+            .navbar-collapse.show {
+                display: block;
+            }
+
+            .navbar-nav {
+                text-align: center;
+            }
+
+            .nav-item {
+                margin: 10px 0;
+            }
+
+            /* Hamburger button positioning */
+            .navbar-toggler {
+                display: block;
+                position: absolute;
+                right: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                border: none;
+                padding: 0;
+                margin: 0;
+                outline: none !important;
+                box-shadow: none !important;
+            }
+        }
+
+        /* Simple hamburger icon */
+        .navbar-toggler .navbar-toggler-icon {
+            background-image: none;
+            position: relative;
+            height: 2px;
+            width: 25px;
+            background: #1a1a1a;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-toggler .navbar-toggler-icon::before,
+        .navbar-toggler .navbar-toggler-icon::after {
+            content: '';
+            position: absolute;
+            height: 2px;
+            width: 25px;
+            background: #1a1a1a;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-toggler .navbar-toggler-icon::before {
+            top: -8px;
+        }
+
+        .navbar-toggler .navbar-toggler-icon::after {
+            bottom: -8px;
+        }
     </style>
 </head>
 
@@ -314,7 +544,7 @@
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
-                <span class="toggler-icon"></span>
+                <span class="navbar-toggler-icon"></span>
             </button>
 
             
@@ -667,6 +897,32 @@
             }).format(amount);
         }
 
+        document.addEventListener('DOMContentLoaded', function() {
+            const navbarToggler = document.querySelector('.navbar-toggler');
+            const navbarCollapse = document.querySelector('.navbar-collapse');
+
+            // Toggle menu
+            navbarToggler.addEventListener('click', function() {
+                const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                this.setAttribute('aria-expanded', !isExpanded);
+                navbarCollapse.classList.toggle('show');
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!navbarToggler.contains(event.target) && 
+                    !navbarCollapse.contains(event.target) && 
+                    navbarCollapse.classList.contains('show')) {
+                    navbarCollapse.classList.remove('show');
+                    navbarToggler.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            // Prevent menu close when clicking inside
+            navbarCollapse.addEventListener('click', function(event) {
+                event.stopPropagation();
+            });
+        });
     </script>
 </body>
 

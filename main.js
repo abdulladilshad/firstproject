@@ -55,7 +55,7 @@ app.use('/',user)
 app.use('/admin',admin)
 
 app.use((req, res, next) => {
-    res.locals.error_msg = req.flash('error'); // Pass flash messages to views
+    res.locals.error_msg = req.flash('error'); 
     next();
 });
 

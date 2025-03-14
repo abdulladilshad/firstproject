@@ -22,6 +22,7 @@ router.post('/editproducttt', adminauth.cheksession, adminController.editproduct
 router.put('/products/toggle-status/:product_id', adminauth.cheksession, adminController.toggleProductStatus);
 
 
+
 // CATEGORY MANAGEMENT 
 router.get('/categories', adminauth.cheksession, adminController.LoadCategory);
 router.get('/addcategories', adminauth.cheksession, adminController.AddCategory);
@@ -54,25 +55,25 @@ router.get('/users', adminauth.cheksession, adminController.Loadusers);
 router.put('/users/toggle-status/:user_id', adminauth.cheksession, adminController.toggleUserStatus);
 
 
-router.get("/orders",orderController.adminOrders);
-router.post("/orders", orderController.updateOrderStatus);
+router.get("/orders", adminauth.cheksession,orderController.adminOrders);
+router.post("/orders",  adminauth.cheksession,orderController.updateOrderStatus);
 
 
 //coupon Mangement
-router.get('/coupons', couponController.getAllCoupons);
-router.get('/coupons/add', couponController.renderAddCoupon);
-router.post('/coupons/add', couponController.addCoupon);
-router.get('/coupons/edit/:id', couponController.renderEditCoupon);
-router.post('/coupons/edit/:id', couponController.editCoupon);
-router.put('/coupon/:coupon_id/toggle-status', couponController.toggleCouponStatus);
+router.get('/coupons', adminauth.cheksession, couponController.getAllCoupons);
+router.get('/coupons/add', adminauth.cheksession, couponController.renderAddCoupon);
+router.post('/coupons/add', adminauth.cheksession, couponController.addCoupon);
+router.get('/coupons/edit/:id', adminauth.cheksession, couponController.renderEditCoupon);
+router.post('/coupons/edit/:id', adminauth.cheksession, couponController.editCoupon);
+router.put('/coupon/:coupon_id/toggle-status', adminauth.cheksession, couponController.toggleCouponStatus);
 
-router.get('/sales',salesController.salesController);
+router.get('/sales', adminauth.cheksession,salesController.salesController);
 //LOGOUT
 router.post('/logout',adminauth.cheksession,adminController.logout)
 
-router.get('/orders-view', orderController.orderView)
+router.get('/orders-view', adminauth.cheksession, orderController.orderView)
 
-router.get("/orders/approve-return/:orderId/:productId",orderController.approveReturn);
-router.get("/orders/cancel-return/:orderId/:productId", orderController.cancelReturn);
+router.get("/orders/approve-return/:orderId/:productId", adminauth.cheksession,orderController.approveReturn);
+router.get("/orders/cancel-return/:orderId/:productId",  adminauth.cheksession,orderController.cancelReturn);
 module.exports=router
 

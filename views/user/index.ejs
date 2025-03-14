@@ -24,6 +24,19 @@
     href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&family=Marcellus&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="/styles/homePage.css">
+
+  <style>
+    @media (max-width: 991.98px) { /* This targets screens smaller than lg breakpoint */
+      .navbar .container-fluid {
+        padding-left: 0;
+      }
+      
+      .navbar-toggler {
+        margin-left: 15px;
+        order: -1; /* Ensures the button appears first */
+      }
+    }
+  </style>
 </head>
 
 <body class="homepage">
@@ -200,9 +213,15 @@
 
   <nav class="navbar navbar-expand-lg bg-light text-uppercase fs-6 p-3 border-bottom align-items-center">
     <div class="container-fluid">
-      <div>
-        <h4>LUXE TIME</h4>
+      <div class="d-flex align-items-center">
+        <button class="navbar-toggler me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div>
+          <h4 class="m-0">LUXE TIME</h4>
+        </div>
       </div>
+
       <div class="row justify-content-between align-items-center w-100">
         <div class="col-auto">
           <a class="navbar-brand text-white" href="/index.html">
@@ -210,10 +229,10 @@
         </div>
 
         <div class="col-auto">
-          <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
+          <!-- <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
             aria-controls="offcanvasNavbar">
             <span class="navbar-toggler-icon"></span>
-          </button>
+          </button> -->
 
           <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar"
             aria-labelledby="offcanvasNavbarLabel">
@@ -761,7 +780,7 @@
         <div class="swiper-slide">
           <div class="testimonial-item text-center">
             <blockquote>
-              <p>“More than expected crazy soft, flexible and best fitted white simple denim shirt.”</p>
+              <p>"More than expected crazy soft, flexible and best fitted white simple denim shirt."</p>
               <div class="review-title text-uppercase">casual way</div>
             </blockquote>
           </div>
@@ -769,7 +788,7 @@
         <div class="swiper-slide">
           <div class="testimonial-item text-center">
             <blockquote>
-              <p>“Best fitted white denim shirt more than expected crazy soft, flexible</p>
+              <p>"Best fitted white denim shirt more than expected crazy soft, flexible</p>
               <div class="review-title text-uppercase">uptop</div>
             </blockquote>
           </div>
@@ -777,7 +796,7 @@
         <div class="swiper-slide">
           <div class="testimonial-item text-center">
             <blockquote>
-              <p>“Best fitted white denim shirt more white denim than expected flexible crazy soft.”</p>
+              <p>"Best fitted white denim shirt more white denim than expected flexible crazy soft."</p>
               <div class="review-title text-uppercase">Denim craze</div>
             </blockquote>
           </div>
@@ -785,7 +804,7 @@
         <div class="swiper-slide">
           <div class="testimonial-item text-center">
             <blockquote>
-              <p>“Best fitted white denim shirt more than expected crazy soft, flexible</p>
+              <p>"Best fitted white denim shirt more than expected crazy soft, flexible</p>
               <div class="review-title text-uppercase">uptop</div>
             </blockquote>
           </div>

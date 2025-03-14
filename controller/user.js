@@ -311,33 +311,44 @@ const Loadshope = async (req, res) => {
 
 
 
-const Loadproductdeatails= async (req, res) => {
+const Loadproductdeatails = async (req, res) => {
     try {
         const productId = req.params.id;
-        const product = await productModel.findById(productId).populate( {path: 'category', select: 'name'} ) 
+
+       
+        const product = await productModel.findOne({
+            _id: productId,
+            isDelete: false
+        }).populate({ path: 'category', select: 'name' }).lean();
+
+        console.log(product);
 
         if (!product) {
             return res.status(404).send('Product not found');
         }
-        
+
         const categoryOffer = await categoryModel.findById(product.category._id, 'offer').lean();
-        
-        
+
         const sameCategoryProducts = await productModel.find({ 
-            category: product.category._id, 
+            category: product.category._id,
             isDelete: false,
             _id: { $ne: productId } 
         }).limit(4).lean();
-        
-        
+
         const categoryOfferValue = categoryOffer?.offer || 0;
-        res.render('user/productdeatails', { product, sameCategoryProducts ,categoryOfferValue}); 
+
+        res.render('user/productdeatails', { 
+            product, 
+            sameCategoryProducts, 
+            categoryOfferValue 
+        });
+
     } catch (error) {
         console.error('Error fetching product:', error);
         res.status(500).send('Internal Server Error');
     }
+};
 
-}
 
 
 
