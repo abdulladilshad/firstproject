@@ -29,11 +29,14 @@ const userSchema = new mongoose.Schema({
     type:Boolean,
     default:false
   },
-   image:{
+  image:{
     type:[String],
-    
-  
   },
+  referralCode: {
+    type: String,
+    unique: true,
+    default: () => Math.random().toString(36).substring(2,8).toUpperCase()
+  }
 },{timestamps:true});
 
 userSchema.plugin(mongoosePaginate);

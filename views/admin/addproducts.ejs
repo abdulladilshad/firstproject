@@ -562,11 +562,7 @@
                     document.getElementById('stock12').innerText = 'Stock is required';
                     document.getElementById('stock12').style.display = 'block';
                     valid = false;
-                } else if (parseInt(stock) <= 0) {
-                    document.getElementById('stock12').innerText = 'Stock must be greater than 0!';
-                    document.getElementById('stock12').style.display = 'block';
-                    valid = false;
-                }
+                } 
                 if (!valid) {
                     return;
                 }

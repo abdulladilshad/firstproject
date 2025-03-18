@@ -284,6 +284,28 @@
             font-size: 0.9em;
             color: #666;
         }
+
+        /* Add these styles to your existing stylesheet */
+        .modal-header.bg-danger {
+            background-color: #dc3545;
+        }
+        
+        .modal-header .btn-close {
+            color: white;
+        }
+        
+        #paymentFailedModal .fas.fa-exclamation-triangle {
+            color: #dc3545;
+        }
+        
+        #paymentFailedModal .modal-footer {
+            justify-content: space-between;
+        }
+        
+        #paymentFailedModal .btn {
+            padding: 8px 20px;
+            border-radius: 5px;
+        }
     </style>
 </head>
 
@@ -629,7 +651,24 @@
         </div>
     </div>
 
-
+    <div class="modal fade" id="paymentFailedModal" tabindex="-1" aria-labelledby="paymentFailedModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paymentFailedModalLabel">Payment Failed</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="paymentFailedMessage">Your payment could not be processed. The order will remain pending.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="retryPayment()">Retry Payment</button>
+                    <a href="/orders" class="btn btn-info">View Orders</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         let selectedAddressId = null;
@@ -821,27 +860,38 @@
                         description: "Purchase Payment",
                         order_id: razorpayData.razorpayOrderId,
                         handler: async function (response) {
-                            const verifyResponse = await fetch('/verify-payment', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    orderId: razorpayData.orderId,
-                                    razorpay_payment_id: response.razorpay_payment_id,
-                                    razorpay_order_id: response.razorpay_order_id,
-                                    razorpay_signature: response.razorpay_signature
-                                })
-                            });
-
-                            const result = await verifyResponse.json();
-
-                            if (verifyResponse.ok) {
-                                window.location.href = `/order/success/${result.orderId}`;
-                            } else {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Payment Verification Failed',
-                                    text: result.message
+                            try {
+                                const verifyResponse = await fetch('/verify-payment', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        orderId: razorpayData.orderId,
+                                        razorpay_payment_id: response.razorpay_payment_id,
+                                        razorpay_order_id: response.razorpay_order_id,
+                                        razorpay_signature: response.razorpay_signature,
+                                        status: 'success'
+                                    })
                                 });
+
+                                const result = await verifyResponse.json();
+
+                                if (verifyResponse.ok) {
+                                    window.location.href = `/order/success/${result.orderId}`;
+                                } else {
+                                    await handlePaymentFailure(razorpayData.orderId);
+                                }
+                            } catch (error) {
+                                console.error('Payment verification failed:', error);
+                                await handlePaymentFailure(razorpayData.orderId);
+                            }
+                        },
+                        modal: {
+                            ondismiss: async function() {
+                                try {
+                                    await handlePaymentFailure(razorpayData.orderId);
+                                } catch (error) {
+                                    console.error('Error handling payment failure:', error);
+                                }
                             }
                         },
                         prefill: {
@@ -1052,6 +1102,70 @@ function removeCoupon() {
     const messageDiv = document.getElementById('couponMessage');
     messageDiv.textContent = '';
     messageDiv.className = 'coupon-message';
+}
+
+async function handlePaymentFailure(orderId) {
+    try {
+        // Update order status to failed
+        const response = await fetch('/verify-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                orderId: orderId,
+                paymentStatus: 'failed',
+                razorpay_payment_id: '',
+                razorpay_order_id: '',
+                razorpay_signature: ''
+            })
+        });
+
+        await response.json(); // Wait for the response
+        
+        // Show the payment failed modal and wait for user interaction
+        const result = await Swal.fire({
+            icon: 'warning',
+            title: 'Payment Failed',
+            text: 'Payment failed. Your order has been placed with payment pending status.',
+            showCancelButton: true,
+            confirmButtonText: 'OK',
+            cancelButtonText: 'Retry Payment',
+            reverseButtons: true,
+            allowOutsideClick: false, // Prevent clicking outside to close
+            allowEscapeKey: false // Prevent ESC key from closing
+        });
+
+        // Only redirect if user explicitly clicks OK
+        if (result.isConfirmed) {
+            window.location.href = `/order/success/${orderId}`;
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+            // User clicked Retry Payment
+            await retryPayment();
+        }
+
+    } catch (error) {
+        console.error('Error handling payment failure:', error);
+        // Show error modal and wait for user interaction
+        await Swal.fire({
+            icon: 'error', 
+            title: 'Error',
+            text: 'Failed to update order status. Please check your orders page.',
+            confirmButtonText: 'OK',
+            allowOutsideClick: false,
+            allowEscapeKey: false
+        });
+        window.location.href = `/order/success/${orderId}`;
+    }
+}
+
+function retryPayment() {
+    const paymentFailedModal = bootstrap.Modal.getInstance(document.getElementById('paymentFailedModal'));
+    paymentFailedModal.hide();
+    
+    // Small delay before reopening Razorpay
+    setTimeout(() => {
+        const razorpayInstance = new Razorpay(options);
+        razorpayInstance.open();
+    }, 500);
 }
 
     </script>

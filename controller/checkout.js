@@ -102,7 +102,7 @@ const verifyRazorpayPayment = async (req, res) => {
         
         
         for (const product of order.products) {
-            product.status = "Confirmed";
+            product.paymentStatus = "Paided";
             
            
             const productDoc = await Product.findById(product.productId);
@@ -204,8 +204,16 @@ const applyCoupon = async (req, res) => {
         res.status(500).json({ message: 'Error applying coupon' });
     }
 };
+
+
+
+
+
+
+
+
 module.exports = {
     getCheckout,
     verifyRazorpayPayment,
-    applyCoupon
+    applyCoupon,
 };

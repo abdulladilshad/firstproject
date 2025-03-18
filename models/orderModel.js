@@ -30,6 +30,7 @@ const orderSchema = new mongoose.Schema({
             quantity: Number,
             price: Number,
             status: { type: String, default: "Pending" },
+            paymentStatus: { type: String, default: "Pending" },
             color: { type: String }
         }
     ]

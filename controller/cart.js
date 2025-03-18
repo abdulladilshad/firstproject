@@ -178,10 +178,10 @@ const updateQuatity = async (req, res) => {
         }
 
 
-        const product = await productModel.findById(productId);
+        const product = await productModel.findOne({_id:productId,isDelete:false});
         if (!product) {
             console.log('Product not found');
-            return res.status(404).json({ message: 'Product not found' });
+            return res.status(404).json({ message: 'Product not found or deleted ' });
         }
 
         console.log('Product found:', {
@@ -408,6 +408,38 @@ const addToCart = async (req, res) => {
     }
 };
 
+
+const checkCartProducts = async (req, res) => {
+
+    console.log('varrrrrrrrrrarrrr');
+    
+    try {
+        const userId = req.session.user.id;
+
+        const cart = await cartModel.findOne({ userId }).populate('items.productId');
+        if (!cart) {
+            return res.status(404).json({ success: false, message: 'Cart not found' });
+        }
+
+        // Collect names of deleted products
+        const deletedProducts = cart.items
+            .filter(item => item.productId.isDelete === true)
+            .map(item => item.productId.productName); // Assuming the product schema has a 'name' field
+
+        if (deletedProducts.length > 0) {
+            return res.json({ 
+                success: false, 
+                message: 'Cart contains deleted products',
+                deletedProducts 
+            });
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error checking cart:', error);
+        res.status(500).json({ success: false, message: 'Error checking cart' });
+    }
+};
 module.exports = {
     LoadCart,
     addCart,
@@ -415,5 +447,7 @@ module.exports = {
     getCartItems,
     updateQuatity,
     checkStock,
-    addToCart
+    addToCart,
+    checkCartProducts
+    
 }

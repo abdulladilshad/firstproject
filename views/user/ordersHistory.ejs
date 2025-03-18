@@ -11,12 +11,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Marcellus&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/styles/ordersHistory.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
-        
         body {
-            padding-top: 80px; /* Add padding for fixed navbar */
+            padding-top: 80px;
+            /* Add padding for fixed navbar */
         }
-        
+
         /* Navbar Styles */
         .navbar {
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
@@ -309,7 +312,7 @@
     </nav>
 
     <div class="container">
-     
+
         <div class="sidebar">
             <a href="/profile" class="sidebar-btn">
                 <i class="fas fa-user"></i>
@@ -329,7 +332,7 @@
             </a>
         </div>
 
-      
+
         <div class="main-content">
             <div class="content-header">
                 <h1>My Orders</h1>
@@ -347,93 +350,121 @@
                         Start Shopping <i class="fas fa-arrow-right ms-2"></i>
                     </a>
                 </div>
-            <% } else { %>
-                <div class="orders-grid">
-                    <% orders.forEach(order=> { %>
-                        <div class="order-card" 
-                             data-individual-orders-id="<%= order.individualOrdersId %>" 
-                             data-status="<%= order.status %>">
-                            <div class="order-card-header">
-                                <div class="order-info">
-                                    <span class="order-number">#<%= order.orderId.toString().slice(-8).toUpperCase() %>
-                                            </span>
-                                    <span class="order-date">
-                                        <i class="far fa-calendar-alt"></i>
-                                        <%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric' ,
-                                            month: 'long' , day: 'numeric' }) %>
-                                    </span>
-                                </div>
-                                <div class="status-badge status-<%= (order.status || 'pending').toLowerCase() %>">
-                                    <%= order.status || 'Pending' %>
-                                </div>
-                            </div>
-                            <div class="order-products">
-                                <div class="product-card">
-                                    <img src="<%= order.productImage %>" alt="<%= order.productName %>">
-                                    <div class="product-details">
-                                        <h4><%= order.productName %></h4>
-                                        <p class="color">Color: <%= order.color %></p>
-                                        <p class="quantity">Qty: <%= order.quantity %></p>
+                <% } else { %>
+                    <div class="orders-grid">
+                        <% orders.forEach(order=> { %>
+                            <div class="order-card" data-individual-orders-id="<%= order.individualOrdersId %>"
+                                data-status="<%= order.status %>" data-customer-name="<%= order.address?.fullName %>"
+                                data-customer-email="<%= order.address?.email %>"
+                                data-customer-phone="<%= order.address?.phone %>"
+                                data-street="<%= order.address?.street %>" data-city="<%= order.address?.city %>"
+                                data-state="<%= order.address?.state %>" data-zip-code="<%= order.address?.zipCode %>">
+                                <div class="order-card-header">
+                                    <div class="order-info">
+                                        <span class="order-number">#<%= order.orderId.toString().slice(-8).toUpperCase()
+                                                %>
+                                        </span>
+                                        <span class="order-date">
+                                            <i class="far fa-calendar-alt"></i>
+                                            <%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric'
+                                                , month: 'long' , day: 'numeric' }) %>
+                                        </span>
+                                    </div>
+                                    <div class="status-badge status-<%= (order.paymentStatus || 'pending').toLowerCase() %>">
                                         
-                                 
-                                        
-                                        <p class="price">$<%= order.totalAmount?.toFixed(2) %></p>
+                                        <%= order.paymentStatus || 'Pending' %>
+                                    </div>
+                                </div>
+                                <div class="order-products">
+                                    <div class="product-card">
+                                        <img src="<%= order.productImage %>" alt="<%= order.productName %>">
+                                        <div class="product-details">
+                                            <h4>
+                                                <%= order.productName %>
+                                            </h4>
+                                            <p class="color">Color: <%= order.color %>
+                                            </p>
+                                            <p class="quantity">Qty: <%= order.quantity %>
+                                            </p>
 
+
+                                            <p class="address" hidden>
+                                                <%= address %>
+                                            </p>
+
+
+                                            <p class="price">$<%= order.totalAmount?.toFixed(2) %>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="order-card-footer">
+                                    <div class="action-buttons d-flex align-items-center gap-2">
+                                        <button class="btn btn-outline-primary"
+                                            onclick="showTrackingModal('<%= order.individualOrdersId %>')">
+                                            <i class="fas fa-truck"></i> Track
+                                        </button>
+                                        <% if (order.paymentStatus === 'Payment Failed') { %>
+                                            <button class="btn btn-outline-success" onclick="handlePayment('<%= order.orderId %>', '<%= order.totalAmount %>')">
+                                                <i class="fas fa-credit-card"></i> Pay Now
+                                            </button>
+                                        <% } %>
+                                        <% if (order.status === 'Delivered') { %>
+                                            <button class="btn btn-outline-secondary"
+                                                onclick="generateInvoice('<%= order.individualOrdersId %>')">
+                                                <i class="fas fa-download"></i> Invoice
+                                            </button>
+                                        <% } %>
+                                        <% if (order.status !=='Delivered' && order.status !=='Cancelled' &&
+                                            order.status !=='Returned' && order.status !=='Return Approved' &&
+                                            order.status !=='Return Canceled' ) { %>
+                                            <button type="button" class="btn btn-outline-danger"
+                                                onclick="showCancelModal('<%= order.individualOrdersId %>', '<%= order.orderId %>')">
+                                                <i class="fas fa-times"></i> Cancel
+                                            </button>
+                                            <% } %>
+                                                <% if (order.status==='Delivered' ) { %>
+                                                    <button class="btn btn-outline-warning"
+                                                        onclick="returnOrder('<%= order.orderId %>', '<%= order.productId %>')">
+                                                        <i class="fas fa-undo"></i> Return
+                                                    </button>
+                                                    <% } %>
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="order-card-footer">
-                                <div class="action-buttons d-flex align-items-center gap-2">
-                                    <button class="btn btn-outline-primary" onclick="showTrackingModal('<%= order.individualOrdersId %>')">
-                                        <i class="fas fa-truck"></i> Track
-                                    </button>
-                                    <button class="btn btn-outline-secondary">
-                                        <i class="fas fa-download"></i> Invoice
-                                    </button>
-                                    <% if (order.status !== 'Delivered' && order.status !== 'Cancelled' && order.status !== 'Returned' && order.status !== 'Return Approved' && order.status !== 'Return Canceled') { %>
-                                        <button type="button" class="btn btn-outline-danger" 
-                                                onclick="showCancelModal('<%= order.individualOrdersId %>', '<%= order.orderId %>')">
-                                            <i class="fas fa-times"></i> Cancel
-                                        </button>
-                                    <% } %>
-                                    <% if (order.status === 'Delivered') { %>
-                                        <button class="btn btn-outline-warning" onclick="returnOrder('<%= order.orderId %>', '<%= order.productId %>')">
-                                            <i class="fas fa-undo"></i> Return
-                                        </button>
-                                    <% } %>
-                                </div>
-                            </div>
-                        </div>
-                        <% }); %>
-                </div>
-                <% } %>
+                            <% }); %>
+                    </div>
+                    <% } %>
 
 
-            <!-- Add this after your orders list -->
-            <% if (totalPages > 0) { %>
-                <nav aria-label="Page navigation" class="mt-4">
-                    <ul class="pagination justify-content-center">
-                        <!-- Previous button -->
-                        <li class="page-item <%= !hasPrevPage ? 'disabled' : '' %>">
-                            <a class="page-link" href="/orders?page=<%= currentPage - 1 %>" tabindex="-1">Previous</a>
-                        </li>
+                        <!-- Add this after your orders list -->
+                        <% if (totalPages> 0) { %>
+                            <nav aria-label="Page navigation" class="mt-4">
+                                <ul class="pagination justify-content-center">
+                                    <!-- Previous button -->
+                                    <li class="page-item <%= !hasPrevPage ? 'disabled' : '' %>">
+                                        <a class="page-link" href="/orders?page=<%= currentPage - 1 %>"
+                                            tabindex="-1">Previous</a>
+                                    </li>
 
 
-                        <!-- Page numbers -->
-                        <% for(let i = 1; i <= totalPages; i++) { %>
-                            <li class="page-item <%= currentPage === i ? 'active' : '' %>">
-                                <a class="page-link" href="/orders?page=<%= i %>"><%= i %></a>
-                            </li>
-                        <% } %>
+                                    <!-- Page numbers -->
+                                    <% for(let i=1; i <=totalPages; i++) { %>
+                                        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                            <a class="page-link" href="/orders?page=<%= i %>">
+                                                <%= i %>
+                                            </a>
+                                        </li>
+                                        <% } %>
 
-                        <!-- Next button -->
-                        <li class="page-item <%= !hasNextPage ? 'disabled' : '' %>">
-                            <a class="page-link" href="/orders?page=<%= currentPage + 1 %>">Next</a>
-                        </li>
-                    </ul>
-                </nav>
-            <% } %>
+                                            <!-- Next button -->
+                                            <li class="page-item <%= !hasNextPage ? 'disabled' : '' %>">
+                                                <a class="page-link" href="/orders?page=<%= currentPage + 1 %>">Next</a>
+                                            </li>
+                                </ul>
+                            </nav>
+                            <% } %>
         </div>
     </div>
 
@@ -447,7 +478,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="tracking-timeline" id="trackingTimeline">
-                        
+
                     </div>
                 </div>
             </div>
@@ -510,7 +541,8 @@
                         </div>
                         <div class="mb-3" id="returnOtherReasonDiv" style="display: none;">
                             <label for="returnOtherReason" class="form-label">Please specify:</label>
-                            <textarea class="form-control" id="returnOtherReason" name="returnOtherReason" rows="3"></textarea>
+                            <textarea class="form-control" id="returnOtherReason" name="returnOtherReason"
+                                rows="3"></textarea>
                         </div>
                         <div class="text-end">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -527,8 +559,8 @@
         function showTrackingModal(orderId) {
             const trackingModal = new bootstrap.Modal(document.getElementById('trackingModal'));
             const trackingTimeline = document.getElementById('trackingTimeline');
-            
-            
+
+
             const steps = [
                 { status: 'Pending', icon: 'clock', description: 'Order is pending confirmation' },
                 { status: 'Placed', icon: 'box', description: 'Your order has been placed' },
@@ -538,14 +570,14 @@
                 { status: 'Cancelled', icon: 'times', description: 'Order has been cancelled' }
             ];
 
-            
+
             const orderElement = document.querySelector(`[data-individual-orders-id="${orderId}"]`);
             const currentStatus = orderElement.getAttribute('data-status');
-            
-            
+
+
             trackingTimeline.innerHTML = '';
-            
-            
+
+
             if (currentStatus === 'Cancelled') {
                 const cancelledStep = `
                     <div class="timeline-step active">
@@ -561,13 +593,13 @@
                 return;
             }
 
-            
+
             steps.forEach((step) => {
-                
+
                 if (step.status === 'Cancelled') return;
-                
+
                 const stepStatus = getStepStatus(currentStatus, step.status);
-                if (stepStatus !== null) { 
+                if (stepStatus !== null) {
                     const stepHtml = `
                         <div class="timeline-step ${stepStatus}">
                             <div class="step-icon"><i class="fas fa-${step.icon}"></i></div>
@@ -588,52 +620,310 @@
             const statusOrder = ['Pending', 'Placed', 'Confirmed', 'Shipped', 'Delivered'];
             const currentIndex = statusOrder.indexOf(currentStatus);
             const stepIndex = statusOrder.indexOf(stepStatus);
-            
-            
+
+
             if (currentIndex === -1 || stepIndex === -1) return null;
 
             if (currentStatus === 'Delivered') {
                 if (stepStatus === 'Delivered') return 'active';
                 return 'completed';
             }
-            
+
             if (stepIndex < currentIndex) return 'completed';
             if (stepIndex === currentIndex) return 'active';
             if (stepIndex > currentIndex) return '';
-            
+
             return null;
         }
 
         function returnOrder(orderId, productId) {
             const returnModal = new bootstrap.Modal(document.getElementById('returnReasonModal'));
             const form = document.getElementById('returnOrderForm');
-            
+
             form.action = `/return/${orderId}/${productId}`;
-            
+
             returnModal.show();
         }
 
         function showCancelModal(individualOrdersId, orderId) {
             const cancelModal = new bootstrap.Modal(document.getElementById('cancelReasonModal'));
             const form = document.getElementById('cancelOrderForm');
-            
+
             form.action = `/orders/cancel?individualOrdersId=${individualOrdersId}&orderId=${orderId}`;
-            
+
             cancelModal.show();
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        function generateInvoice(orderId) {
+            try {
+                const orderCard = document.querySelector(`[data-individual-orders-id="${orderId}"]`);
+                const orderNumber = orderCard.querySelector('.order-number').textContent;
+                const orderDate = orderCard.querySelector('.order-date').textContent;
+                const productName = orderCard.querySelector('.product-details h4').textContent;
+                const productColor = orderCard.querySelector('.color').textContent;
+                const productQty = orderCard.querySelector('.quantity').textContent;
+                const totalAmount = orderCard.querySelector('.price').textContent;
+                const addressText = document.querySelector('.address').textContent.trim();
+
+                const fixedAddressText = addressText
+                    .replace(/(\w+):/g, '"$1":') 
+                    .replace(/'/g, '"');          
+
+                const address = JSON.parse(fixedAddressText);
+
+
+
+                // Initialize jsPDF
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                // Set document properties
+                doc.setProperties({
+                    title: `Invoice - ${orderNumber}`,
+                    subject: 'Order Invoice',
+                    author: 'LUXE TIME',
+                    creator: 'LUXE TIME Store'
+                });
+
+                // Add store logo/header
+                doc.setFontSize(24);
+                doc.setTextColor(26, 26, 26);
+                doc.text('LUXE TIME', 20, 20);
+
+                // Add small dot after store name
+                doc.setFillColor(26, 26, 26);
+                doc.circle(95, 17, 1, 'F');
+
+                // Add Invoice title
+                doc.setFontSize(20);
+                doc.text('INVOICE', 20, 40);
+
+                // Add order details
+                doc.setFontSize(10);
+                doc.setTextColor(102, 102, 102);
+                doc.text(`Order Number: ${orderNumber}`, 20, 55);
+                doc.text(`Date: ${orderDate}`, 20, 62);
+
+                // Add line separator
+                doc.setDrawColor(230, 230, 230);
+                doc.line(20, 70, 190, 70);
+
+                // Add billing/shipping information
+                doc.setFontSize(12);
+                doc.setTextColor(26, 26, 26);
+                doc.text('Billing & Shipping Details', 20, 75);
+
+                // Create address table headers
+                const addressHeaders = [['Details', 'Information']];
+                // Get address details from data attributes (you'll need to add these to your order card)
+                const addressData = [
+                    ['Full Name', address?.fullName || 'N/A'],
+                    ['Phone', address?.phone || 'N/A'],
+                    ['Street', address?.street || 'N/A'],
+                    ['City', address?.city || 'N/A'],
+                    ['State', address?.state || 'N/A'],
+                    ['Zip Code', address?.zipCode || 'N/A']
+                ];
+
+                // Generate address table
+                doc.autoTable({
+                    startY: 80,
+                    head: addressHeaders,
+                    body: addressData,
+                    theme: 'grid',
+                    headStyles: {
+                        fillColor: [26, 26, 26],
+                        textColor: 255,
+                        fontStyle: 'bold'
+                    },
+                    styles: {
+                        fontSize: 10,
+                        cellPadding: 5
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 60 },
+                        1: { cellWidth: 100 }
+                    }
+                });
+
+               
+                const productStartY = doc.lastAutoTable.finalY + 20;
+                doc.setFontSize(12);
+                doc.text('Order Details', 20, productStartY - 10);
+
+               
+                const headers = [['Product', 'Color', 'Quantity', 'Price']];
+                const data = [[
+                    productName,
+                    productColor.replace('Color: ', ''),
+                    productQty.replace('Qty: ', ''),
+                    totalAmount
+                ]];
+
+                
+                doc.autoTable({
+                    startY: productStartY,
+                    head: headers,
+                    body: data,
+                    theme: 'grid',
+                    headStyles: {
+                        fillColor: [26, 26, 26],
+                        textColor: 255,
+                        fontStyle: 'bold'
+                    },
+                    styles: {
+                        fontSize: 10,
+                        cellPadding: 5
+                    }
+                });
+
+                // Add total section
+                const finalY = doc.lastAutoTable.finalY + 10;
+                doc.setFontSize(10);
+                doc.setTextColor(26, 26, 26);
+           
+
+                // Add tax (assuming 10%)
+             
+
+                // Add total
+                const total = parseFloat(totalAmount.replace('$', '')) ;
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.text('Total:', 140, finalY + 15);
+                doc.text(`$${total.toFixed(2)}`, 180, finalY + 15, { align: 'right' });
+
+                // Add footer
+                doc.setFontSize(8);
+                doc.setTextColor(128, 128, 128);
+                doc.text('Thank you for shopping with LUXE TIME', 20, 270);
+                doc.text('For any queries, please contact support@luxetime.com', 20, 275);
+
+                // Save the PDF
+                doc.save(`invoice-${orderNumber.toLowerCase()}.pdf`);
+
+            } catch (error) {
+                console.error('Error generating invoice:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to generate invoice. Please try again.'
+                });
+            }
+        }
+
+        function handlePayment(orderId, amount) {
+            Swal.fire({
+                title: 'Proceed to Payment',
+                text: `Total amount to pay: $${parseFloat(amount).toFixed(2)}`,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Pay Now'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Make API call to create Razorpay order
+                    fetch(`/create-order/${orderId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.key_id) {
+                            throw new Error('Missing Razorpay key');
+                        }
+
+                        const options = {
+                            key: data.key_id,
+                            amount: data.amount,
+                            currency: data.currency,
+                            name: 'LUXE TIME',
+                            description: 'Order Payment',
+                            order_id: data.order_id,
+                            handler: function (response) {
+                                // Handle successful payment
+                                fetch('/verify-failPayment', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        razorpay_payment_id: response.razorpay_payment_id,
+                                        razorpay_order_id: response.razorpay_order_id,
+                                        razorpay_signature: response.razorpay_signature,
+                                        order_id: orderId
+                                    })
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Payment Successful!',
+                                            text: 'Your order has been confirmed.',
+                                            showConfirmButton: false,
+                                            timer: 1500
+                                        }).then(() => {
+                                            location.reload();
+                                        });
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Verification error:', error);
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Verification Failed',
+                                        text: 'Please contact support if amount is deducted'
+                                    });
+                                });
+                            },
+                            prefill: {
+                                name: data.customerName || '',
+                                email: data.email || '',
+                                contact: data.phone || ''
+                            },
+                            theme: {
+                                color: '#3399cc'
+                            }
+                        };
+
+                        const rzp = new Razorpay(options);
+                        rzp.on('payment.failed', function (response){
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Payment Failed',
+                                text: 'The payment process failed. Please try again.'
+                            });
+                        });
+                        rzp.open();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to initiate payment. Please try again.'
+                        });
+                    });
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
             const cancelReason = document.getElementById('cancelReason');
             const otherReasonDiv = document.getElementById('otherReasonDiv');
             const cancelOrderForm = document.getElementById('cancelOrderForm');
 
-            cancelReason.addEventListener('change', function() {
+            cancelReason.addEventListener('change', function () {
                 otherReasonDiv.style.display = this.value === 'Other' ? 'block' : 'none';
             });
 
-            cancelOrderForm.addEventListener('submit', function(e) {
+            cancelOrderForm.addEventListener('submit', function (e) {
                 e.preventDefault();
-                
+
                 const reason = cancelReason.value;
                 const otherReason = document.getElementById('otherReason')?.value || '';
                 const additionalComments = document.getElementById('additionalComments')?.value || '';
@@ -661,55 +951,55 @@
                             },
                             body: new URLSearchParams(formData)
                         })
-                        .then(async response => {
-                            if (response.redirected) {
-                                window.location.href = response.url;
-                                return null;
-                            }
-                            
-                            const contentType = response.headers.get('content-type');
-                            if (contentType && contentType.includes('application/json')) {
-                                const data = await response.json();
-                                if (!response.ok) {
-                                    throw new Error(data.message || 'Server error');
+                            .then(async response => {
+                                if (response.redirected) {
+                                    window.location.href = response.url;
+                                    return null;
                                 }
-                                return data;
-                            } else {
-                                if (!response.ok) {
-                                    throw new Error('Server error occurred');
+
+                                const contentType = response.headers.get('content-type');
+                                if (contentType && contentType.includes('application/json')) {
+                                    const data = await response.json();
+                                    if (!response.ok) {
+                                        throw new Error(data.message || 'Server error');
+                                    }
+                                    return data;
+                                } else {
+                                    if (!response.ok) {
+                                        throw new Error('Server error occurred');
+                                    }
+                                    return { success: true };
                                 }
-                                return { success: true };
-                            }
-                        })
-                        .then(data => {
-                            if (data === null) {
-                                return;
-                            }
-                            if (data && data.success) {
-                                const modal = bootstrap.Modal.getInstance(document.getElementById('cancelReasonModal'));
-                                modal.hide();
-                                
+                            })
+                            .then(data => {
+                                if (data === null) {
+                                    return;
+                                }
+                                if (data && data.success) {
+                                    const modal = bootstrap.Modal.getInstance(document.getElementById('cancelReasonModal'));
+                                    modal.hide();
+
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Cancel Request Sent!',
+                                        text: 'Your cancellation request has been submitted successfully.',
+                                        showConfirmButton: false,
+                                        timer: 1500
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    throw new Error(data?.message || 'Failed to cancel order');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error details:', error);
                                 Swal.fire({
-                                    icon: 'success',
-                                    title: 'Cancel Request Sent!',
-                                    text: 'Your cancellation request has been submitted successfully.',
-                                    showConfirmButton: false,
-                                    timer: 1500
-                                }).then(() => {
-                                    location.reload();
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: `Failed to cancel order: ${error.message}`
                                 });
-                            } else {
-                                throw new Error(data?.message || 'Failed to cancel order');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error details:', error);
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: `Failed to cancel order: ${error.message}`
                             });
-                        });
                     }
                 });
             });
@@ -718,13 +1008,13 @@
             const returnOtherReasonDiv = document.getElementById('returnOtherReasonDiv');
             const returnOrderForm = document.getElementById('returnOrderForm');
 
-            returnReason.addEventListener('change', function() {
+            returnReason.addEventListener('change', function () {
                 returnOtherReasonDiv.style.display = this.value === 'Other' ? 'block' : 'none';
             });
 
-            returnOrderForm.addEventListener('submit', function(e) {
+            returnOrderForm.addEventListener('submit', function (e) {
                 e.preventDefault();
-                
+
                 const reason = returnReason.value;
                 const otherReason = document.getElementById('returnOtherReason')?.value || '';
                 const finalReason = reason === 'Other' ? otherReason : reason;
@@ -759,57 +1049,67 @@
                             },
                             body: new URLSearchParams(formData)
                         })
-                        .then(async response => {
-                            if (response.redirected) {
-                                window.location.href = response.url;
-                                return null;
-                            }
-                            
-                            const contentType = response.headers.get('content-type');
-                            if (contentType && contentType.includes('application/json')) {
-                                const data = await response.json();
-                                if (!response.ok) {
-                                    throw new Error(data.message || 'Server error');
+                            .then(async response => {
+                                if (response.redirected) {
+                                    window.location.href = response.url;
+                                    return null;
                                 }
-                                return data;
-                            } else {
-                                if (!response.ok) {
-                                    throw new Error('Server error occurred');
+
+                                const contentType = response.headers.get('content-type');
+                                if (contentType && contentType.includes('application/json')) {
+                                    const data = await response.json();
+                                    if (!response.ok) {
+                                        throw new Error(data.message || 'Server error');
+                                    }
+                                    return data;
+                                } else {
+                                    if (!response.ok) {
+                                        throw new Error('Server error occurred');
+                                    }
+                                    return { success: true };
                                 }
-                                return { success: true };
-                            }
-                        })
-                        .then(data => {
-                            if (data === null) {
-                                return;
-                            }
-                            if (data && data.success) {
-                                const modal = bootstrap.Modal.getInstance(document.getElementById('returnReasonModal'));
-                                modal.hide();
-                                
+                            })
+                            .then(data => {
+                                if (data === null) {
+                                    return;
+                                }
+                                if (data && data.success) {
+                                    const modal = bootstrap.Modal.getInstance(document.getElementById('returnReasonModal'));
+                                    modal.hide();
+
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Success!',
+                                        text: 'Return request submitted successfully',
+                                        showConfirmButton: false,
+                                        timer: 1500
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    throw new Error(data?.message || 'Failed to submit return request');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error details:', error);
                                 Swal.fire({
-                                    icon: 'success',
-                                    title: 'Success!',
-                                    text: 'Return request submitted successfully',
-                                    showConfirmButton: false,
-                                    timer: 1500
-                                }).then(() => {
-                                    location.reload();
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: `Failed to submit return request: ${error.message}`
                                 });
-                            } else {
-                                throw new Error(data?.message || 'Failed to submit return request');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error details:', error);
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: `Failed to submit return request: ${error.message}`
                             });
-                        });
                     }
                 });
+            });
+
+            // Add click handlers for invoice buttons
+            const invoiceButtons = document.querySelectorAll('.btn-outline-secondary');
+            invoiceButtons.forEach(button => {
+                button.onclick = function () {
+                    const orderCard = this.closest('.order-card');
+                    const orderId = orderCard.dataset.individualOrdersId;
+                    generateInvoice(orderId);
+                };
             });
         });
     </script>

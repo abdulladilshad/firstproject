@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,6 +36,17 @@
       <small class="error-message" id="confirm-password-error"></small>
     </div>
 
+    <div class="checkbox-container">
+      <input type="checkbox" id="has-referral" name="has-referral" class="referral-checkbox">
+      <label for="has-referral" class="checkbox-label">I have a referral code</label>
+    </div>
+
+    <div class="user-box referral-box" style="display: none;">
+      <input type="text" name="referralCode" id="referralCode" style="color: #ffff;" />
+      <label>Referral Code</label>
+      <small class="error-message" id="referral-error"></small>
+    </div>
+
     <div class="submit">
       <button type="submit">Submit</button>
     </div>
@@ -57,6 +67,20 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('form').addEventListener('submit', formvalidate);
+    
+    // Add event listener for the referral checkbox
+    const referralCheckbox = document.getElementById('has-referral');
+    const referralBox = document.querySelector('.referral-box');
+    
+    referralCheckbox.addEventListener('change', function() {
+      if (this.checked) {
+        referralBox.style.display = 'block';
+      } else {
+        referralBox.style.display = 'none';
+        document.getElementById('referralCode').value = ''; // Clear the input when hiding
+        document.getElementById('referral-error').textContent = ''; // Clear any error
+      }
+    });
   });
 
   function formvalidate(e) {
@@ -66,16 +90,20 @@
     var email = document.getElementById('email').value.trim();
     var password = document.getElementById('password').value.trim();
     var confirmpassword = document.getElementById('confirmpassword').value.trim();
+    var hasReferral = document.getElementById('has-referral').checked;
+    var referralCode = document.getElementById('referralCode').value.trim();
 
     // Error message elements
     var emailError = document.getElementById('email-error');
     var passwordError = document.getElementById('password-error');
     var confirmPasswordError = document.getElementById('confirm-password-error');
+    var referralError = document.getElementById('referral-error');
 
     // Reset previous errors
     emailError.textContent = "";
     passwordError.textContent = "";
     confirmPasswordError.textContent = "";
+    referralError.textContent = "";
 
     let isValid = true;
 
@@ -110,6 +138,12 @@
       isValid = false;
     }
 
+    // Referral code validation (only if checkbox is checked)
+    if (hasReferral && referralCode === "") {
+      referralError.textContent = "Please enter a referral code";
+      isValid = false;
+    }
+
     // If all checks pass, submit the form
     if (isValid) {
       e.target.submit();
@@ -122,6 +156,28 @@
     color: red;
     font-size: 12px;
     display: block;
+  }
+  
+  .checkbox-container {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .referral-checkbox {
+    width: auto;
+    height: auto;
+    margin-right: 10px;
+  }
+  
+  .checkbox-label {
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  
+  .referral-box {
+    transition: all 0.3s ease;
   }
 </style>
 </body>

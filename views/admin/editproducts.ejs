@@ -502,10 +502,6 @@
                     return;
                 }
 
-                if (parseInt(stock) <= 0) {
-                    alert("Stock must be greater than 0!");
-                    return;
-                }
 
                 // Add new variant to existing variants
                 existingVariants.push({ color, quantity: parseInt(stock) });

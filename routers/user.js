@@ -76,17 +76,18 @@ router.get('/auth/google/callback',
 
 
 router.get('/shope', userController.Loadshope);
-
+router.get('/shope/search', userController.searchProducts);
 router.get('/product/:id',  userController.Loadproductdeatails);
 
-//pro
+
 
 
 router.get('/cart', auth.isBan, auth.checkSession,cartController.LoadCart);
 router.post('/cart', auth.isBan, auth.checkSession,cartController.addCart);
 router.delete('/cart/remove/:productId', auth.isBan, auth.checkSession,cartController.removeCart);
 router.get('/all',auth.isBan, auth.checkSession, cartController.getCartItems);
-router.post('/cart/update/:productId',auth.isBan, auth.checkSession, cartController.updateQuatity)
+router.post('/cart/update/:productId',auth.isBan, auth.checkSession, cartController.updateQuatity);
+router.get("/check-cart-products", auth.checkSession, cartController.checkCartProducts);
 
 
 
@@ -111,6 +112,7 @@ router.post('/orders/cancel',auth.isBan, auth.checkSession,orderController.cance
 router.post('/return/:orderId/:productId', orderController.returnOrder);
 
 
+router.get('/shope/filter', userController.filterProducts);
 
 
 router.get('/address',auth.isBan, auth.checkSession, addressController.getAddresses);
@@ -139,6 +141,9 @@ router.post('/place', orderController.placeOrders);
 
 router.post('/create', orderController.createRazorpayOrder);
 router.post('/verify-payment', orderController.verifyRazorpayPayment);
+
+router.post('/create-order/:orderId', orderController.failPayment);
+router.post('/verify-failPayment', orderController.verifyFailPayment);
 
 // Order success page
 router.get('/success/:orderId', orderController.orderSuccesss);

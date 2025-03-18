@@ -1,5 +1,3 @@
-
-
 :root {
     --primary-color: #4a90e2;
     --sidebar-width: 250px;
@@ -133,15 +131,17 @@ body {
 }
 
 .card {
-    background: #fff;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
     padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease;
+    margin-bottom: 20px;
 }
 
-.card:hover {
-    transform: translateY(-5px);
+.card-title {
+    color: #333;
+    font-size: 18px;
+    font-weight: 600;
 }
 
 .card h3 {
@@ -226,8 +226,6 @@ body {
         width: 100%;
     }
 }
-
-
 
 .hamburger-menu {
   display: none;
@@ -378,7 +376,6 @@ body {
   width: 100%;
 }
 
-
 .main-content {
   margin-left: 250px;
   transition: margin-left 0.3s ease;
@@ -388,4 +385,210 @@ body {
   .main-content {
       margin-left: 0;
   }
+}
+
+.sales-analytics {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.filter-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.period-filters, .date-filters {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.filter-btn {
+    padding: 8px 16px;
+    border: 1px solid #e0e0e0;
+    background: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+    background: #f8f9fa;
+}
+
+.filter-btn.active {
+    background: #4a90e2;
+    color: #fff;
+    border-color: #4a90e2;
+}
+
+.date-input {
+    padding: 8px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.chart-container {
+    height: 400px;
+    margin-top: 20px;
+    position: relative;
+}
+
+.chart-filters {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-filter {
+    padding: 8px 16px;
+    border: 1px solid #e0e0e0;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.btn-filter:hover {
+    background: #f8f9fa;
+}
+
+.btn-filter.active {
+    background: #4a90e2;
+    color: white;
+    border-color: #4a90e2;
+}
+
+@media (max-width: 768px) {
+    .filter-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .period-filters, .date-filters {
+        flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+        flex: 1;
+        text-align: center;
+    }
+
+    .chart-filters {
+        flex-wrap: wrap;
+    }
+    
+    .btn-filter {
+        flex: 1;
+        text-align: center;
+    }
+}
+
+/* Table Styles */
+.table-responsive {
+    margin-top: 1rem;
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    margin-bottom: 1rem;
+    background-color: transparent;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-top: 1px solid #dee2e6;
+    text-align: left;
+}
+
+.table thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #dee2e6;
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(74, 144, 226, 0.05);
+    transition: background-color 0.3s ease;
+}
+
+/* Table Filter Styles */
+.table-filters {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.table-search {
+    padding: 0.5rem 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    font-size: 14px;
+    min-width: 200px;
+}
+
+.table-search:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+}
+
+.sort-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0 5px;
+    color: #6c757d;
+}
+
+.sort-button:hover {
+    color: var(--primary-color);
+}
+
+/* Responsive table adjustments */
+@media (max-width: 768px) {
+    .table-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .table-search {
+        width: 100%;
+    }
+}
+
+/* Status Badge Styles */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-badge.active {
+    background-color: #e6f4ea;
+    color: #1e7e34;
+}
+
+.status-badge.inactive {
+    background-color: #fce8e8;
+    color: #dc3545;
 }

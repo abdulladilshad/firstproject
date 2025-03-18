@@ -3,9 +3,11 @@ const adminSchema = require('../models/adminmodel')
 const bcrypt = require('bcryptjs');
 const categoryModel = require('../models/categories')
 const productModel = require('../models/product')
+const Order = require('../models/orderModel')
 const fs = require('fs');
 const path = require('path');
- 
+const Category = require('../models/categories')
+
 const Loadlogin = async (req, res) => {
     try {
         const oldAdm = await adminSchema.findOne({ email: 'admin@gmail.com' });
@@ -53,40 +55,196 @@ const login = async (req, res) => {
 
 const Loddashbord = async (req, res) => {
     try {
-        const admin = req.session.admin
-        if (!admin) return res.redirect('/admin/login')
+        const admin = req.session.admin;
+        if (!admin) return res.redirect('/admin/login');
 
-        const searchQuery = req.query.search || ""
-
+        const searchQuery = req.query.search || "";
         let users = [];
 
         if (searchQuery) {
-            users = await usermodel
-                .find({
-                    email: { $regex: searchQuery, $options: 'i' },
-                })
-                .exec()
+            users = await usermodel.find({
+                email: { $regex: searchQuery, $options: 'i' },
+            }).exec();
         } else {
-            users = await usermodel.find({}).exec()
+            users = await usermodel.find({}).exec();
         }
 
+        // Get current date and calculate date ranges
+        const currentDate = new Date();
+        currentDate.setUTCHours(0, 0, 0, 0);
 
-        const usersWithIndex = users.map((user, index) => {
-            const userObject = user.toObject();
-            userObject.originalIndex = index + 1
-            return userObject;
-        })
+        // Weekly data (last 7 days)
+        const weeklyData = await Order.aggregate([
+            {
+                $match: {
+                    createdAt: {
+                        $gte: new Date(currentDate.getTime() - (7 * 24 * 60 * 60 * 1000))
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                    totalSales: { $sum: "$totalAmount" }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ]);
+
+        // Monthly data (last 12 months)
+        const monthlyData = await Order.aggregate([
+            {
+                $match: {
+                    createdAt: {
+                        $gte: new Date(currentDate.getTime() - (365 * 24 * 60 * 60 * 1000))
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
+                    totalSales: { $sum: "$totalAmount" }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ]);
+
+        // Yearly data
+        const yearlyData = await Order.aggregate([
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y", date: "$createdAt" } },
+                    totalSales: { $sum: "$totalAmount" }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ]);
+
+        // Calculate totals for dashboard cards
+        const totalSales = await Order.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    total: { $sum: "$totalAmount" }
+                }
+            }
+        ]);
+
+        const totalOrders = await Order.countDocuments();
+
+        const avgOrderValue = totalSales.length > 0 ? (totalSales[0].total / totalOrders).toFixed(2) : 0;
+
+        const productsSold = await Order.aggregate([
+            {
+                $unwind: "$products"
+            },
+            {
+                $group: {
+                    _id: null,
+                    total: { $sum: "$products.quantity" }
+                }
+            }
+        ]);
+
+        const usersWithIndex = users.map((user, index) => ({
+            ...user.toObject(),
+            originalIndex: index + 1
+        }));
+
+        // Add these new aggregations for top products and brands
+        const topProducts = await Order.aggregate([
+            { $unwind: "$products" },
+            {
+                $group: {
+                    _id: "$products.productId",
+                    totalQuantity: { $sum: "$products.quantity" },
+                    totalRevenue: { $sum: { $multiply: ["$products.price", "$products.quantity"] } }
+                }
+            },
+            { $sort: { totalQuantity: -1 } },
+            { $limit: 10 },
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "productDetails"
+                }
+            },
+            {
+                $project: {
+                    productName: { $arrayElemAt: ["$productDetails.productName", 0] },
+                    totalQuantity: 1,
+                    totalRevenue: 1
+                }
+            }
+        ]);
+
+        const topBrands = await Order.aggregate([
+            { $unwind: "$products" },
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "products.productId",
+                    foreignField: "_id",
+                    as: "productDetails"
+                }
+            },
+            { $unwind: "$productDetails" },
+            {
+                $group: {
+                    _id: "$productDetails.brand",
+                    totalQuantity: { $sum: "$products.quantity" },
+                    totalRevenue: { $sum: { $multiply: ["$products.price", "$products.quantity"] } }
+                }
+            },
+            { $sort: { totalQuantity: -1 } },
+            { $limit: 10 }
+        ]);
+
+        // Add this code to fetch categories
+        const categories = await Category.aggregate([
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: '_id',
+                    foreignField: 'category',
+                    as: 'products'
+                }
+            },
+            {
+                $project: {
+                    name: 1,
+                    isListed: 1,
+                    productCount: { $size: '$products' }
+                }
+            }
+        ]);
 
         res.render('admin/dashbord', {
             users: usersWithIndex,
             searchQuery: searchQuery,
-        })
+            salesData: {
+                weekly: weeklyData,
+                monthly: monthlyData,
+                yearly: yearlyData
+            },
+            topProducts,
+            topBrands,
+            dashboardStats: {
+                totalSales: totalSales.length > 0 ? totalSales[0].total : 0,
+                totalOrders,
+                avgOrderValue,
+                productsSold: productsSold.length > 0 ? productsSold[0].total : 0
+            },
+            categories: categories
+        });
 
     } catch (error) {
-        console.error('Error while fetching dashboard users:', error);
-        res.render('admin/login', { message: 'Failed to load dashboard' })
+        console.error('Error:', error);
+        res.status(500).send('Server Error');
     }
-}
+};
 
 
 const Loadusers = async (req, res) => {
@@ -265,9 +423,6 @@ const addProduct = async (req, res) => {
             for (let variant of variants) {
                 if (!variant.color || typeof variant.color !== 'string' || variant.color.trim() === "") {
                     return res.status(400).send("Each variant must have a valid color.");
-                }
-                if (!variant.quantity || isNaN(variant.quantity) || Number(variant.quantity) <= 0) {
-                    return res.status(400).send("Each variant must have a stock quantity greater than 0.");
                 }
             }
         } catch (err) {
@@ -558,9 +713,6 @@ const editproducttt = async (req, res) => {
             for (let variant of variants) {
                 if (!variant.color || typeof variant.color !== 'string' || variant.color.trim() === "") {
                     return res.status(400).send("Each variant must have a valid color.");
-                }
-                if (!variant.quantity || isNaN(variant.quantity) || Number(variant.quantity) <= 0) {
-                    return res.status(400).send("Each variant must have a stock quantity greater than 0.");
                 }
             }
         } catch (err) {

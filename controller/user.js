@@ -3,6 +3,7 @@ const categoryModel = require('../models/categories')
 const productModel = require('../models/product')
 const Otp =require('../models/otpModel')
 const nodemailer = require('nodemailer')
+const Wallet = require('../models/walletModel')
 const otpGenerator = require('otp-generator')
 const dotenv =require ("dotenv") 
 const bcrypt = require('bcryptjs');
@@ -136,9 +137,8 @@ const loadregister = async (req, res) => {
 
 const register = async (req, res) => {
     try {
-        const { email, password, confirmpassword } = req.body;
+        const { email, password, confirmpassword, referralCode } = req.body;
 
-        
         if (!email || !password || !confirmpassword) {
             return res.render('user/register', { message: 'All fields are required' });
         }
@@ -147,33 +147,59 @@ const register = async (req, res) => {
             return res.render('user/register', { message: 'Passwords do not match' });
         }
 
-        
         const existingUser = await userschema.findOne({ email });
         if (existingUser) {
             return res.render('user/register', { message: 'User already exists' });
         }
 
-        
         const hashedpassword = await bcrypt.hash(password, 10);
 
-        
-        const newUser = new userschema({ email, password: hashedpassword, isVerified: false });
-        await newUser.save();
+        // Create new user with wallet
+        const newUser = new userschema({ 
+            email, 
+            password: hashedpassword, 
+            isVerified: false,
+            wallet: {
+                balance: 0,
+                transactions: []
+            }
+        });
 
-        
+        // Handle referral code if provided
+        if (referralCode) {
+            const referrer = await userschema.findOne({ referralCode });
+            if (referrer) {
+                // Find or create wallet for referrer
+                let referrerWallet = await Wallet.findOne({ user: referrer._id });
+                
+                if (!referrerWallet) {
+                    referrerWallet = new Wallet({
+                        user: referrer._id,
+                        balance: 0
+                    });
+                }
+
+                // Add referral bonus
+                referrerWallet.balance += 50;
+                await referrerWallet.save();
+
+                // Create wallet for new user
+                const newUserWallet = new Wallet({
+                    user: newUser._id,
+                    balance: 0
+                });
+                await newUserWallet.save();
+            }
+        }
+
+        await newUser.save();
         await Otp.deleteOne({ email });
 
-        
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-        
         await Otp.create({ email, otp });
-
-       
         await sentOtp(email, otp);
 
-        
-        res.render('user/otp', { email: email,message:"" })
+        res.render('user/otp', { email: email, message: "" })
 
     } catch (error) {
         console.error('Error during registration:', error);
@@ -248,6 +274,8 @@ const loadhome = async (req, res) => {
         const categories = await categoryModel.find({isdelete:false})
         const user = await userschema.findOne({_id: req.session.user.id}, 'image');
         
+        
+        
         res.render('user/index', { categories,products, user })
           
 
@@ -262,22 +290,40 @@ const Loadshope = async (req, res) => {
     try {
         const itemsPerPage = 9;
         const page = parseInt(req.query.page) || 1;
+        const category = req.query.category;
 
-      
-        const totalItems = await productModel.countDocuments({ isDelete: false });
-        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        if (category) {
+            const categoryExists = await categoryModel.findOne({ 
+                _id: category,
+                isdelete: false 
+            });
+            
+            if (!categoryExists) {
+                
+                return res.redirect('/shope');
+            }
+        }
 
         
+        const filter = { isDelete: false };
+        if (category) {
+            filter.category = category;
+        }
+
+        
+        const totalItems = await productModel.countDocuments(filter);
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
         const currentPage = Math.max(1, Math.min(page, totalPages));
         const skip = (currentPage - 1) * itemsPerPage;
 
         
         const products = await productModel
-            .find({ isDelete: false })
+            .find(filter)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(itemsPerPage)
-            .lean(); 
+            .populate('category') 
+            .lean();
 
         
         const categories = await categoryModel
@@ -291,20 +337,14 @@ const Loadshope = async (req, res) => {
             totalPages,
             totalItems,
             itemsPerPage,
+            selectedCategory: category, 
             title: 'Shop - LUXE TIME WORLD'
         });
 
     } catch (error) {
         console.error('Error in Loadshope:', error);
-        res.status(500).render('user/shope', {
-            categories: [],
-            products: [],
-            currentPage: 1,
-            totalPages: 1,
-            totalItems: 0,
-            itemsPerPage: 9,
-            error: 'Failed to load products'
-        });
+        
+        res.redirect('/shope');
     }
 };
 
@@ -360,7 +400,159 @@ const logout = (req, res) => {
     res.redirect('/login')
 }
 
+const filterProducts = async (req, res) => {
+    try {
+        const { category, minPrice, maxPrice, sort, search, page = 1 } = req.query;
+        const itemsPerPage = 9;
+        
+        
+        const filter = { isDelete: false };
+        if (category) {
+            filter.category = category;
+        }
+        if (minPrice !== undefined || maxPrice !== undefined) {
+            filter.price = {};
+            if (minPrice) filter.price.$gte = Number(minPrice);
+            if (maxPrice) filter.price.$lte = Number(maxPrice);
+        }
+        
+        
+        if (search) {
+            filter.$or = [
+                { productName: { $regex: search, $options: 'i' } },
+                { description: { $regex: search, $options: 'i' } }
+            ];
+        }
 
+        
+        let sortOption = {};
+        switch (sort) {
+            case 'price_asc':
+                sortOption = { price: 1 };
+                break;
+            case 'price_desc':
+                sortOption = { price: -1 };
+                break;
+            case 'newest':
+                sortOption = { createdAt: -1 };
+                break;
+            default:
+                sortOption = { createdAt: -1 };
+        }
+
+        
+        const skip = (parseInt(page) - 1) * itemsPerPage;
+        
+        
+        const totalItems = await productModel.countDocuments(filter);
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        const currentPage = Math.max(1, Math.min(parseInt(page), totalPages));
+
+        console.log('Sorting by:', sort, 'Sort option:', sortOption);
+        
+        
+        const products = await productModel
+            .find(filter)
+            .sort(sortOption)
+            .skip(skip)
+            .limit(itemsPerPage)
+            .lean();
+
+        res.json({
+            success: true,
+            products,
+            pagination: {
+                currentPage,
+                totalPages,
+                totalItems
+            }
+        });
+
+    } catch (error) {
+        console.error('Error in filterProducts:', error);
+        res.json({
+            success: false,
+            message: 'Failed to fetch products'
+        });
+    }
+};
+
+const searchProducts = async (req, res) => {
+    try {
+        const searchTerm = req.query.term;
+        const page = parseInt(req.query.page) || 1;
+        const itemsPerPage = 9; 
+        const category = req.query.category || null;
+        const sort = req.query.sort || '';
+        
+        if (!searchTerm) {
+            return res.json({
+                success: false,
+                message: 'Search term is required'
+            });
+        }
+
+        
+        const filter = {
+            isDelete: false,
+            $or: [
+                { productName: { $regex: searchTerm, $options: 'i' } },
+                { description: { $regex: searchTerm, $options: 'i' } }
+            ]
+        };
+
+        
+        if (category) {
+            filter.category = category;
+        }
+
+        
+        let sortOption = {};
+        switch (sort) {
+            case 'price_asc':
+                sortOption = { price: 1 };
+                break;
+            case 'price_desc':
+                sortOption = { price: -1 };
+                break;
+            case 'newest':
+                sortOption = { createdAt: -1 };
+                break;
+            default:
+                sortOption = { createdAt: -1 };
+        }
+
+        
+        const totalItems = await productModel.countDocuments(filter);
+
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        const skip = (page - 1) * itemsPerPage;
+
+        const products = await productModel.find(filter)
+            .sort(sortOption)
+            .skip(skip)
+            .limit(itemsPerPage)
+            .populate('category')
+            .lean();
+
+        res.json({
+            success: true,
+            products,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalItems
+            }
+        });
+
+    } catch (error) {
+        console.error('Search error:', error);
+        res.json({
+            success: false,
+            message: 'Error performing search'
+        });
+    }
+};
 
 module.exports = {
     loadhome,
@@ -376,5 +568,6 @@ module.exports = {
     Loadproductdeatails,
     sentOtp,
     ResendOtp,
-    
+    filterProducts,
+    searchProducts
 }
