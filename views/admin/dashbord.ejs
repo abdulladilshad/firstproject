@@ -89,7 +89,7 @@
             <section class="dashboard-overview">
                 <div class="card">
                     <h3><i class="fas fa-dollar-sign"></i> Total Sales</h3>
-                    <p>₹<%= dashboardStats.totalSales.toLocaleString() %></p>
+                    <p>$<%= dashboardStats.totalSales.toLocaleString() %></p>
                     <span class="stat-positive"><i class="fas fa-arrow-up"></i> 8.5% Up from yesterday</span>
                 </div>
                 <div class="card">
@@ -99,7 +99,7 @@
                 </div>
                 <div class="card">
                     <h3><i class="fas fa-chart-line"></i> Average Order Value</h3>
-                    <p>₹<%= dashboardStats.avgOrderValue.toLocaleString() %></p>
+                    <p>$<%= dashboardStats.avgOrderValue.toLocaleString() %></p>
                     <span class="stat-negative"><i class="fas fa-arrow-down"></i> 4.3% Down from yesterday</span>
                 </div>
                 <div class="card">
@@ -169,7 +169,7 @@
                                                     <%= product.totalQuantity %>
                                                 </td>
                                                 <td data-value="<%= product.totalRevenue %>">
-                                                    ₹<%= product.totalRevenue.toLocaleString() %>
+                                                    $<%= product.totalRevenue.toLocaleString() %>
                                                 </td>
                                             </tr>
                                         <% }) %>
@@ -220,7 +220,7 @@
                                                     <%= brand.totalQuantity %>
                                                 </td>
                                                 <td data-value="<%= brand.totalRevenue %>">
-                                                    ₹<%= brand.totalRevenue.toLocaleString() %>
+                                                    $<%= brand.totalRevenue.toLocaleString() %>
                                                 </td>
                                             </tr>
                                         <% }) %>
@@ -380,7 +380,7 @@
                                 displayColors: false,
                                 callbacks: {
                                     label: function(context) {
-                                        return '₹ ' + context.parsed.y.toLocaleString('en-IN');
+                                        return '$ ' + context.parsed.y.toLocaleString('en-IN');
                                     }
                                 }
                             }
@@ -393,7 +393,7 @@
                                 },
                                 ticks: {
                                     callback: function(value) {
-                                        return '₹' + value.toLocaleString('en-IN');
+                                        return '$' + value.toLocaleString('en-IN');
                                     },
                                     font: {
                                         size: 12

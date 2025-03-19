@@ -77,8 +77,8 @@
                             type="text" 
                             placeholder="Search users..." 
                             class="search-bar" 
-                            value=""
-                            oninput="window.location.href = '/admin/users?search=' + this.value"
+                            id="searchInput"
+                            value="<%= users.searchQuery || '' %>"
                         >
                     </div>
                 </div>
@@ -284,6 +284,141 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+let currentPage = 1;
+let searchTimeout;
+
+// Add debounced search function
+document.getElementById('searchInput').addEventListener('input', function(e) {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        currentPage = 1; // Reset to first page on new search
+        performSearch(e.target.value);
+    }, 300); // Debounce for 300ms
+});
+
+async function performSearch(searchQuery) {
+    try {
+        const response = await fetch(`/admin/users?search=${encodeURIComponent(searchQuery)}&page=${currentPage}`, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) throw new Error('Search failed');
+
+        const data = await response.json();
+        updateTable(data.users);
+        updatePagination(data.pagination);
+    } catch (error) {
+        console.error('Search error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Search Error',
+            text: 'Failed to perform search. Please try again.'
+        });
+    }
+}
+
+function updateTable(users) {
+    const tbody = document.querySelector('table tbody');
+    tbody.innerHTML = '';
+
+    users.forEach((user, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${user.email}</td>
+            <td>
+                <span class="badge ${user.googleId ? 'success' : 'neutral'}">
+                    ${user.googleId ? 'Yes' : 'No'}
+                </span>
+            </td>
+            <td>
+                <span class="role-badge ${user.role.toLowerCase()}">
+                    ${user.role}
+                </span>
+            </td>
+            <td>${new Date(user.createdAt).toDateString()}</td>
+            <td>
+                <button 
+                    class="action-btn ${user.isBlock ? 'unblock' : 'block'}"
+                    onclick="toggleUserStatus('${user._id}', ${user.isBlock})"
+                >
+                    <i class="fas fa-${user.isBlock ? 'unlock' : 'ban'}"></i>
+                    ${user.isBlock ? 'Unblock' : 'Block'}
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function updatePagination(pagination) {
+    const container = document.querySelector('.pagination-container');
+    if (!container) return;
+
+    let html = '';
+
+    // Previous button
+    if (pagination.hasPrevPage) {
+        html += `<a href="#" onclick="changePage(${pagination.prevPage})" class="pagination-link">
+            <i class="fas fa-chevron-left"></i>
+        </a>`;
+    } else {
+        html += `<span class="pagination-link disabled">
+            <i class="fas fa-chevron-left"></i>
+        </span>`;
+    }
+
+    // Calculate page range
+    let startPage = Math.max(1, pagination.currentPage - 2);
+    let endPage = Math.min(pagination.totalPages, startPage + 4);
+    if (endPage - startPage < 4) {
+        startPage = Math.max(1, endPage - 4);
+    }
+
+    // First page and ellipsis
+    if (startPage > 1) {
+        html += `<a href="#" onclick="changePage(1)" class="pagination-link">1</a>`;
+        if (startPage > 2) {
+            html += `<span class="pagination-ellipsis">...</span>`;
+        }
+    }
+
+    // Page numbers
+    for (let i = startPage; i <= endPage; i++) {
+        html += `<a href="#" onclick="changePage(${i})" 
+            class="pagination-link ${pagination.currentPage === i ? 'active' : ''}">${i}</a>`;
+    }
+
+    // Last page and ellipsis
+    if (endPage < pagination.totalPages) {
+        if (endPage < pagination.totalPages - 1) {
+            html += `<span class="pagination-ellipsis">...</span>`;
+        }
+        html += `<a href="#" onclick="changePage(${pagination.totalPages})" 
+            class="pagination-link">${pagination.totalPages}</a>`;
+    }
+
+    // Next button
+    if (pagination.hasNextPage) {
+        html += `<a href="#" onclick="changePage(${pagination.nextPage})" class="pagination-link">
+            <i class="fas fa-chevron-right"></i>
+        </a>`;
+    } else {
+        html += `<span class="pagination-link disabled">
+            <i class="fas fa-chevron-right"></i>
+        </span>`;
+    }
+
+    container.innerHTML = html;
+}
+
+function changePage(page) {
+    currentPage = page;
+    performSearch(document.getElementById('searchInput').value);
+    return false;
+}
 
     </script>
 </body>

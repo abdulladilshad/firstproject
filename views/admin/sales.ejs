@@ -578,13 +578,13 @@
                             <div class="row">
                                 <div class="col-8">
                                     <h5 class="card-title">Total Sales</h5>
-                                    <h3 class="card-text">₹<%= typeof totalSales !=='undefined' ? totalSales : '45,690'
+                                    <h3 class="card-text">$<%= typeof totalSales !=='undefined' ? totalSales : '45,690'
                                             %>
                                     </h3>
                                     <p class="text-success mb-0"><i class="fas fa-arrow-up me-1"></i>8.3% growth</p>
                                 </div>
                                 <div class="col-4 text-end">
-                                    <i class="fas fa-rupee-sign icon"></i>
+                                    <i class="fas fa-dollar-sign icon"></i>
                                 </div>
                             </div>
                         </div>
@@ -614,7 +614,7 @@
                             <div class="row">
                                 <div class="col-8">
                                     <h5 class="card-title">Average Order</h5>
-                                    <h3 class="card-text">₹<%= typeof avgOrderValue !=='undefined' ? avgOrderValue
+                                    <h3 class="card-text">$<%= typeof avgOrderValue !=='undefined' ? avgOrderValue
                                             : '1,879' %>
                                     </h3>
                                     <p class="text-danger mb-0"><i class="fas fa-arrow-down me-1"></i>2.4% decrease</p>
@@ -652,49 +652,50 @@
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="card-title mb-0"><i class="fas fa-list me-2"></i>Recent Transactions</h5>
                         <div class="input-group w-25">
-                            <input type="text" class="form-control" placeholder="Search orders">
-                            <button class="btn btn-outline-secondary" type="button"><i
-                                    class="fas fa-search"></i></button>
+                            <input type="text" 
+                                class="form-control" 
+                                id="searchInput"
+                                placeholder="Search orders..." 
+                                autocomplete="off"
+                            >
+                            <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                                <i class="fas fa-search"></i>
+                            </button>
                         </div>
                     </div>
                     <div class="table-responsive">
-                        <table class="table">
-                            <tbody>
+                        <table class="table" id="ordersTable">
+                            <thead>
                                 <tr>
-                                    <td>#OrderID</td>
-                                    <td>Date</td>
-                                    <td>Customer Name</td>
-                                    <td>Products</td>
-                                    <td>Amount</td>
+                                    <th>#OrderID</th>
+                                    <th>Date</th>
+                                    <th>Customer Name</th>
+                                    <th>Products</th>
+                                    <th>Amount</th>
                                 </tr>
+                            </thead>
+                            <tbody id="ordersTableBody">
                                 <% if (typeof orders !=='undefined' && orders.length> 0) { %>
                                     <% orders.forEach(order=> { %>
                                         <tr>
                                             <td><span class="fw-medium">#<%= order.orderId %></span></td>
-                                            <td>
-                                                <%= new Date(order.date).toLocaleDateString() %>
-                                            </td>
-                                            <td>
-                                                <%= order.customerName %>
-                                            </td>
-                                            <td><span class="badge bg-info text-dark">
-                                                    <%= order.productCount %> items
-                                                </span></td>
+                                            <td><%= new Date(order.date).toLocaleDateString() %></td>
+                                            <td><%= order.customerName %></td>
+                                            <td><span class="badge bg-info text-dark"><%= order.productCount %> items</span></td>
                                             <td><span class="fw-medium">$<%= order.totalAmount %></span></td>
-                                       
                                         </tr>
-                                        <% }); %>
-                                            <% } else { %>
-                                                <tr>
-                                                    <td colspan="7" class="text-center py-4">
-                                                        <div class="d-flex flex-column align-items-center">
-                                                            <i class="fas fa-box-open fa-3x text-secondary mb-3"></i>
-                                                            <h5 class="text-secondary">No orders found</h5>
-                                                            <p class="text-muted">Try adjusting your filter criteria</p>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                                <% } %>
+                                    <% }); %>
+                                <% } else { %>
+                                    <tr id="noOrdersRow">
+                                        <td colspan="5" class="text-center py-4">
+                                            <div class="d-flex flex-column align-items-center">
+                                                <i class="fas fa-box-open fa-3x text-secondary mb-3"></i>
+                                                <h5 class="text-secondary">No orders found</h5>
+                                                <p class="text-muted">Try adjusting your search criteria</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% } %>
                             </tbody>
                         </table>
                     </div>
@@ -710,7 +711,7 @@
                             <ul class="pagination mb-0">
                                 <!-- Previous Page -->
                                 <li class="page-item <%= !hasPrevPage ? 'disabled' : '' %>">
-                                    <a class="page-link" href="?page=<%= prevPage %>&period=<%= selectedPeriod %>&startDate=<%= startDate %>&endDate=<%= endDate %>" aria-label="Previous">
+                                    <a class="page-link" href="?page=<%= prevPage %>&period=<%= selectedPeriod %>&startDate=<%= startDate %>&endDate=<%= endDate %>&search=<%= searchQuery %>" aria-label="Previous">
                                         <span aria-hidden="true">&laquo;</span>
                                     </a>
                                 </li>
@@ -718,7 +719,7 @@
                                 <!-- First Page -->
                                 <% if(currentPage > 2) { %>
                                     <li class="page-item">
-                                        <a class="page-link" href="?page=1&period=<%= selectedPeriod %>&startDate=<%= startDate %>&endDate=<%= endDate %>">1</a>
+                                        <a class="page-link" href="?page=1&period=<%= selectedPeriod %>&startDate=<%= startDate %>&endDate=<%= endDate %>&search=<%= searchQuery %>">1</a>
                                     </li>
                                     <% if(currentPage > 3) { %>
                                         <li class="page-item disabled"><span class="page-link">...</span></li>
@@ -728,7 +729,7 @@
                                 <!-- Page Numbers -->
                                 <% for(let i = Math.max(1, currentPage - 1); i <= Math.min(totalPages, currentPage + 1); i++) { %>
                                     <li class="page-item <%= currentPage === i ? 'active' : '' %>">
-                                        <a class="page-link" href="?page=<%= i %>&period=<%= selectedPeriod %>&startDate=<%= startDate %>&endDate=<%= endDate %>"><%= i %></a>
+                                        <a class="page-link" href="?page=<%= i %>&period=<%= selectedPeriod %>&startDate=<%= startDate %>&endDate=<%= endDate %>&search=<%= searchQuery %>"><%= i %></a>
                                     </li>
                                 <% } %>
 
@@ -738,13 +739,13 @@
                                         <li class="page-item disabled"><span class="page-link">...</span></li>
                                     <% } %>
                                     <li class="page-item">
-                                        <a class="page-link" href="?page=<%= totalPages %>&period=<%= selectedPeriod %>&startDate=<%= startDate %>&endDate=<%= endDate %>"><%= totalPages %></a>
+                                        <a class="page-link" href="?page=<%= totalPages %>&period=<%= selectedPeriod %>&startDate=<%= startDate %>&endDate=<%= endDate %>&search=<%= searchQuery %>"><%= totalPages %></a>
                                     </li>
                                 <% } %>
 
                                 <!-- Next Page -->
                                 <li class="page-item <%= !hasNextPage ? 'disabled' : '' %>">
-                                    <a class="page-link" href="?page=<%= nextPage %>&period=<%= selectedPeriod %>&startDate=<%= startDate %>&endDate=<%= endDate %>" aria-label="Next">
+                                    <a class="page-link" href="?page=<%= nextPage %>&period=<%= selectedPeriod %>&startDate=<%= startDate %>&endDate=<%= endDate %>&search=<%= searchQuery %>" aria-label="Next">
                                         <span aria-hidden="true">&raquo;</span>
                                     </a>
                                 </li>
@@ -1037,6 +1038,167 @@
         }
 
         // Update your Excel button HTML to use this function directly
+    </script>
+    <script>
+        // Debounce function to limit API calls
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Function to perform the search
+        async function performSearch(searchTerm) {
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+            const tbody = document.getElementById('ordersTableBody');
+            
+            try {
+                // Show loading state
+                searchInput.disabled = true;
+                searchButton.disabled = true;
+                searchButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                
+                // Show loading in table
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-4">
+                            <div class="d-flex flex-column align-items-center">
+                                <i class="fas fa-spinner fa-spin fa-3x text-primary mb-3"></i>
+                                <h5 class="text-primary">Searching...</h5>
+                                <p class="text-muted">Please wait while we fetch the results</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+
+                // Get current filter values
+                const urlParams = new URLSearchParams(window.location.search);
+                const period = urlParams.get('period') || 'daily';
+                const startDate = document.getElementById('startDate')?.value || '';
+                const endDate = document.getElementById('endDate')?.value || '';
+
+                // Make the API call
+                const response = await fetch(`/admin/search-orders?search=${encodeURIComponent(searchTerm)}&period=${period}&startDate=${startDate}&endDate=${endDate}`);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to fetch search results');
+                }
+
+                // Update table with results
+                if (!data.orders || data.orders.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="text-center py-4">
+                                <div class="d-flex flex-column align-items-center">
+                                    <i class="fas fa-search fa-3x text-secondary mb-3"></i>
+                                    <h5 class="text-secondary">No orders found</h5>
+                                    <p class="text-muted">Try adjusting your search criteria</p>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    tbody.innerHTML = data.orders.map(order => `
+                        <tr>
+                            <td><span class="fw-medium">#${order.orderId}</span></td>
+                            <td>${new Date(order.date).toLocaleDateString()}</td>
+                            <td>${order.customerName}</td>
+                            <td><span class="badge bg-info text-dark">${order.productCount} items</span></td>
+                            <td><span class="fw-medium">$${order.totalAmount.toFixed(2)}</span></td>
+                        </tr>
+                    `).join('');
+                }
+
+                // Update stats if available
+                if (data.stats) {
+                    try {
+                        // Get all stat cards
+                        const statCards = document.querySelectorAll('.stat-card');
+                        
+                        // Update Total Sales
+                        const totalSalesElement = statCards[0]?.querySelector('.card-text');
+                        if (totalSalesElement) {
+                            totalSalesElement.textContent = `$${Number(data.stats.totalSales).toFixed(2)}`;
+                        }
+                        
+                        // Update Total Orders
+                        const totalOrdersElement = statCards[1]?.querySelector('.card-text');
+                        if (totalOrdersElement) {
+                            totalOrdersElement.textContent = data.stats.totalOrders;
+                        }
+                        
+                        // Update Average Order Value
+                        const avgOrderElement = statCards[2]?.querySelector('.card-text');
+                        if (avgOrderElement) {
+                            avgOrderElement.textContent = `$${Number(data.stats.avgOrderValue).toFixed(2)}`;
+                        }
+                        
+                        // Update Products Sold
+                        const productsSoldElement = statCards[3]?.querySelector('.card-text');
+                        if (productsSoldElement) {
+                            productsSoldElement.textContent = data.stats.productsSold;
+                        }
+                    } catch (statsError) {
+                        console.error('Error updating statistics:', statsError);
+                    }
+                }
+
+            } catch (error) {
+                console.error('Search error:', error);
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-4">
+                            <div class="d-flex flex-column align-items-center">
+                                <i class="fas fa-exclamation-circle fa-3x text-danger mb-3"></i>
+                                <h5 class="text-danger">Error performing search</h5>
+                                <p class="text-muted">${error.message || 'Please try again later'}</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            } finally {
+                // Reset input and button state
+                searchInput.disabled = false;
+                searchButton.disabled = false;
+                searchButton.innerHTML = '<i class="fas fa-search"></i>';
+            }
+        }
+
+        // Set up search input handler with debounce
+        const searchInput = document.getElementById('searchInput');
+        const debouncedSearch = debounce((searchTerm) => {
+            if (searchTerm.length >= 1 || searchTerm === '') {
+                performSearch(searchTerm);
+            }
+        }, 300);
+
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.trim();
+            debouncedSearch(searchTerm);
+        });
+
+        // Handle search button click
+        document.getElementById('searchButton').addEventListener('click', () => {
+            const searchTerm = searchInput.value.trim();
+            performSearch(searchTerm);
+        });
+
+        // Handle form submission
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const searchTerm = searchInput.value.trim();
+                performSearch(searchTerm);
+            }
+        });
     </script>
 </body>
 

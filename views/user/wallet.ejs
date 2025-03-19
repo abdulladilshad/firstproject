@@ -349,55 +349,69 @@
 
         
         <div class="main-content">
-            <div class="wallet-card">
-                <div class="balance-label">Your Balance</div>
-                <div class="balance">$<%= balance %></div>
-            </div>
-
-            <form action="/wallet" method="POST">
-                <input type="number" name="amount" placeholder="Amount to deposit" required>
-                <button type="submit">Deposit</button>
-            </form>
-            
-            <button class="transaction-btn" onclick="openTransactionModal()">View Transaction History</button>
-
-           
-            <div id="transactionModal" class="modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <span class="close" onclick="closeTransactionModal()">&times;</span>
-                        <h3>Transaction History</h3>
-                    </div>
-                    
-                    <% if (transactions && transactions.length > 0) { %>
-                        <ul class="transaction-list">
-                            <% transactions.forEach(transaction => { %>
-                                <li class="transaction-item">
-                                    <div>
-                                        <div class="transaction-type <%= transaction.type %>">
-                                            <%= transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1) %>
-                                        </div>
-                                        <div class="transaction-date">
-                                            <%= new Date(transaction.createdAt).toLocaleString() %>
-                                        </div>
-                                    </div>
-                                    <div class="transaction-amount <%= transaction.type %>">
-                                        <%= transaction.type === 'deposit' ? '+' : '+' %>$<%= transaction.amount.toFixed(2) %>
-                                    </div>
-                                </li>
-                            <% }) %>
-                        </ul>
-                    <% } else { %>
-                        <div class="no-transactions">
-                            <p>No transactions found</p>
-                        </div>
-                    <% } %>
+            <% if (hasWallet) { %>
+                <div class="wallet-card">
+                    <div class="balance-label">Your Balance</div>
+                    <div class="balance">$<%= balance %></div>
                 </div>
-            </div>
+
+                <form id="depositForm" onsubmit="handleDeposit(event)">
+                    <input type="number" name="amount" placeholder="Amount to deposit" required>
+                    <button type="submit">Deposit</button>
+                </form>
+                
+                <button class="transaction-btn" onclick="openTransactionModal()">View Transaction History</button>
+
+                <div id="transactionModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <span class="close" onclick="closeTransactionModal()">&times;</span>
+                            <h3>Transaction History</h3>
+                        </div>
+                        
+                        <% if (transactions && transactions.length > 0) { %>
+                            <ul class="transaction-list">
+                                <% transactions.forEach(transaction => { %>
+                                    <li class="transaction-item">
+                                        <div>
+                                            <div class="transaction-type <%= transaction.type %>">
+                                                <%= transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1) %>
+                                            </div>
+                                            <div class="transaction-date">
+                                                <%= new Date(transaction.createdAt).toLocaleString() %>
+                                            </div>
+                                        </div>
+                                        <div class="transaction-amount <%= transaction.type %>">
+                                            <%= transaction.type === 'deposit' ? '+' : '+' %>$<%= transaction.amount.toFixed(2) %>
+                                        </div>
+                                    </li>
+                                <% }) %>
+                            </ul>
+                        <% } else { %>
+                            <div class="no-transactions">
+                                <p>No transactions found</p>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="create-wallet-container" style="text-align: center; padding: 40px;">
+                    <div style="margin-bottom: 20px;">
+                        <i class="fas fa-wallet" style="font-size: 64px; color: #3498db;"></i>
+                    </div>
+                    <h2 style="margin-bottom: 20px;">You don't have a wallet yet!</h2>
+                    <p style="color: #666; margin-bottom: 30px;">Create your wallet to start managing your funds and make purchases.</p>
+                    <form action="/wallet/create" method="POST">
+                        <button type="submit" style="max-width: 200px; background-color: #3498db;">Create Wallet</button>
+                    </form>
+                </div>
+            <% } %>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
     
         const modal = document.getElementById("transactionModal");
@@ -416,6 +430,124 @@
         window.onclick = function(event) {
             if (event.target == modal) {
                 modal.style.display = "none";
+            }
+        }
+
+        async function handleDeposit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const amount = form.amount.value;
+            const submitButton = form.querySelector('button[type="submit"]');
+            
+            try {
+                // Show loading state
+                submitButton.disabled = true;
+                submitButton.innerHTML = 'Processing...';
+
+                // Validate amount
+                if (!amount || parseFloat(amount) <= 0) {
+                    throw new Error('Please enter a valid amount');
+                }
+
+                const response = await fetch('/wallet/deposit/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ amount })
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to create deposit order');
+                }
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Failed to create deposit order');
+                }
+
+                const options = {
+                    key: data.key_id,
+                    amount: data.amount,
+                    currency: data.currency,
+                    name: 'LUXE TIME',
+                    description: 'Wallet Deposit',
+                    order_id: data.order_id,
+                    handler: async function (response) {
+                        try {
+                            const verifyResponse = await fetch('/wallet/deposit/verify', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                    amount: data.amount
+                                })
+                            });
+
+                            const verifyData = await verifyResponse.json();
+                            
+                            if (verifyData.success) {
+                                await Swal.fire({
+                                    icon: 'success',
+                                    title: 'Deposit Successful!',
+                                    text: 'Your wallet has been updated.',
+                                    showConfirmButton: false,
+                                    timer: 1500
+                                });
+                                location.reload();
+                            } else {
+                                throw new Error(verifyData.message || 'Payment verification failed');
+                            }
+                        } catch (error) {
+                            console.error('Verification error:', error);
+                            await Swal.fire({
+                                icon: 'error',
+                                title: 'Verification Failed',
+                                text: 'Please contact support if amount is deducted'
+                            });
+                        }
+                    },
+                    prefill: {
+                        email: data.email,
+                        contact: data.contact
+                    },
+                    theme: {
+                        color: '#3399cc'
+                    },
+                    modal: {
+                        ondismiss: function() {
+                            submitButton.disabled = false;
+                            submitButton.innerHTML = 'Deposit';
+                        }
+                    }
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.on('payment.failed', function (response) {
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = 'Deposit';
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Payment Failed',
+                        text: 'The payment process failed. Please try again.'
+                    });
+                });
+                rzp.open();
+
+            } catch (error) {
+                console.error('Error:', error);
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Deposit';
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'Failed to process deposit. Please try again.'
+                });
             }
         }
     </script>

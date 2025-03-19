@@ -43,13 +43,8 @@ const isBan = async (req, res, next) => {
         }
 
         if (user?.isBlock) {
-            req.session.destroy((err) => {
-                if (err) {
-                    console.error('Error destroying session:', err);
-                    return next(err); 
-                }
-                res.render('user/login', { message: ['You have been blocked'] });
-            });
+            req.session.destroy();
+            res.redirect('/login')
         } else {
             next();
         }

@@ -23,6 +23,12 @@
     rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="/styles/userShope.css">
+
+  <style>
+    .dis{
+      color: white !important;
+    }
+  </style>
 </head>
 
 <body class="shop-page">
@@ -130,8 +136,8 @@
               <h6>Price Range</h6>
               <input type="range" class="form-range" id="priceRange" min="0" max="100000" step="1000" value="100000">
               <div class="d-flex justify-content-between">
-                <span>₹0</span>
-                <span id="maxPriceDisplay">₹100000</span>
+                <span>$0</span>
+                <span id="maxPriceDisplay">$100000</span>
               </div>
               <div class="mt-2" id="priceFilterIndicator" style="display: none;">
                 <small class="text-muted">Filtering products up to: <span id="currentPriceFilter"></span></small>
@@ -171,8 +177,20 @@
                         <%= product.productName %>
                       </a>
                     </h5>
-                    <div class="price mb-3">₹<%= product.price.toFixed(2) %>
-                    </div>
+                    <div class="price mb-3">
+                      <% if (product.offerPrice) { %>
+                          <span class="original-price text-muted">
+                              <del>$<%= product.price.toFixed(2) %></del>
+                          </span>
+                          <span class="offer-price text-success">
+                              $<%= product.offerPrice %>
+                          </span>
+                          <% const discountPercentage = Math.round((1 - product.offerPrice / product.price) * 100); %>
+                          <span class="discount-badge text-danger">-<%= discountPercentage %>%</span>
+                      <% } else { %>
+                          <span class="regular-price">$<%= product.price.toFixed(2) %></span>
+                      <% } %>
+                  </div>
                   </div>
                 </div>
               </div>
@@ -367,7 +385,7 @@
           search: ''
       };
 
-      // Initialize filters from URL params
+      //
       function initializeFiltersFromURL() {
           const urlParams = new URLSearchParams(window.location.search);
           currentFilters = {
@@ -379,27 +397,27 @@
               search: urlParams.get('search') || ''
           };
 
-          // Set initial values in UI
+          
           if (currentFilters.maxPrice) {
               priceRange.value = currentFilters.maxPrice;
-              document.getElementById('maxPriceDisplay').textContent = '₹' + currentFilters.maxPrice;
+              document.getElementById('maxPriceDisplay').textContent = '$' + currentFilters.maxPrice;
               
-              // Show price filter indicator if not at max value
+              
               const priceFilterIndicator = document.getElementById('priceFilterIndicator');
               const currentPriceFilter = document.getElementById('currentPriceFilter');
               
               if (parseInt(currentFilters.maxPrice) < parseInt(priceRange.max)) {
-                  currentPriceFilter.textContent = '₹' + currentFilters.maxPrice;
+                  currentPriceFilter.textContent = '$' + currentFilters.maxPrice;
                   priceFilterIndicator.style.display = 'block';
               }
           } else {
-              // Default max price
-              document.getElementById('maxPriceDisplay').textContent = '₹' + priceRange.max;
+              
+              document.getElementById('maxPriceDisplay').textContent = '$' + priceRange.max;
           }
           
           if (currentFilters.sort) {
               sortSelect.value = currentFilters.sort;
-              // Update sort indicator
+              
               const sortIndicator = document.getElementById('sortIndicator');
               const currentSortMethod = document.getElementById('currentSortMethod');
               const selectedOption = sortSelect.options[sortSelect.selectedIndex].text;
@@ -413,24 +431,24 @@
           }
       }
 
-      // Event Listeners
+      
       priceRange.addEventListener('input', function() {
-          // Update the price display immediately while sliding
-          document.getElementById('maxPriceDisplay').textContent = '₹' + this.value;
+          
+          document.getElementById('maxPriceDisplay').textContent = '$' + this.value;
       });
       
       priceRange.addEventListener('change', function() {
-          // Only apply filters when slider is released
-          currentFilters.maxPrice = this.value;
-          currentFilters.page = 1; // Reset to first page when filter changes
-          document.getElementById('maxPriceDisplay').textContent = '₹' + this.value;
           
-          // Show price filter indicator if not at max value
+          currentFilters.maxPrice = this.value;
+          currentFilters.page = 1; 
+          document.getElementById('maxPriceDisplay').textContent = '$' + this.value;
+          
+          
           const priceFilterIndicator = document.getElementById('priceFilterIndicator');
           const currentPriceFilter = document.getElementById('currentPriceFilter');
           
           if (parseInt(this.value) < parseInt(this.max)) {
-              currentPriceFilter.textContent = '₹' + this.value;
+              currentPriceFilter.textContent = '$' + this.value;
               priceFilterIndicator.style.display = 'block';
           } else {
               priceFilterIndicator.style.display = 'none';
@@ -443,7 +461,7 @@
           currentFilters.sort = this.value;
           currentFilters.page = 1;
           
-          // Update sort indicator
+          
           const sortIndicator = document.getElementById('sortIndicator');
           const currentSortMethod = document.getElementById('currentSortMethod');
           
@@ -468,7 +486,7 @@
               search: ''
           };
           priceRange.value = priceRange.max;
-          document.getElementById('maxPriceDisplay').textContent = '₹' + priceRange.max;
+          document.getElementById('maxPriceDisplay').textContent = '$' + priceRange.max;
           document.getElementById('priceFilterIndicator').style.display = 'none';
           sortSelect.value = '';
           document.getElementById('sortIndicator').style.display = 'none';
@@ -477,7 +495,7 @@
           applyFilters();
       });
 
-      // Search functionality
+      
       searchIcon.addEventListener('click', function(e) {
           e.preventDefault();
           searchInput.classList.toggle('active');
@@ -502,7 +520,7 @@
           }, 300);
       });
 
-      // Handle Enter key press in search input
+      
       searchInput.addEventListener('keypress', function(e) {
           if (e.key === 'Enter') {
               currentFilters.search = this.value.trim();
@@ -511,34 +529,34 @@
           }
       });
 
-      // Apply filters and update URL
+      
       async function applyFilters() {
           try {
-              // Show loading state
+              
               productGrid.innerHTML = '<div class="col-12 text-center my-5"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
               
-              // Build query string
+              
               const params = new URLSearchParams();
               Object.entries(currentFilters).forEach(([key, value]) => {
                   if (value) params.append(key, value);
               });
 
-              // Update URL without refresh
+              
               const newUrl = `${window.location.pathname}?${params.toString()}`;
               window.history.pushState({ filters: currentFilters }, '', newUrl);
 
-              // Fetch filtered results
+              
               let endpoint = '/shope/filter';
               if (currentFilters.search && currentFilters.search.length > 0) {
                   endpoint = '/shope/search';
                   
-                  // Create a separate params object for search to ensure all parameters are included
+                  
                   const searchParams = new URLSearchParams();
                   
-                  // Add term parameter first (required by search API)
+                  
                   searchParams.set('term', currentFilters.search);
                   
-                  // Add all other parameters
+                  
                   if (currentFilters.category) searchParams.set('category', currentFilters.category);
                   if (currentFilters.sort) searchParams.set('sort', currentFilters.sort);
                   if (currentFilters.page) searchParams.set('page', currentFilters.page);
@@ -609,7 +627,20 @@
                           <h5 class="text-uppercase fs-5 mt-3">
                               <a href="/product/${product._id}">${product.productName}</a>
                           </h5>
-                          <div class="price mb-3">₹${product.price.toFixed(2)}</div>
+                          <div class="price mb-3">
+                              ${product.offerPrice ? 
+                                `<span class="original-price text-muted">
+                                    <del>$${product.price.toFixed(2)}</del>
+                                </span>
+                                <span class="offer-price text-success">
+                                    $${product.offerPrice}
+                                </span>
+                                <span class="discount-badge text-danger dis">
+                                    -${Math.round((1 - product.offerPrice / product.price) * 100)}%
+                                </span>` : 
+                                `$${product.price.toFixed(2)}`
+                              }
+                          </div>
                       </div>
                   </div>
               </div>
@@ -633,7 +664,7 @@
                       </li>
           `;
 
-          // First page
+          
           if (currentPage > 2) {
               paginationHtml += `
                   <li class="page-item">
@@ -649,7 +680,7 @@
               }
           }
 
-          // Current page and neighbors
+          
           for (let i = Math.max(1, currentPage - 1); i <= Math.min(totalPages, currentPage + 1); i++) {
               paginationHtml += `
                   <li class="page-item ${currentPage === i ? 'active' : ''}">
@@ -658,7 +689,7 @@
               `;
           }
 
-          // Last page
+          
           if (currentPage < totalPages - 1) {
               if (currentPage < totalPages - 2) {
                   paginationHtml += `
@@ -685,7 +716,7 @@
           paginationContainer.innerHTML = paginationHtml;
           paginationContainer.style.display = 'block';
 
-          // Add click handlers for pagination
+          
           const pageLinks = paginationContainer.querySelectorAll('.page-link');
           pageLinks.forEach(link => {
               link.addEventListener('click', function(e) {
@@ -699,7 +730,7 @@
           });
       }
 
-      // Handle browser back/forward buttons
+      
       window.addEventListener('popstate', function(e) {
           if (e.state && e.state.filters) {
               currentFilters = e.state.filters;
@@ -710,7 +741,7 @@
           }
       });
 
-      // Initialize filters and apply them
+      
       initializeFiltersFromURL();
       applyFilters();
   });

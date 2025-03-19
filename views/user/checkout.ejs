@@ -306,6 +306,50 @@
             padding: 8px 20px;
             border-radius: 5px;
         }
+
+        /* Add these styles for form validation */
+        .form-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .form-group input:focus {
+            border-color: #4A90E2;
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+        }
+        
+        .form-group input.is-invalid {
+            border-color: #dc3545;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23dc3545' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+        
+        .error-message {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .cod-limit-message {
+            font-size: 12px;
+            color: #dc3545;
+            font-style: italic;
+            margin-left: 5px;
+        }
+        
+        input[type="radio"]:disabled + label {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 
@@ -518,14 +562,14 @@
                                             <% if (item.offer> 0) { %>
                                                 <p class="item-price">
                                                     <span
-                                                        class="original-price text-decoration-line-through text-muted">₹
+                                                        class="original-price text-decoration-line-through text-muted">$
                                                         <%= item.price.toFixed(2) %></span>
-                                                    <span class="discounted-price text-danger">₹<%=
+                                                    <span class="discounted-price text-danger">$<%=
                                                             item.discountedPrice.toFixed(2) %></span>
                                                     <span class="offer-badge">-<%= item.offer %>% OFF</span>
                                                 </p>
                                                 <% } else { %>
-                                                    <p class="item-price">₹<%= item.price.toFixed(2) %>
+                                                    <p class="item-price">$<%= item.price.toFixed(2) %>
                                                     </p>
                                                     <% } %>
                                                         <p class="item-quantity">Quantity: <%= item.quantity %>
@@ -535,7 +579,7 @@
                                         </div>
                                     </div>
                                     <div class="item-total">
-                                        ₹<%= (item.discountedPrice * item.quantity).toFixed(2) %>
+                                        $<%= (item.discountedPrice * item.quantity).toFixed(2) %>
                                     </div>
                                 </div>
                                 <% }) %>
@@ -560,11 +604,11 @@
                                                 </div>
                                                 <div class="coupon-terms">
                                                     <% if (coupon.minPurchase) { %>
-                                                        <p>Min. Purchase: ₹<%= coupon.minPurchase %>
+                                                        <p>Min. Purchase: $<%= coupon.minPurchase %>
                                                         </p>
                                                         <% } %>
                                                             <% if (coupon.maxDiscount) { %>
-                                                                <p>Max Discount: ₹<%= coupon.maxDiscount %>
+                                                                <p>Max Discount: $<%= coupon.maxDiscount %>
                                                                 </p>
                                                                 <% } %>
                                                                     <p class="expiry">Expires: <%= new
@@ -598,18 +642,18 @@
                         <div class="payment-option">
                             <input type="radio" name="payment" value="wallet" id="wallet">
                             <label for="wallet">Wallet (Balance: $<span id="walletBalance">
-                                    <%= wallet.balance %>
+                                    <%= wallet?.balance %>
                                 </span>)</label>
                             <div id="walletInfo" class="payment-details" style="display: none;">
                                 <div class="wallet-status" id="walletStatus"></div>
                             </div>
                         </div>
                         <div class="payment-option">
-                            <input type="radio" name="payment" value="cod" id="cod" checked>
-                            <label for="cod">Cash on Delivery</label>
+                            <input type="radio" name="payment" value="cod" id="cod" <% if (total > 5000) { %>disabled<% } else { %>checked<% } %>>
+                            <label for="cod" <% if (total > 5000) { %>class="text-muted"<% } %>>Cash on Delivery <% if (total > 5000) { %><span class="cod-limit-message">(Not available for orders over $5000)</span><% } %></label>
                         </div>
                         <div class="payment-option">
-                            <input type="radio" name="payment" value="razorpay" id="razorpay">
+                            <input type="radio" name="payment" value="razorpay" id="razorpay" <% if (total > 5000) { %>checked<% } %>>
                             <label for="razorpay">Pay Online (Razorpay)</label>
                         </div>
                     </div>
@@ -619,27 +663,27 @@
                     <div class="price-details">
                         <div class="price-row subtotal">
                             <span>Subtotal</span>
-                            <span>₹<%= subtotal.toFixed(2) %></span>
+                            <span>$<%= subtotal.toFixed(2) %></span>
                         </div>
                         <div class="price-row discount">
                             <span>Product Discount</span>
-                            <span>-₹<%= totalDiscount.toFixed(2) %></span>
+                            <span>-$<%= totalDiscount.toFixed(2) %></span>
                         </div>
                         <div class="price-row coupon-discount" style="display: none;">
                             <span>Coupon Discount (<span class="applied-coupon-code"></span>)</span>
-                            <span>-₹0.00</span>
+                            <span>-$0.00</span>
                         </div>
                         <div class="price-row tax">
                             <span>Tax (10%)</span>
-                            <span>₹<%= tax.toFixed(2) %></span>
+                            <span>$<%= tax.toFixed(2) %></span>
                         </div>
                         <div class="price-row shipping">
                             <span>Shipping</span>
-                            <span>₹0.00</span>
+                            <span>$0.00</span>
                         </div>
                         <div class="price-row total">
                             <span>Total</span>
-                            <span id="cart-total">₹<%= total.toFixed(2) %></span>
+                            <span id="cart-total">$<%= total.toFixed(2) %></span>
                         </div>
                     </div>
 
@@ -738,20 +782,101 @@
 
         document.getElementById('newAddressForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-
+            
+            // Add validation before processing the form
+            if (!validateAddressForm()) {
+                return false;
+            }
            
             const formData = new FormData(e.target);
             const addressData = Object.fromEntries(formData.entries());
-
-
             addressData.id = `temp-${Date.now()}`;
-
-
             updateSelectedAddressUI(addressData);
-
-
             hideAddressForm();
         });
+
+        // Add this new function for address validation
+        function validateAddressForm() {
+            // Get form fields
+            const fullName = document.getElementById('fullName').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const street = document.getElementById('street').value.trim();
+            const city = document.getElementById('city').value.trim();
+            const state = document.getElementById('state').value.trim();
+            const zipCode = document.getElementById('zipCode').value.trim();
+            
+            // Reset previous error messages
+            document.querySelectorAll('.error-message').forEach(el => el.remove());
+            
+            let isValid = true;
+            
+            // Validate full name (letters, spaces, and some special characters like hyphens)
+            if (!fullName || !/^[A-Za-z\s\-']{2,50}$/.test(fullName)) {
+                showError('fullName', 'Please enter a valid name (2-50 characters, letters only)');
+                isValid = false;
+            }
+            
+            // Improved phone number validation
+            // Extract just the digits from the phone number
+            const phoneDigits = phone.replace(/\D/g, '');
+            
+            // Check if starts with 6, 7, 8, or 9
+            if (!phoneDigits.match(/^[6-9]/)) {
+                showError('phone', 'Phone number must start with 6, 7, 8, or 9');
+                isValid = false;
+            }
+            // Check if we have enough digits (between 10 and 15)
+            else if (phoneDigits.length < 10 || phoneDigits.length > 15) {
+                showError('phone', 'Please enter a valid phone number with 10-15 digits');
+                isValid = false;
+            }
+            
+            // Validate street address (not empty and minimum length)
+            if (!street || street.length < 5) {
+                showError('street', 'Please enter a valid street address (minimum 5 characters)');
+                isValid = false;
+            }
+            
+            // Validate city (letters and spaces only)
+            if (!city || !/^[A-Za-z\s]{2,30}$/.test(city)) {
+                showError('city', 'Please enter a valid city name (letters only)');
+                isValid = false;
+            }
+            
+            // Validate state (letters and spaces only)
+            if (!state || !/^[A-Za-z\s]{2,30}$/.test(state)) {
+                showError('state', 'Please enter a valid state name (letters only)');
+                isValid = false;
+            }
+            
+            // Validate ZIP code (5-10 alphanumeric characters)
+            if (!zipCode || !/^[A-Za-z0-9]{5,10}$/.test(zipCode)) {
+                showError('zipCode', 'Please enter a valid ZIP/postal code (5-10 characters)');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+
+        // Helper function to show error messages
+        function showError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.style.color = '#dc3545';
+            errorDiv.style.fontSize = '12px';
+            errorDiv.style.marginTop = '5px';
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+            field.parentNode.appendChild(errorDiv);
+            field.style.borderColor = '#dc3545';
+            
+            // Remove error styling when user starts typing
+            field.addEventListener('input', function() {
+                this.style.borderColor = '';
+                const errorMsg = this.parentNode.querySelector('.error-message');
+                if (errorMsg) errorMsg.remove();
+            }, { once: true });
+        }
 
         function updateSelectedAddressUI(address) {
             document.querySelector(".current-address").innerHTML = `
@@ -781,10 +906,9 @@
 
         async function placeOrder() {
           
-
             const currentAddressElement = document.querySelector(".current-address .address-card");
             const cartTotalElement = document.getElementById('cart-total');
-            const cartTotal = parseFloat(cartTotalElement.textContent.trim().replace('₹', '').replace(',', ''));
+            const cartTotal = parseFloat(cartTotalElement.textContent.trim().replace('$', '').replace(',', ''));
 
             console.log(cartTotal, "cartTotal");
 
@@ -799,6 +923,16 @@
 
             const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
             console.log("Selected payment method:", paymentMethod);
+            
+            // Check if COD is selected but order amount is over $5000
+            if (paymentMethod === 'cod' && cartTotal > 5000) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Payment Method Not Available',
+                    text: 'Cash on Delivery is not available for orders over $5000. Please choose another payment method.'
+                });
+                return;
+            }
 
             let orderData = {
                 paymentMethod: paymentMethod,
@@ -975,8 +1109,15 @@
         document.addEventListener('DOMContentLoaded', function () {
             
             fetchWalletBalance();
-
             
+            // Check if COD should be initially disabled
+            const cartTotal = <%= total %>;
+            if (cartTotal > 5000) {
+                document.getElementById('cod').disabled = true;
+                document.getElementById('razorpay').checked = true;
+            }
+
+            // Payment method change handler
             const paymentMethods = document.querySelectorAll('input[name="payment"]');
             paymentMethods.forEach(method => {
                 method.addEventListener('change', function () {
@@ -1011,12 +1152,12 @@
             const data = await response.json();
 
             if (response.ok) {
-                messageDiv.innerHTML = `<span class="success">Coupon applied! You saved ₹${data.discountAmount}</span>`;
+                messageDiv.innerHTML = `<span class="success">Coupon applied! You saved $${data.discountAmount}</span>`;
                 
                 document.querySelector('.price-row.discount span:last-child').textContent =
-                    `-₹${(parseFloat(data.totalDiscount)).toFixed(2)}`;
+                    `-$${(parseFloat(data.totalDiscount)).toFixed(2)}`;
                 document.querySelector('.price-row.total span:last-child').textContent =
-                    `₹${data.newTotal.toFixed(2)}`;
+                    `$${data.newTotal.toFixed(2)}`;
             } else {
                 messageDiv.innerHTML = `<span class="error">${data.message}</span>`;
             }
@@ -1047,18 +1188,18 @@
 
             if (response.ok) {
                 messageDiv.className = 'coupon-message success';
-                messageDiv.textContent = `Coupon applied! You saved ₹${data.discountAmount}`;
+                messageDiv.textContent = `Coupon applied! You saved $${data.discountAmount}`;
 
                 
                 const existingDiscount = <%= totalDiscount %>;
                 const totalDiscountAmount = existingDiscount + data.discountAmount;
                 document.querySelector('.price-row.discount span:last-child').textContent =
-                    `-₹${totalDiscountAmount.toFixed(2)}`;
+                    `-$${totalDiscountAmount.toFixed(2)}`;
 
                
                 const newTotal = <%= subtotal %> - totalDiscountAmount + <%= tax %>;
                 document.querySelector('.price-row.total span:last-child').textContent =
-                    `₹${newTotal.toFixed(2)}`;
+                    `$${newTotal.toFixed(2)}`;
             } else {
                 messageDiv.className = 'coupon-message error';
                 messageDiv.textContent = data.message;
@@ -1066,10 +1207,10 @@
 
                
                 document.querySelector('.price-row.discount span:last-child').textContent = 
-                    `-₹${<%= totalDiscount.toFixed(2) %>} `;
+                    `-$${<%= totalDiscount.toFixed(2) %>} `;
                     
                     document.querySelector('.price-row.total span:last-child').textContent = 
-                        `₹${<%= total.toFixed(2) %>} `;
+                        `$${<%= total.toFixed(2) %>} `;
                 }
             } catch (error) {
                 messageDiv.className = 'coupon-message error';
@@ -1078,10 +1219,10 @@
                 
                
                 document.querySelector('.price-row.discount span:last-child').textContent = 
-                    `-₹${<%= totalDiscount.toFixed(2) %>} `;
+                    `-$${<%= totalDiscount.toFixed(2) %>} `;
                 
                 document.querySelector('.price-row.total span:last-child').textContent = 
-                    `₹${<%= total.toFixed(2) %>} `;
+                    `$${<%= total.toFixed(2) %>} `;
             }
         }
     });
@@ -1094,10 +1235,10 @@ function removeCoupon() {
     
     
     document.querySelector('.price-row.discount span:last-child').textContent = 
-        `-₹${<%= totalDiscount.toFixed(2) %>} `;
+        `-$${<%= totalDiscount.toFixed(2) %>} `;
     
     document.querySelector('.price-row.total span:last-child').textContent = 
-        `₹${<%= total.toFixed(2) %>}`;
+        `$${<%= total.toFixed(2) %>}`;
     
     const messageDiv = document.getElementById('couponMessage');
     messageDiv.textContent = '';
@@ -1106,7 +1247,7 @@ function removeCoupon() {
 
 async function handlePaymentFailure(orderId) {
     try {
-        // Update order status to failed
+        
         const response = await fetch('/verify-payment', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1119,9 +1260,9 @@ async function handlePaymentFailure(orderId) {
             })
         });
 
-        await response.json(); // Wait for the response
+        await response.json(); 
         
-        // Show the payment failed modal and wait for user interaction
+        
         const result = await Swal.fire({
             icon: 'warning',
             title: 'Payment Failed',
@@ -1130,21 +1271,21 @@ async function handlePaymentFailure(orderId) {
             confirmButtonText: 'OK',
             cancelButtonText: 'Retry Payment',
             reverseButtons: true,
-            allowOutsideClick: false, // Prevent clicking outside to close
-            allowEscapeKey: false // Prevent ESC key from closing
+            allowOutsideClick: false, 
+            allowEscapeKey: false 
         });
 
-        // Only redirect if user explicitly clicks OK
+        
         if (result.isConfirmed) {
             window.location.href = `/order/success/${orderId}`;
         } else if (result.dismiss === Swal.DismissReason.cancel) {
-            // User clicked Retry Payment
+            
             await retryPayment();
         }
 
     } catch (error) {
         console.error('Error handling payment failure:', error);
-        // Show error modal and wait for user interaction
+        
         await Swal.fire({
             icon: 'error', 
             title: 'Error',
@@ -1161,7 +1302,7 @@ function retryPayment() {
     const paymentFailedModal = bootstrap.Modal.getInstance(document.getElementById('paymentFailedModal'));
     paymentFailedModal.hide();
     
-    // Small delay before reopening Razorpay
+    
     setTimeout(() => {
         const razorpayInstance = new Razorpay(options);
         razorpayInstance.open();

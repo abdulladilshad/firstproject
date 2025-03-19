@@ -70,8 +70,7 @@
             <header class="topbar">
                 <h1>Product Management</h1>
                 <div class="topbar-actions">
-                    <input type="text" placeholder="Search products..." class="search-bar" value=""
-                        oninput="window.location.href = '/admin/products?search=' + this.value">
+                    <input type="text" placeholder="Search products..." class="search-bar" id="searchInput">
                     <a href="/admin/addproducts"><button class="add-button">Add Product</button></a>
                 </div>
             </header>
@@ -83,13 +82,12 @@
                             <th>Name</th>
                             <th>Price</th>
                             <th>Stock</th>
-
                             <th>Category</th>
                             <th>Image</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="productTableBody">
                         <!-- Dynamic rows rendered using EJS -->
                         <%w=(currentPage==1)?0:(currentPage-1)*7%>
                             <% products.forEach((product, index)=> { %>
@@ -182,7 +180,107 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+        let currentPage = 1;
+        let debounceTimer;
 
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                currentPage = 1;
+                searchProducts(e.target.value);
+            }, 300);
+        });
+
+        function searchProducts(query) {
+            fetch(`/admin/search-products?query=${encodeURIComponent(query)}&page=${currentPage}`)
+                .then(response => response.json())
+                .then(data => {
+                    updateProductTable(data.products);
+                    updatePagination(data.currentPage, data.totalPages);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire('Error', 'Failed to search products', 'error');
+                });
+        }
+
+        function updateProductTable(products) {
+            const tbody = document.getElementById('productTableBody');
+            tbody.innerHTML = '';
+            
+            products.forEach((product, index) => {
+                const w = (currentPage == 1) ? 0 : (currentPage - 1) * 7;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1 + w}</td>
+                    <td>${product.productName}</td>
+                    <td>$${product.price}</td>
+                    <td>${product.variants.map(variant => 
+                        `Color: ${variant.color}, Quantity: ${variant.quantity}`
+                    ).join('<br>')}</td>
+                    <td>${product.category.name}</td>
+                    <td>
+                        <button onclick="viewProduct('${product._id}')">view</button>
+                    </td>
+                    <td>
+                        <a href="/admin/editproducts/${product._id}"><button>Edit</button></a>
+                        <button onclick="toggleProductStatus('${product._id}', '${product.isDelete}')">
+                            ${product.isDelete ? 'List' : 'Unlist'}
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updatePagination(currentPage, totalPages) {
+            const paginationDiv = document.querySelector('.pagination');
+            let html = '';
+
+            if (currentPage > 1) {
+                html += `<a href="#" onclick="changePage(${currentPage - 1})" class="nav-btn">
+                    <i class="fa-solid fa-angle-left"></i>
+                </a>`;
+            }
+
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4);
+            }
+
+            if (startPage > 1) {
+                html += `<a href="#" onclick="changePage(1)" class="page-btn">1</a>`;
+                if (startPage > 2) {
+                    html += '<span class="dots">...</span>';
+                }
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<a href="#" onclick="changePage(${i})" class="page-btn ${currentPage === i ? 'active' : ''}">${i}</a>`;
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    html += '<span class="dots">...</span>';
+                }
+                html += `<a href="#" onclick="changePage(${totalPages})" class="page-btn">${totalPages}</a>`;
+            }
+
+            if (currentPage < totalPages) {
+                html += `<a href="#" onclick="changePage(${currentPage + 1})" class="nav-btn">
+                    <i class="fa-solid fa-angle-right"></i>
+                </a>`;
+            }
+
+            paginationDiv.innerHTML = html;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            const searchQuery = document.getElementById('searchInput').value;
+            searchProducts(searchQuery);
+        }
 
         function editProduct(productId) {
             window.location.href = '/admin/products/edit/' + productId;

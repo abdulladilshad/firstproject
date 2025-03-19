@@ -15,6 +15,7 @@ router.get('/dashboard',adminauth.cheksession, adminController.Loddashbord);
 
 // PRODUCT MANAGEMENT 
 router.get('/products',adminauth.cheksession, adminController.LoadProducts);
+router.get('/search-products', adminauth.cheksession, adminController.searchProducts);
 router.post('/addproducts', adminauth.cheksession, adminController.addProduct);
 router.get('/addproducts', adminauth.cheksession, adminController.renderAddProduct);
 router.get('/editproducts/:id', adminauth.cheksession, adminController.editproducts);
@@ -68,6 +69,7 @@ router.post('/coupons/edit/:id', adminauth.cheksession, couponController.editCou
 router.put('/coupon/:coupon_id/toggle-status', adminauth.cheksession, couponController.toggleCouponStatus);
 
 router.get('/sales', adminauth.cheksession,salesController.salesController);
+router.get('/search-orders', adminauth.cheksession, salesController.searchOrders);
 //LOGOUT
 router.post('/logout',adminauth.cheksession,adminController.logout)
 

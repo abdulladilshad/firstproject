@@ -69,11 +69,11 @@ const Loddashbord = async (req, res) => {
             users = await usermodel.find({}).exec();
         }
 
-        // Get current date and calculate date ranges
+        
         const currentDate = new Date();
         currentDate.setUTCHours(0, 0, 0, 0);
 
-        // Weekly data (last 7 days)
+        
         const weeklyData = await Order.aggregate([
             {
                 $match: {
@@ -91,7 +91,7 @@ const Loddashbord = async (req, res) => {
             { $sort: { _id: 1 } }
         ]);
 
-        // Monthly data (last 12 months)
+        
         const monthlyData = await Order.aggregate([
             {
                 $match: {
@@ -109,7 +109,7 @@ const Loddashbord = async (req, res) => {
             { $sort: { _id: 1 } }
         ]);
 
-        // Yearly data
+        
         const yearlyData = await Order.aggregate([
             {
                 $group: {
@@ -120,7 +120,7 @@ const Loddashbord = async (req, res) => {
             { $sort: { _id: 1 } }
         ]);
 
-        // Calculate totals for dashboard cards
+        
         const totalSales = await Order.aggregate([
             {
                 $group: {
@@ -151,7 +151,7 @@ const Loddashbord = async (req, res) => {
             originalIndex: index + 1
         }));
 
-        // Add these new aggregations for top products and brands
+        
         const topProducts = await Order.aggregate([
             { $unwind: "$products" },
             {
@@ -202,7 +202,7 @@ const Loddashbord = async (req, res) => {
             { $limit: 10 }
         ]);
 
-        // Add this code to fetch categories
+        
         const categories = await Category.aggregate([
             {
                 $lookup: {
@@ -251,12 +251,40 @@ const Loadusers = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = 8;
+        const searchQuery = req.query.search || '';
 
-        const users = await usermodel.paginate({}, { page, limit })
+        let query = {};
+        if (searchQuery) {
+            query = {
+                $or: [
+                    { email: { $regex: searchQuery, $options: 'i' } },
+                    { role: { $regex: searchQuery, $options: 'i' } }
+                ]
+            };
+        }
+
+        const users = await usermodel.paginate(query, { page, limit });
+
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.json({
+                users: users.docs,
+                pagination: {
+                    currentPage: users.page,
+                    totalPages: users.totalPages,
+                    hasNextPage: users.hasNextPage,
+                    hasPrevPage: users.hasPrevPage,
+                    nextPage: users.nextPage,
+                    prevPage: users.prevPage
+                }
+            });
+        }
 
         res.render('admin/adminUser', { users });
     } catch (error) {
         console.error(error);
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.status(500).json({ error: 'Server error' });
+        }
         res.status(500).send('Server error');
     }
 };
@@ -378,13 +406,13 @@ const addProduct = async (req, res) => {
             });
         }
 
-        // ✅ Ensure `offer` is defined
+        
         const productOffer = offer ? Number(offer) : 0;
 
-        // ✅ Ensure `stock` is defined (convert empty string to `0`)
+        
         const productStock = stock && !isNaN(stock) ? Number(stock) : 0;
 
-        // ✅ Process Images (Unchanged)
+        
         const savedImagePaths = [];
         const saveBase64ToFile = async (base64Data, filename) => {
             const matches = base64Data.match(/^data:image\/(png|jpg|jpeg);base64,(.+)$/);
@@ -411,7 +439,7 @@ const addProduct = async (req, res) => {
 
         req.body.imagePaths = savedImagePaths;
 
-        // ✅ Handle Variants
+        
         let variants;
         try {
             variants = JSON.parse(req.body.variants || '[]');
@@ -432,11 +460,11 @@ const addProduct = async (req, res) => {
 
         req.body.variants = variants;
 
-        // ✅ Create Product with Offer, Stock & Variants
+        
         const newProduct = new productModel({
             ...req.body,
-            offer: productOffer, // ✅ Store offer properly
-            stock: productStock, // ✅ Store stock properly
+            offer: productOffer, 
+            stock: productStock, 
         });
 
         await newProduct.save();
@@ -478,25 +506,25 @@ const postAddCategory = async (req, res) => {
     try {
         const { name, description, offer } = req.body;
 
-        // ✅ Ensure all required fields are provided
+        
         if (!name || !description) {
             return res.render('admin/addcategories', { error: 'Category name and description are required' });
         }
 
-        // ✅ Check if the category already exists (case-insensitive)
+        
         const existingCategory = await categoryModel.findOne({ name: { $regex: new RegExp(`^${name}$`, "i") } });
         if (existingCategory) {
             return res.render('admin/addcategories', { error: 'Category name already exists' });
         }
 
-        // ✅ Ensure `offer` is properly formatted (default to `0` if missing)
+        
         const categoryOffer = offer && !isNaN(offer) ? Number(offer) : 0;
 
-        // ✅ Create and save the category
+        
         const newCategory = new categoryModel({ 
             name, 
             description, 
-            offer: categoryOffer // ✅ Save the offer value
+            offer: categoryOffer 
         });
 
         await newCategory.save();
@@ -526,10 +554,10 @@ const editCategory = async (req, res) => {
         const categoryId = req.params.id;
         const { name, description, offer } = req.body;
 
-        // ✅ Ensure `offer` is properly formatted (default to `0` if missing)
+        
         const categoryOffer = offer && !isNaN(offer) ? Number(offer) : 0;
 
-        // ✅ Check if the category name already exists (excluding the current category)
+        
         const existingCategory = await categoryModel.findOne({
             name: { $regex: new RegExp(`^${name}$`, "i") },
             _id: { $ne: categoryId }
@@ -542,7 +570,7 @@ const editCategory = async (req, res) => {
             });
         }
 
-        // ✅ Update the category with the new name, description, and offer
+        
         await categoryModel.findByIdAndUpdate(categoryId, { name, description, offer: categoryOffer });
 
         res.redirect('/admin/categories?success=Category updated successfully.');
@@ -631,7 +659,7 @@ const editproducts = async (req, res) => {
 
 const editproducttt = async (req, res) => {
     try {
-        console.log("Request Body:", req.body); // Debugging: Check if `offer` and `stock` are present
+        console.log("Request Body:", req.body); 
 
         const { productId, image1, image2, image3, image4, productName, category, price, brand, productDescription, material, offer, stock } = req.body;
 
@@ -644,11 +672,11 @@ const editproducttt = async (req, res) => {
             return res.status(404).send("Product not found.");
         }
 
-        // ✅ Ensure `offer` and `stock` are defined
+        
         const productOffer = offer ? Number(offer) : 0;
         const productStock = stock && !isNaN(stock) ? Number(stock) : 0;
 
-        // ✅ Check if product name already exists
+        
         if (productName) {
             const existingProduct = await productModel.findOne({
                 productName: { $regex: new RegExp("^" + productName.trim() + "$", "i") },
@@ -667,7 +695,7 @@ const editproducttt = async (req, res) => {
             product.productName = productName.trim();
         }
 
-        // ✅ Process Images
+        
         const saveBase64ToFile = async (base64Data, filename) => {
             const matches = base64Data.match(/^data:image\/(png|jpg|jpeg);base64,(.+)$/);
             if (!matches) return false;
@@ -700,10 +728,10 @@ const editproducttt = async (req, res) => {
         product.price = price;
         product.brand = brand;
         product.material = material;
-        product.offer = productOffer; // ✅ Update Offer
-        product.stock = productStock; // ✅ Update Stock
+        product.offer = productOffer; 
+        product.stock = productStock; 
 
-        // ✅ Handle Variants
+        
         let variants;
         try {
             variants = JSON.parse(req.body.variants || '[]');
@@ -739,6 +767,41 @@ const logout = async (req, res) => {
     res.redirect('/admin/login')
 }
 
+const searchProducts = async (req, res) => {
+    try {
+        const query = req.query.query || '';
+        const page = parseInt(req.query.page) || 1;
+        const limit = 7;
+
+        const searchRegex = new RegExp(query, 'i');
+
+        const searchQuery = {
+            $or: [
+                { productName: searchRegex },
+                { brand: searchRegex },
+                { 'category.name': searchRegex }
+            ]
+        };
+
+        const options = {
+            page,
+            limit,
+            sort: { _id: -1 },
+            populate: { path: 'category', select: 'name' }
+        };
+
+        const products = await productModel.paginate(searchQuery, options);
+
+        res.json({
+            products: products.docs,
+            currentPage: page,
+            totalPages: products.totalPages
+        });
+    } catch (error) {
+        console.error('Error searching products:', error);
+        res.status(500).json({ error: 'Failed to search products' });
+    }
+};
 
 module.exports = {
     editproducttt,
@@ -758,6 +821,7 @@ module.exports = {
     loadEditCategory,
     Loadusers,
     toggleProductStatus,
-    toggleUserStatus
+    toggleUserStatus,
+    searchProducts
 }
 

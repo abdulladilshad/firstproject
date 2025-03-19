@@ -421,10 +421,10 @@ const checkCartProducts = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Cart not found' });
         }
 
-        // Collect names of deleted products
+       
         const deletedProducts = cart.items
             .filter(item => item.productId.isDelete === true)
-            .map(item => item.productId.productName); // Assuming the product schema has a 'name' field
+            .map(item => item.productId.productName); 
 
         if (deletedProducts.length > 0) {
             return res.json({ 

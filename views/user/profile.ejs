@@ -341,7 +341,7 @@
             const avatarInput = document.getElementById('avatar');
 
 
-            // Name validation
+            //
             if (!name.trim()) {
                 Swal.fire({
                     icon: 'warning',
@@ -355,11 +355,11 @@
             formData.append('email', email);
 
 
-            // Image validation
+            
             if (avatarInput && avatarInput.files[0]) {
                 const file = avatarInput.files[0];
                 
-                // Check file type
+                
                 const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
                 if (!validImageTypes.includes(file.type)) {
                     Swal.fire({
@@ -371,8 +371,8 @@
                 }
 
 
-                // Check file size (max 5MB)
-                const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+                
+                const maxSize = 5 * 1024 * 1024; 
                 if (file.size > maxSize) {
                     Swal.fire({
                         icon: 'error',
@@ -422,13 +422,13 @@
             }
         });
 
-        // Preview image before upload
+        
         if (document.getElementById('avatar')) {
             document.getElementById('avatar').addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (file) {
 
-                    // Validate file type
+                    
                     const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
                     if (!validImageTypes.includes(file.type)) {
                         Swal.fire({
@@ -437,12 +437,12 @@
                             text: 'Please upload only image files (JPEG, PNG, JPG, GIF)'
                         });
 
-                        this.value = ''; // Clear the input
+                        this.value = ''; 
                         return;
                     }
 
-                    // Validate file size
-                    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+                    
+                    const maxSize = 5 * 1024 * 1024; 
                     if (file.size > maxSize) {
                         Swal.fire({
                             icon: 'error',
@@ -450,11 +450,11 @@
                             text: 'Image size should be less than 5MB'
                         });
 
-                        this.value = ''; // Clear the input
+                        this.value = ''; 
                         return;
                     }
 
-                    // If validation passes, show preview
+                    
                     const reader = new FileReader();
                     reader.onload = function(e) {
                         document.getElementById('profilePreview').src = e.target.result;
@@ -464,7 +464,7 @@
             });
         }
 
-        // Copy referral code to clipboard
+        
         function copyReferralCode() {
             const referralCode = document.getElementById('referralCode');
             referralCode.select();
@@ -479,7 +479,7 @@
             });
         }
         
-        // Share referral on WhatsApp
+        
         function shareReferral() {
             const referralCode = document.getElementById('referralCode').value;
             const message = encodeURIComponent(`Hey! Check out LUXE TIME, a premium watch store. Use my referral code ${referralCode} to get special discount on your first purchase! Visit: ${window.location.origin}`);

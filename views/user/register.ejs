@@ -68,7 +68,7 @@
   document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('form').addEventListener('submit', formvalidate);
     
-    // Add event listener for the referral checkbox
+    //
     const referralCheckbox = document.getElementById('has-referral');
     const referralBox = document.querySelector('.referral-box');
     
@@ -77,8 +77,8 @@
         referralBox.style.display = 'block';
       } else {
         referralBox.style.display = 'none';
-        document.getElementById('referralCode').value = ''; // Clear the input when hiding
-        document.getElementById('referral-error').textContent = ''; // Clear any error
+        document.getElementById('referralCode').value = ''; 
+        document.getElementById('referral-error').textContent = ''; 
       }
     });
   });
@@ -86,20 +86,20 @@
   function formvalidate(e) {
     e.preventDefault();
 
-    // Get form values
+    
     var email = document.getElementById('email').value.trim();
     var password = document.getElementById('password').value.trim();
     var confirmpassword = document.getElementById('confirmpassword').value.trim();
     var hasReferral = document.getElementById('has-referral').checked;
     var referralCode = document.getElementById('referralCode').value.trim();
 
-    // Error message elements
+    
     var emailError = document.getElementById('email-error');
     var passwordError = document.getElementById('password-error');
     var confirmPasswordError = document.getElementById('confirm-password-error');
     var referralError = document.getElementById('referral-error');
 
-    // Reset previous errors
+    
     emailError.textContent = "";
     passwordError.textContent = "";
     confirmPasswordError.textContent = "";
@@ -107,7 +107,7 @@
 
     let isValid = true;
 
-    // Email validation
+    
     var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (email === "") {
       emailError.textContent = "Email is required";
@@ -117,7 +117,7 @@
       isValid = false;
     }
 
-    // Password validation
+    
     if (password === "") {
       passwordError.textContent = "Password is required";
       isValid = false;
@@ -129,7 +129,7 @@
       isValid = false;
     }
 
-    // Confirm password validation
+    
     if (confirmpassword === "") {
       confirmPasswordError.textContent = "Confirm password is required";
       isValid = false;
@@ -138,13 +138,13 @@
       isValid = false;
     }
 
-    // Referral code validation (only if checkbox is checked)
+    
     if (hasReferral && referralCode === "") {
       referralError.textContent = "Please enter a referral code";
       isValid = false;
     }
 
-    // If all checks pass, submit the form
+    
     if (isValid) {
       e.target.submit();
     }

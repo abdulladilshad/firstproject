@@ -18,6 +18,12 @@ const couponSchema = new mongoose.Schema(
     expirationDate: {
       type: Date,
       required: true,
+      validate: {
+        validator: function (value) {
+          return value > Date.now();
+        },
+        message: 'Expiration date must be in the future'
+      }
     },
     isActive: {
       type: Boolean,
@@ -29,16 +35,21 @@ const couponSchema = new mongoose.Schema(
     },
     maxDiscount: {
       type: Number,
-      default: null,
+      default: Infinity, // Improved logic
     },
     usageLimit: {
       type: Number,
-      default: null,
+      default: Infinity, // Improved logic
     },
     usedCount: {
       type: Number,
-      default: 0, // Track how many times the coupon has been used
+      default: 0,
     },
+    usedBy: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: 'User',
+      default: [] // Important fix
+    }
   },
   { timestamps: true }
 );

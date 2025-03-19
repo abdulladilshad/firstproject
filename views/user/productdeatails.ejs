@@ -410,12 +410,12 @@
                                     </h3>
                                     <div class="product-price">
                                         <% if (product.offerPrice) { %>
-                                            <span class="original-price">₹<%= product.price.toFixed(2) %></span>
-                                            <span class="offer-price">₹<%= product.offerPrice.toFixed(2) %></span>
+                                            <span class="original-price">$<%= product.price.toFixed(2) %></span>
+                                            <span class="offer-price">$<%= product.offerPrice.toFixed(2) %></span>
                                             <% const discountPercentage = Math.round((1 - product.offerPrice / product.price) * 100); %>
                                             <span class="discount-badge">-<%= discountPercentage %>%</span>
                                         <% } else { %>
-                                            <span class="regular-price">₹<%= product.price.toFixed(2) %></span>
+                                            <span class="regular-price">$<%= product.price.toFixed(2) %></span>
                                         <% } %>
                                     </div>
                                 </div>

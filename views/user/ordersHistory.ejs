@@ -346,7 +346,7 @@
                     </div>
                     <h3>No Orders Yet</h3>
                     <p>Looks like you haven't made any orders yet</p>
-                    <a href="/products" class="btn btn-primary">
+                    <a href="/shope" class="btn btn-primary">
                         Start Shopping <i class="fas fa-arrow-right ms-2"></i>
                     </a>
                 </div>
@@ -382,22 +382,22 @@
                                             <h4>
                                                 <%= order.productName %>
                                             </h4>
-                                            <p class="color">Color: <%= order.color %>
-                                            </p>
-                                            <p class="quantity">Qty: <%= order.quantity %>
-                                            </p>
-
-
+                                            <p class="color">Color: <%= order.color %></p>
+                                            <p class="quantity">Qty: <%= order.quantity %></p>
+                                
                                             <p class="address" hidden>
                                                 <%= address %>
                                             </p>
-
-
-                                            <p class="price">$<%= order.totalAmount?.toFixed(2) %>
-                                            </p>
+                                
+                                            <p class="price">$<%= order.totalAmount?.toFixed(2) %></p>
+                                
+                                            <% if (order.paymentMethod === 'razorpay') { %>
+                                                <p class="status">Status: <%= order.status || 'Pending' %></p>
+                                            <% } %>
                                         </div>
                                     </div>
                                 </div>
+                                
 
                                 <div class="order-card-footer">
                                     <div class="action-buttons d-flex align-items-center gap-2">
@@ -673,11 +673,11 @@
 
 
 
-                // Initialize jsPDF
+                //
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
 
-                // Set document properties
+                
                 doc.setProperties({
                     title: `Invoice - ${orderNumber}`,
                     subject: 'Order Invoice',
@@ -685,37 +685,37 @@
                     creator: 'LUXE TIME Store'
                 });
 
-                // Add store logo/header
+                
                 doc.setFontSize(24);
                 doc.setTextColor(26, 26, 26);
                 doc.text('LUXE TIME', 20, 20);
 
-                // Add small dot after store name
+                
                 doc.setFillColor(26, 26, 26);
                 doc.circle(95, 17, 1, 'F');
 
-                // Add Invoice title
+                
                 doc.setFontSize(20);
                 doc.text('INVOICE', 20, 40);
 
-                // Add order details
+                
                 doc.setFontSize(10);
                 doc.setTextColor(102, 102, 102);
                 doc.text(`Order Number: ${orderNumber}`, 20, 55);
                 doc.text(`Date: ${orderDate}`, 20, 62);
 
-                // Add line separator
+                
                 doc.setDrawColor(230, 230, 230);
                 doc.line(20, 70, 190, 70);
 
-                // Add billing/shipping information
+                
                 doc.setFontSize(12);
                 doc.setTextColor(26, 26, 26);
                 doc.text('Billing & Shipping Details', 20, 75);
 
-                // Create address table headers
+                
                 const addressHeaders = [['Details', 'Information']];
-                // Get address details from data attributes (you'll need to add these to your order card)
+                
                 const addressData = [
                     ['Full Name', address?.fullName || 'N/A'],
                     ['Phone', address?.phone || 'N/A'],
@@ -725,7 +725,7 @@
                     ['Zip Code', address?.zipCode || 'N/A']
                 ];
 
-                // Generate address table
+                
                 doc.autoTable({
                     startY: 80,
                     head: addressHeaders,
@@ -777,29 +777,29 @@
                     }
                 });
 
-                // Add total section
+                
                 const finalY = doc.lastAutoTable.finalY + 10;
                 doc.setFontSize(10);
                 doc.setTextColor(26, 26, 26);
            
 
-                // Add tax (assuming 10%)
+                
              
 
-                // Add total
+                
                 const total = parseFloat(totalAmount.replace('$', '')) ;
                 doc.setFontSize(12);
                 doc.setFont(undefined, 'bold');
                 doc.text('Total:', 140, finalY + 15);
                 doc.text(`$${total.toFixed(2)}`, 180, finalY + 15, { align: 'right' });
 
-                // Add footer
+                
                 doc.setFontSize(8);
                 doc.setTextColor(128, 128, 128);
                 doc.text('Thank you for shopping with LUXE TIME', 20, 270);
                 doc.text('For any queries, please contact support@luxetime.com', 20, 275);
 
-                // Save the PDF
+                
                 doc.save(`invoice-${orderNumber.toLowerCase()}.pdf`);
 
             } catch (error) {
@@ -823,7 +823,7 @@
                 confirmButtonText: 'Pay Now'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Make API call to create Razorpay order
+                    
                     fetch(`/create-order/${orderId}`, {
                         method: 'POST',
                         headers: {
@@ -844,7 +844,7 @@
                             description: 'Order Payment',
                             order_id: data.order_id,
                             handler: function (response) {
-                                // Handle successful payment
+                                
                                 fetch('/verify-failPayment', {
                                     method: 'POST',
                                     headers: {
@@ -1102,7 +1102,7 @@
                 });
             });
 
-            // Add click handlers for invoice buttons
+            
             const invoiceButtons = document.querySelectorAll('.btn-outline-secondary');
             invoiceButtons.forEach(button => {
                 button.onclick = function () {

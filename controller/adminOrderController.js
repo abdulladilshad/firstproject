@@ -136,7 +136,8 @@ const orderView = async (req, res) => {
 
 
         const orders = await OrderModel.find({
-            _id: orderId
+            _id: orderId,
+          
 
         })
             .sort({ createdAt: -1 })
@@ -144,6 +145,11 @@ const orderView = async (req, res) => {
 
             
             const order = orders[0];
+
+            
+        const totalAmount = order?.totalAmount || 0; 
+        console.log('Total Amount:', totalAmount);
+
             console.log(order.products.map(e => e), 'opopopopopopo');
             
         const product = order && order.products 
@@ -154,13 +160,14 @@ const orderView = async (req, res) => {
         
         const productSchema = await productModel.findOne({ _id: new mongoose.Types.ObjectId(product.productId) });
 
-        console.log("lllllllllllllllllllllll", product);
+        console.log("lllllllllllllllllllllll", product);     
 
 
         res.render('admin/orderView', {
             orders,
             product,
             productSchema,
+            totalAmount,
             title: 'Order Management'
         });
     } catch (error) {

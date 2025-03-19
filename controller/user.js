@@ -78,7 +78,6 @@ const transporter = nodemailer.createTransport({
 const Loadotp = async (req, res) => {
     const { email } = req.query;
     
-    
 
     if (!email) {
         return res.status(400).send("Email is required for OTP verification");
@@ -88,11 +87,14 @@ const Loadotp = async (req, res) => {
 };
 
 
+
+
 const postotp = async (req, res) => {
     try {
         const { email, otp } = req.body;
+console.log(req.body, "poppppp")
+
         
-       
         if (!email || !otp) {
             return res.render('user/otp', { message: 'Email and OTP are required' });
         }
@@ -104,8 +106,16 @@ const postotp = async (req, res) => {
             return res.render('user/otp', { message: 'OTP expired or not found' });
         }
 
+        
         if (otpRecord.otp != otp) {
-            return res.render('user/otp', { message: 'Invalid OTP',email });
+            return res.render('user/otp', { message: 'Invalid OTP', email });
+        }
+
+        
+        const user = await userschema.findOne({ email });
+
+        if (!user) {
+            return res.render('user/otp', { message: 'User not found' });
         }
 
         
@@ -115,15 +125,15 @@ const postotp = async (req, res) => {
         await Otp.deleteOne({ email });
 
         
-        req.session.user = { email };
-         res.redirect('/'); 
+        req.session.user = { id: user._id, email };
+
+        
+        res.redirect('/');
     } catch (error) {
         console.error('Error during OTP verification:', error);
         return res.render('user/otp', { message: 'Something went wrong' });
     }
 };
-
-
 
 
 
@@ -154,7 +164,7 @@ const register = async (req, res) => {
 
         const hashedpassword = await bcrypt.hash(password, 10);
 
-        // Create new user with wallet
+        
         const newUser = new userschema({ 
             email, 
             password: hashedpassword, 
@@ -165,11 +175,11 @@ const register = async (req, res) => {
             }
         });
 
-        // Handle referral code if provided
+        
         if (referralCode) {
             const referrer = await userschema.findOne({ referralCode });
             if (referrer) {
-                // Find or create wallet for referrer
+                
                 let referrerWallet = await Wallet.findOne({ user: referrer._id });
                 
                 if (!referrerWallet) {
@@ -179,11 +189,11 @@ const register = async (req, res) => {
                     });
                 }
 
-                // Add referral bonus
+                
                 referrerWallet.balance += 50;
                 await referrerWallet.save();
 
-                // Create wallet for new user
+                
                 const newUserWallet = new Wallet({
                     user: newUser._id,
                     balance: 0
@@ -257,8 +267,8 @@ const Loadlogin = (req, res) => {
     const successMessages = req.flash("success");
   
     res.render("user/login", { 
-        errorMessages: errorMessages.length > 0 ? errorMessages : null,
-        successMessages: successMessages.length > 0 ? successMessages : null
+        errorMessages: errorMessages.length > 0 ? errorMessages : "",
+        successMessages: successMessages.length > 0 ? successMessages : ""
      });                                             
 };
 
@@ -299,25 +309,21 @@ const Loadshope = async (req, res) => {
             });
             
             if (!categoryExists) {
-                
                 return res.redirect('/shope');
             }
         }
 
-        
         const filter = { isDelete: false };
         if (category) {
             filter.category = category;
         }
 
-        
         const totalItems = await productModel.countDocuments(filter);
         const totalPages = Math.ceil(totalItems / itemsPerPage);
         const currentPage = Math.max(1, Math.min(page, totalPages));
         const skip = (currentPage - 1) * itemsPerPage;
 
-        
-        const products = await productModel
+        let products = await productModel
             .find(filter)
             .sort({ createdAt: -1 })
             .skip(skip)
@@ -326,6 +332,17 @@ const Loadshope = async (req, res) => {
             .lean();
 
         
+        products = await Promise.all(products.map(async (product) => {
+            const categoryOffer = await categoryModel.findById(product.category._id, 'offer').lean();
+            const categoryOfferValue = categoryOffer?.offer || 0;
+
+            if (categoryOfferValue) {
+                product.offerPrice = (product.price * (1 - categoryOfferValue / 100)).toFixed(2);
+            }
+
+            return product;
+        }));
+
         const categories = await categoryModel
             .find({ isdelete: false })
             .lean();
@@ -337,16 +354,16 @@ const Loadshope = async (req, res) => {
             totalPages,
             totalItems,
             itemsPerPage,
-            selectedCategory: category, 
+            selectedCategory: category,
             title: 'Shop - LUXE TIME WORLD'
         });
 
     } catch (error) {
         console.error('Error in Loadshope:', error);
-        
         res.redirect('/shope');
     }
 };
+
 
 
 
@@ -456,11 +473,24 @@ const filterProducts = async (req, res) => {
             .sort(sortOption)
             .skip(skip)
             .limit(itemsPerPage)
+            .populate('category')
             .lean();
+            
+        
+        const productsWithOffers = await Promise.all(products.map(async (product) => {
+            const categoryOffer = await categoryModel.findById(product.category._id, 'offer').lean();
+            const categoryOfferValue = categoryOffer?.offer || 0;
+
+            if (categoryOfferValue) {
+                product.offerPrice = (product.price * (1 - categoryOfferValue / 100)).toFixed(2);
+            }
+
+            return product;
+        }));
 
         res.json({
             success: true,
-            products,
+            products: productsWithOffers,
             pagination: {
                 currentPage,
                 totalPages,
@@ -534,10 +564,22 @@ const searchProducts = async (req, res) => {
             .limit(itemsPerPage)
             .populate('category')
             .lean();
+            
+        
+        const productsWithOffers = await Promise.all(products.map(async (product) => {
+            const categoryOffer = await categoryModel.findById(product.category._id, 'offer').lean();
+            const categoryOfferValue = categoryOffer?.offer || 0;
+
+            if (categoryOfferValue) {
+                product.offerPrice = (product.price * (1 - categoryOfferValue / 100)).toFixed(2);
+            }
+
+            return product;
+        }));
 
         res.json({
             success: true,
-            products,
+            products: productsWithOffers,
             pagination: {
                 currentPage: page,
                 totalPages,

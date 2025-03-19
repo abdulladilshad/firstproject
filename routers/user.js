@@ -123,8 +123,10 @@ router.get('/addresses/:id',auth.isBan, auth.checkSession, addressController.get
 
 
 
-router.get('/wallet', walletController.getWallet);
-router.post('/wallet', walletController.deposit);
+router.get('/wallet', auth.isBan, auth.checkSession, walletController.getWallet);
+router.post('/wallet/deposit/create', auth.isBan, auth.checkSession, walletController.createWalletDeposit);
+router.post('/wallet/deposit/verify', auth.isBan, auth.checkSession, walletController.verifyWalletDeposit);
+router.post('/wallet/create', auth.isBan, auth.checkSession, walletController.createWallet);
 
 
 
@@ -136,7 +138,6 @@ router.put('/select-address', auth.isBan, auth.checkSession,addressController.se
 
 
 
-router.post('/place', orderController.placeOrders);
 
 
 router.post('/create', orderController.createRazorpayOrder);
