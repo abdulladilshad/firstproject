@@ -125,7 +125,7 @@
             
                 .nav-icon {
                     font-size: 20px;
-                    padding: 8px;
+                    padding: 0px;
                 }
             }
             
@@ -359,49 +359,7 @@
                 }
             }
 
-document.addEventListener('DOMContentLoaded', function() {
-    new Swiper('.related-products-slider', {
-        slidesPerView: 'auto',
-        spaceBetween: 20,
-        loop: true,
-        loopFillGroupWithBlank: true,
-        centeredSlides: false,
-        autoplay: {
-            delay: 3000,
-            disableOnInteraction: false,
-        },
-        pagination: {
-            el: '.swiper-pagination',
-            clickable: true,
-        },
-        navigation: {
-            nextEl: '.swiper-button-next',
-            prevEl: '.swiper-button-prev',
-        },
-        breakpoints: {
-            320: {
-                slidesPerView: 1.2,
-                spaceBetween: 10,
-                slidesPerGroup: 1
-            },
-            480: {
-                slidesPerView: 2.2,
-                spaceBetween: 15,
-                slidesPerGroup: 2
-            },
-            768: {
-                slidesPerView: 3.2,
-                spaceBetween: 20,
-                slidesPerGroup: 3
-            },
-            1024: {
-                slidesPerView: 4.2,
-                spaceBetween: 20,
-                slidesPerGroup: 4
-            }
-        }
-    });
-});
+
 
 
  

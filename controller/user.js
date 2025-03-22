@@ -77,13 +77,16 @@ const transporter = nodemailer.createTransport({
 
 const Loadotp = async (req, res) => {
     const { email } = req.query;
+
+    console.log(email,'emilimailemailemailamel');
+    
     
 
     if (!email) {
         return res.status(400).send("Email is required for OTP verification");
     }
 
-    res.render('user/otp', { email:email, message: "" }); 
+    res.render('user/otp', { email, message: "" });
 };
 
 
@@ -92,7 +95,7 @@ const Loadotp = async (req, res) => {
 const postotp = async (req, res) => {
     try {
         const { email, otp } = req.body;
-console.log(req.body, "poppppp")
+
 
         
         if (!email || !otp) {
@@ -126,12 +129,16 @@ console.log(req.body, "poppppp")
 
         
         req.session.user = { id: user._id, email };
+        
+        
+        
+        
 
         
         res.redirect('/');
     } catch (error) {
         console.error('Error during OTP verification:', error);
-        return res.render('user/otp', { message: 'Something went wrong' });
+        return res.render('user/otp', { email, message: 'Something went wrong' });
     }
 };
 

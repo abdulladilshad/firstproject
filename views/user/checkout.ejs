@@ -783,7 +783,7 @@
         document.getElementById('newAddressForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Add validation before processing the form
+            
             if (!validateAddressForm()) {
                 return false;
             }
@@ -795,9 +795,9 @@
             hideAddressForm();
         });
 
-        // Add this new function for address validation
+        
         function validateAddressForm() {
-            // Get form fields
+            
             const fullName = document.getElementById('fullName').value.trim();
             const phone = document.getElementById('phone').value.trim();
             const street = document.getElementById('street').value.trim();
@@ -805,51 +805,51 @@
             const state = document.getElementById('state').value.trim();
             const zipCode = document.getElementById('zipCode').value.trim();
             
-            // Reset previous error messages
+            
             document.querySelectorAll('.error-message').forEach(el => el.remove());
             
             let isValid = true;
             
-            // Validate full name (letters, spaces, and some special characters like hyphens)
+            
             if (!fullName || !/^[A-Za-z\s\-']{2,50}$/.test(fullName)) {
                 showError('fullName', 'Please enter a valid name (2-50 characters, letters only)');
                 isValid = false;
             }
             
-            // Improved phone number validation
-            // Extract just the digits from the phone number
+            
+            
             const phoneDigits = phone.replace(/\D/g, '');
             
-            // Check if starts with 6, 7, 8, or 9
+            
             if (!phoneDigits.match(/^[6-9]/)) {
                 showError('phone', 'Phone number must start with 6, 7, 8, or 9');
                 isValid = false;
             }
-            // Check if we have enough digits (between 10 and 15)
+            
             else if (phoneDigits.length < 10 || phoneDigits.length > 15) {
                 showError('phone', 'Please enter a valid phone number with 10-15 digits');
                 isValid = false;
             }
             
-            // Validate street address (not empty and minimum length)
+            
             if (!street || street.length < 5) {
                 showError('street', 'Please enter a valid street address (minimum 5 characters)');
                 isValid = false;
             }
             
-            // Validate city (letters and spaces only)
+            
             if (!city || !/^[A-Za-z\s]{2,30}$/.test(city)) {
                 showError('city', 'Please enter a valid city name (letters only)');
                 isValid = false;
             }
             
-            // Validate state (letters and spaces only)
+            
             if (!state || !/^[A-Za-z\s]{2,30}$/.test(state)) {
                 showError('state', 'Please enter a valid state name (letters only)');
                 isValid = false;
             }
             
-            // Validate ZIP code (5-10 alphanumeric characters)
+            
             if (!zipCode || !/^[A-Za-z0-9]{5,10}$/.test(zipCode)) {
                 showError('zipCode', 'Please enter a valid ZIP/postal code (5-10 characters)');
                 isValid = false;
@@ -858,7 +858,7 @@
             return isValid;
         }
 
-        // Helper function to show error messages
+        
         function showError(fieldId, message) {
             const field = document.getElementById(fieldId);
             const errorDiv = document.createElement('div');
@@ -870,7 +870,7 @@
             field.parentNode.appendChild(errorDiv);
             field.style.borderColor = '#dc3545';
             
-            // Remove error styling when user starts typing
+            
             field.addEventListener('input', function() {
                 this.style.borderColor = '';
                 const errorMsg = this.parentNode.querySelector('.error-message');
@@ -924,7 +924,7 @@
             const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
             console.log("Selected payment method:", paymentMethod);
             
-            // Check if COD is selected but order amount is over $5000
+            
             if (paymentMethod === 'cod' && cartTotal > 5000) {
                 Swal.fire({
                     icon: 'error',
@@ -1110,14 +1110,14 @@
             
             fetchWalletBalance();
             
-            // Check if COD should be initially disabled
+            
             const cartTotal = <%= total %>;
             if (cartTotal > 5000) {
                 document.getElementById('cod').disabled = true;
                 document.getElementById('razorpay').checked = true;
             }
 
-            // Payment method change handler
+            
             const paymentMethods = document.querySelectorAll('input[name="payment"]');
             paymentMethods.forEach(method => {
                 method.addEventListener('change', function () {

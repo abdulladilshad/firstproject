@@ -60,7 +60,6 @@
             transform: translateX(-50%);
         }
 
-        .navbar-nav .nav-link:hover::after,
         .navbar-nav .nav-link.active::after {
             width: 80%;
         }
@@ -97,81 +96,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        /* Improved Hamburger Button Styles */
-        .navbar-toggler {
-            border: none;
-            padding: 0;
-            width: 30px;
-            height: 24px;
-            position: relative;
-            background: transparent;
-            cursor: pointer;
-            outline: none;
-        }
-
-        .navbar-toggler:focus {
-            outline: none;
-            box-shadow: none;
-        }
-
-        .toggler-icon {
-            position: absolute;
-            width: 100%;
-            height: 2px;
-            background: #1a1a1a;
-            transition: all 0.3s ease;
-            left: 0;
-        }
-
-        .navbar-toggler .toggler-icon {
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        .navbar-toggler .toggler-icon::before,
-        .navbar-toggler .toggler-icon::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 2px;
-            background: #1a1a1a;
-            left: 0;
-            transition: all 0.3s ease;
-        }
-
-        .navbar-toggler .toggler-icon::before {
-            top: -8px;
-        }
-
-        .navbar-toggler .toggler-icon::after {
-            bottom: -8px;
-        }
-
-        /* Hamburger Animation */
-        .navbar-toggler[aria-expanded="true"] .toggler-icon {
-            background: transparent;
-        }
-
-        .navbar-toggler[aria-expanded="true"] .toggler-icon::before {
-            top: 0;
-            transform: rotate(45deg);
-        }
-
-        .navbar-toggler[aria-expanded="true"] .toggler-icon::after {
-            bottom: 0;
-            transform: rotate(-45deg);
-        }
-
-        @media (max-width: 991px) {
-            .navbar-toggler {
-                display: block;
-                position: absolute;
-                right: 15px;
-                top: 50%;
-                transform: translateY(-50%);
-            }
         }
 
         /* Mobile Responsive */
@@ -471,7 +395,7 @@
         }
 
         .order-summary {
-            width: 300px;
+            width: 250px;
             padding: 20px;
             background: #f8f9fa;
             border-radius: 8px;
@@ -515,49 +439,84 @@
             .nav-item {
                 margin: 10px 0;
             }
+        }
 
-            /* Hamburger button positioning */
-            .navbar-toggler {
+        /* Hamburger menu styles from product details page */
+        .hamburger-menu {
+            display: none;
+            width: 30px;
+            height: 20px;
+            position: relative;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        
+        @media (max-width: 991px) {
+            .hamburger-menu {
+                display: block;
+                width: 30px;
+                height: 20px;
+                position: relative;
+                cursor: pointer;
+                z-index: 1000;
+            }
+            
+            .hamburger-menu span {
                 display: block;
                 position: absolute;
-                right: 15px;
-                top: 50%;
-                transform: translateY(-50%);
-                border: none;
-                padding: 0;
-                margin: 0;
-                outline: none !important;
-                box-shadow: none !important;
+                height: 3px;
+                width: 100%;
+                background: #333;
+                border-radius: 3px;
+                opacity: 1;
+                left: 0;
+                transform: rotate(0deg);
+                transition: .25s ease-in-out;
             }
-        }
-
-        /* Simple hamburger icon */
-        .navbar-toggler .navbar-toggler-icon {
-            background-image: none;
-            position: relative;
-            height: 2px;
-            width: 25px;
-            background: #1a1a1a;
-            display: block;
-            transition: all 0.3s ease;
-        }
-
-        .navbar-toggler .navbar-toggler-icon::before,
-        .navbar-toggler .navbar-toggler-icon::after {
-            content: '';
-            position: absolute;
-            height: 2px;
-            width: 25px;
-            background: #1a1a1a;
-            transition: all 0.3s ease;
-        }
-
-        .navbar-toggler .navbar-toggler-icon::before {
-            top: -8px;
-        }
-
-        .navbar-toggler .navbar-toggler-icon::after {
-            bottom: -8px;
+            
+            .hamburger-menu span:nth-child(1) {
+                top: 0px;
+            }
+            
+            .hamburger-menu span:nth-child(2) {
+                top: 8px;
+            }
+            
+            .hamburger-menu span:nth-child(3) {
+                top: 16px;
+            }
+            
+            .hamburger-menu.open span:nth-child(1) {
+                top: 8px;
+                transform: rotate(135deg);
+            }
+            
+            .hamburger-menu.open span:nth-child(2) {
+                opacity: 0;
+                left: -60px;
+            }
+            
+            .hamburger-menu.open span:nth-child(3) {
+                top: 8px;
+                transform: rotate(-135deg);
+            }
+            
+            #navbarContent {
+                position: fixed;
+                top: 80px;
+                left: -100%;
+                width: 100%;
+                height: calc(100vh - 80px);
+                background: white;
+                overflow-y: auto;
+                transition: 0.3s ease-in-out;
+                padding: 20px;
+                z-index: 999;
+            }
+            
+            #navbarContent.show {
+                left: 0;
+            }
         }
     </style>
 </head>
@@ -572,10 +531,12 @@
                 <span class="brand-dot"></span>
             </a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
+            <!-- Replace navbar-toggler with hamburger-menu -->
+            <div class="hamburger-menu d-lg-none">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
 
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav mx-auto text-uppercase">
@@ -586,13 +547,10 @@
                         <a class="nav-link" href="/shope">Shop</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/men">Men</a>
+                        <a class="nav-link" href="/men">BLOG</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/women">Women</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/limited-edition">Limited Edition</a>
+                        <a class="nav-link" href="/women">CONTACT</a>
                     </li>
                 </ul>
             </div>
@@ -928,35 +886,6 @@
             }).format(amount);
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            const navbarToggler = document.querySelector('.navbar-toggler');
-            const navbarCollapse = document.querySelector('.navbar-collapse');
-
-            
-            navbarToggler.addEventListener('click', function () {
-                const isExpanded = this.getAttribute('aria-expanded') === 'true';
-                this.setAttribute('aria-expanded', !isExpanded);
-                navbarCollapse.classList.toggle('show');
-            });
-
-            
-            document.addEventListener('click', function (event) {
-                if (!navbarToggler.contains(event.target) &&
-                    !navbarCollapse.contains(event.target) &&
-                    navbarCollapse.classList.contains('show')) {
-                    navbarCollapse.classList.remove('show');
-                    navbarToggler.setAttribute('aria-expanded', 'false');
-                }
-            });
-
-           
-            navbarCollapse.addEventListener('click', function (event) {
-                event.stopPropagation();
-            });
-        });
-
-
-
         document.getElementById("checkout-btn").addEventListener("click", async function () {
             try {
                 const response = await fetch("/check-cart-products", { method: "GET" });
@@ -984,6 +913,41 @@
             }
         });
 
+    </script>
+    
+    <!-- Hamburger Menu Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const hamburgerMenu = document.querySelector('.hamburger-menu');
+            const navbarContent = document.getElementById('navbarContent');
+            
+            hamburgerMenu.addEventListener('click', function() {
+                this.classList.toggle('open');
+                navbarContent.classList.toggle('show');
+                document.body.classList.toggle('menu-open');
+            });
+            
+            // Close menu when clicking on a nav link
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    hamburgerMenu.classList.remove('open');
+                    navbarContent.classList.remove('show');
+                    document.body.classList.remove('menu-open');
+                });
+            });
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.navbar') && 
+                    !event.target.closest('#navbarContent') && 
+                    navbarContent.classList.contains('show')) {
+                    hamburgerMenu.classList.remove('open');
+                    navbarContent.classList.remove('show');
+                    document.body.classList.remove('menu-open');
+                }
+            });
+        });
     </script>
 </body>
 

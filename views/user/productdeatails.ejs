@@ -14,6 +14,18 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/styles/userProductDeatails.css">
     <style>
+        /* Hide magnifying glass on small screens by default */
+        @media (max-width: 768px) {
+            .magnifying-glass {
+                display: none !important;
+            }
+        }
+        
+        /* Add a class to hide zoom functionality when needed */
+        .zoom-disabled .magnifying-glass {
+            display: none !important;
+        }
+        
         .related-products {
             padding: 60px 0;
             background-color: #f8f9fa;
@@ -72,11 +84,14 @@
 
         .product-card {
             width: 100%;
+            height: 430px; /* Fixed height for consistent card size */
             margin: 0;
             background: white;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
         }
 
         .product-card:hover {
@@ -87,11 +102,13 @@
             position: relative;
             overflow: hidden;
             border-radius: 8px 8px 0 0;
+            height: 280px; /* Fixed height for image container */
+            width: 100%;
         }
 
         .product-image img {
             width: 100%;
-            height: 300px;
+            height: 100%;
             object-fit: cover;
             transition: transform 0.3s ease;
         }
@@ -159,6 +176,10 @@
         .product-info {
             padding: 15px;
             text-align: center;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .product-name {
@@ -200,61 +221,204 @@
         .swiper-pagination-bullet {
             background: #000;
         }
+        
+        /* Hamburger menu styles */
+        .hamburger-menu {
+          display: none;
+        }
+        
+        /* Desktop navbar styles */
+        @media (min-width: 992px) {
+          .navbar-nav {
+            margin: 0 auto;
+          }
+          
+          .nav-icons-desktop {
+            display: flex;
+            align-items: center;
+            margin-right: auto;
+          }
+          
+          .nav-icons-desktop .nav-icon {
+            margin-right: 15px;
+            color: #333;
+            font-size: 18px;
+          }
+        }
+        
+        @media (max-width: 991px) {
+          .navbar > .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: nowrap;
+          }
+          
+          .navbar-brand {
+            flex: 0 0 auto;
+            margin-right: 165px;
+          }
+          
+          .hamburger-menu {
+            display: block;
+            width: 30px;
+            height: 20px;
+            position: relative;
+            cursor: pointer;
+            z-index: 1000;
+          }
+          
+          .hamburger-menu span {
+            display: block;
+            position: absolute;
+            height: 3px;
+            width: 100%;
+            background: #333;
+            border-radius: 3px;
+            opacity: 1;
+            left: 0;
+            transform: rotate(0deg);
+            transition: .25s ease-in-out;
+          }
+          
+          .hamburger-menu span:nth-child(1) {
+            top: 0px;
+          }
+          
+          .hamburger-menu span:nth-child(2) {
+            top: 8px;
+          }
+          
+          .hamburger-menu span:nth-child(3) {
+            top: 16px;
+          }
+          
+          .hamburger-menu.open span:nth-child(1) {
+            top: 8px;
+            transform: rotate(135deg);
+          }
+          
+          .hamburger-menu.open span:nth-child(2) {
+            opacity: 0;
+            left: -60px;
+          }
+          
+          .hamburger-menu.open span:nth-child(3) {
+            top: 8px;
+            transform: rotate(-135deg);
+          }
+          
+          #navbarContent {
+            position: fixed;
+            top: 80px;
+            left: -100%;
+            width: 100%;
+            height: calc(100vh - 80px);
+            background: white;
+            overflow-y: auto;
+            transition: 0.3s ease-in-out;
+            padding: 20px;
+            z-index: 999;
+          }
+          
+          #navbarContent.show {
+            left: 0;
+          }
+          
+          .navbar-nav {
+            flex-direction: column;
+            width: 100%;
+          }
+          
+          .nav-item {
+            margin: 10px 0;
+          }
+          
+          .nav-link {
+            font-size: 18px;
+          }
+          
+          .nav-icons {
+            margin-top: 20px;
+            justify-content: flex-start !important;
+            order: 2;
+            display: flex;
+            padding-right: 85px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            padding-top: 15px;
+            width: 100%;
+          }
+          
+          .nav-icon {
+            margin-right: 20px;
+            font-size: 20px;
+            color: #333;
+          }
+        }
     </style>
 </head>
 
 <body>
    
     <nav class="navbar navbar-expand-lg fixed-top bg-white">
-        <div class="container fle">
-           
-            <div class="nav-icons">
-                <a href="/search" class="nav-icon" title="Search">
-                    <i class="fas fa-search"></i>
-                </a>
+        <div class="container">
+            <!-- Icons for desktop view - on the left side -->
+            <div class="d-none d-lg-flex nav-icons-desktop">
                 <a href="/wishlist" class="nav-icon" title="Wishlist">
                     <i class="fas fa-heart"></i>
                 </a>
                 <a href="/cart" class="nav-icon" title="Cart">
                     <i class="fas fa-shopping-cart"></i>
                 </a>
-                <a href="/account" class="nav-icon" title="Account">
+                <a href="/profile" class="nav-icon" title="Account">
                     <i class="fas fa-user"></i>
                 </a>
             </div>
-    
             
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-    
-           
+            <!-- Custom Hamburger Menu for Mobile -->
+            <div class="hamburger-menu d-lg-none">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            
+            <!-- Navigation Content -->
             <div class="collapse navbar-collapse" id="navbarContent">
-           
+                <!-- Main Menu -->
                 <ul class="navbar-nav mx-auto text-uppercase">
                     <li class="nav-item">
-                        <a class="nav-link" href="/">Home</a>
+                        <a class="nav-link" href="/">HOME</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="/shop">Shop</a>
+                        <a class="nav-link active" href="/shop">SHOP</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/men">Men</a>
+                        <a class="nav-link" href="/men">BLOG</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/women">Women</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/limited-edition">Limited Edition</a>
+                        <a class="nav-link" href="/women">CONTACT</a>
                     </li>
                 </ul>
-    
-               
-                <a class="navbar-brand" href="/">
-                    LUXE TIME 
-                    <span class="brand-dot"></span>
-                </a>
+                
+                <!-- Icons for mobile view only - shown below menu -->
+                <div class="d-lg-none nav-icons">
+                    <a href="/wishlist" class="nav-icon" title="Wishlist">
+                        <i class="fas fa-heart"></i>
+                    </a>
+                    <a href="/cart" class="nav-icon" title="Cart">
+                        <i class="fas fa-shopping-cart"></i>
+                    </a>
+                    <a href="/profile" class="nav-icon" title="Account">
+                        <i class="fas fa-user"></i>
+                    </a>
+                </div>
             </div>
+            
+            <!-- Brand on right side -->
+            <a class="navbar-brand ms-auto" href="/">
+                LUXE TIME
+                <span class="brand-dot"></span>
+            </a>
         </div>
     </nav>
 
@@ -286,17 +450,17 @@
                             <% 
                             let effectiveOffer = 0;
                             
-                            // Check if category offer exists and is greater than product offer
+                           
                             if (categoryOfferValue) {
                                 effectiveOffer = categoryOfferValue
                             }
                            
-                            // Check if product offer exists and is greater than current effective offer
+                           
                             if (product.offer && product.offer > effectiveOffer) {
                                 effectiveOffer = product.offer;
                             }
                             
-                            // Calculate the discounted price if there's an offer
+                           
                             const discountedPrice = effectiveOffer > 0 
                                 ? product.price - (product.price * (effectiveOffer / 100))
                                 : product.price;
@@ -434,8 +598,38 @@
         const mainImage = document.querySelector('.main-image img');
         const magnifyingGlass = document.querySelector('.magnifying-glass');
         const thumbnailWrappers = document.querySelectorAll('.thumbnail-wrapper');
+        let zoomEnabled = window.innerWidth > 768; // Disable zoom on mobile by default
 
         document.addEventListener('DOMContentLoaded', function () {
+            // Apply initial zoom state based on screen size
+            const productContainer = document.querySelector('.product-container');
+            if (!zoomEnabled) {
+                productContainer.classList.add('zoom-disabled');
+            }
+            
+            // Handle window resize to toggle zoom functionality
+            window.addEventListener('resize', function() {
+                if (window.innerWidth <= 768 && zoomEnabled) {
+                    zoomEnabled = false;
+                    productContainer.classList.add('zoom-disabled');
+                } else if (window.innerWidth > 768 && !zoomEnabled) {
+                    zoomEnabled = true;
+                    productContainer.classList.remove('zoom-disabled');
+                }
+            });
+            
+            // Add zoom toggle button to product container
+            const zoomToggle = document.createElement('button');
+            zoomToggle.className = 'btn btn-sm btn-outline-secondary position-absolute top-0 end-0 m-2';
+            zoomToggle.innerHTML = zoomEnabled ? '<i class="fas fa-search-minus"></i>' : '<i class="fas fa-search-plus"></i>';
+            zoomToggle.title = zoomEnabled ? 'Disable zoom' : 'Enable zoom';
+            zoomToggle.addEventListener('click', function() {
+                zoomEnabled = !zoomEnabled;
+                productContainer.classList.toggle('zoom-disabled');
+                this.innerHTML = zoomEnabled ? '<i class="fas fa-search-minus"></i>' : '<i class="fas fa-search-plus"></i>';
+                this.title = zoomEnabled ? 'Disable zoom' : 'Enable zoom';
+            });
+            document.querySelector('.main-image').appendChild(zoomToggle);
             
             thumbnailWrappers.forEach(wrapper => {
                 wrapper.addEventListener('click', function () {
@@ -444,20 +638,19 @@
                 });
             });
 
-            
+            // Magnifying glass functionality - only works when zoom is enabled
             mainImage.addEventListener('mousemove', function (e) {
+                if (!zoomEnabled) return;
+                
                 const rect = mainImage.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
 
-                
                 magnifyingGlass.style.left = `${x}px`;
                 magnifyingGlass.style.top = `${y}px`;
 
-                
                 const zoomLevel = 2.5;
 
-               
                 const bgX = (x / rect.width) * 100;
                 const bgY = (y / rect.height) * 100;
                 magnifyingGlass.style.backgroundImage = `url('${mainImage.src}')`;
@@ -515,7 +708,7 @@ async function addToCart(productId) {
         const remainingStock = availableStock - currentCartQuantity;
 
 
-        // Check if adding one more would exceed the maximum limit of 5
+        
         if (currentCartQuantity >= 5) {
             Swal.fire({
                 title: 'Limit Reached',
@@ -639,6 +832,41 @@ async function addToCart(productId) {
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Hamburger Menu Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const hamburgerMenu = document.querySelector('.hamburger-menu');
+            const navbarContent = document.getElementById('navbarContent');
+            
+            hamburgerMenu.addEventListener('click', function() {
+                this.classList.toggle('open');
+                navbarContent.classList.toggle('show');
+                document.body.classList.toggle('menu-open');
+            });
+            
+            // Close menu when clicking on a nav link
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    hamburgerMenu.classList.remove('open');
+                    navbarContent.classList.remove('show');
+                    document.body.classList.remove('menu-open');
+                });
+            });
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.navbar') && 
+                    !event.target.closest('#navbarContent') && 
+                    navbarContent.classList.contains('show')) {
+                    hamburgerMenu.classList.remove('open');
+                    navbarContent.classList.remove('show');
+                    document.body.classList.remove('menu-open');
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

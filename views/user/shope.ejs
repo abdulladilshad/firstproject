@@ -28,6 +28,152 @@
     .dis{
       color: white !important;
     }
+    /* Hamburger menu styles */
+    .hamburger-menu {
+      display: none;
+    }
+    
+    @media (max-width: 991px) {
+      .navbar > .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: nowrap;
+      }
+      
+      .navbar-brand {
+        flex: 0 0 auto;
+        margin-right: 0;
+      }
+      
+      .hamburger-menu {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 30px;
+        height: 30px;
+        position: relative;
+        cursor: pointer;
+        z-index: 1000;
+      }
+      
+      .hamburger-menu span {
+        display: block;
+        position: absolute;
+        height: 3px;
+        width: 100%;
+        background: #333;
+        border-radius: 3px;
+        opacity: 1;
+        left: 0;
+        transform: rotate(0deg);
+        transition: .25s ease-in-out;
+      }
+      
+      .hamburger-menu span:nth-child(1) {
+        top: 6px;
+      }
+      
+      .hamburger-menu span:nth-child(2) {
+        top: 14px;
+      }
+      
+      .hamburger-menu span:nth-child(3) {
+        top: 22px;
+      }
+      
+      .hamburger-menu.open span:nth-child(1) {
+        top: 14px;
+        transform: rotate(135deg);
+      }
+      
+      .hamburger-menu.open span:nth-child(2) {
+        opacity: 0;
+        left: -60px;
+      }
+      
+      .hamburger-menu.open span:nth-child(3) {
+        top: 14px;
+        transform: rotate(-135deg);
+      }
+      
+      #navbarContent {
+        position: fixed;
+        top: 80px;
+        left: -100%;
+        width: 100%;
+        height: calc(100vh - 80px);
+        background: white;
+        overflow-y: auto;
+        transition: 0.3s ease-in-out;
+        padding: 20px;
+        z-index: 999;
+      }
+      
+      #navbarContent.show {
+        left: 0;
+      }
+      
+      .navbar-nav {
+        flex-direction: column;
+        width: 100%;
+        align-items: center;
+        padding-left: 0;
+        text-align: center;
+      }
+      
+      .nav-item {
+        margin: 15px 0;
+        width: 100%;
+        text-align: center;
+      }
+      
+      .nav-link {
+        font-size: 16px;
+        padding: 8px 0;
+        display: inline-block;
+      }
+      
+      .nav-link.active {
+        font-weight: 500;
+        position: relative;
+      }
+      
+      .nav-link.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80%;
+        height: 1px;
+        background-color: #333;
+      }
+      
+      .nav-icons {
+        margin-top: 30px;
+        justify-content: center !important;
+        padding-left: 0;
+        width: 100%;
+        display: flex;
+      }
+      
+      .nav-icon {
+        margin-right: 30px;
+        font-size: 18px;
+      }
+      
+      /* Mobile navbar controls layout */
+      .search-container.d-flex {
+        order: 1;
+        margin-left: auto;
+        margin-right: 15px;
+      }
+      
+      .hamburger-menu {
+        order: 2;
+      }
+    }
   </style>
 </head>
 
@@ -38,13 +184,23 @@
       <!-- Brand -->
       <a class="navbar-brand" href="/">
         LUXE TIME
-        <span class="brand-dot"></span>
+      
       </a>
 
-      <!-- Mobile Toggle -->
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+      <!-- Search Container moved outside hamburger menu -->
+      <div class="search-container d-flex d-lg-none">
+        <input type="text" id="searchInputMobile" class="search-input" placeholder="Search products...">
+        <a href="javascript:void(0);" class="nav-icon search-icon" title="Search">
+          <i class="fas fa-search"></i>
+        </a>
+      </div>
+
+      <!-- Custom Hamburger Menu for Mobile -->
+      <div class="hamburger-menu d-lg-none">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
 
       <!-- Navigation Content -->
       <div class="collapse navbar-collapse" id="navbarContent">
@@ -57,19 +213,16 @@
             <a class="nav-link active" href="/shope">Shop</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/men">Men</a>
+            <a class="nav-link" href="/men">BLOG</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/women">Women</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/limited-edition">Limited Edition</a>
+            <a class="nav-link" href="/women">CONTACT</a>
           </li>
         </ul>
 
         <!-- Right Icons -->
         <div class="nav-icons">
-          <div class="search-container">
+          <div class="search-container d-none d-lg-flex">
             <input type="text" id="searchInput" class="search-input" placeholder="Search products...">
             <a href="javascript:void(0);" class="nav-icon search-icon" title="Search">
               <i class="fas fa-search"></i>
@@ -369,7 +522,8 @@
   document.addEventListener('DOMContentLoaded', function() {
       const searchContainer = document.querySelector('.search-container');
       const searchInput = document.getElementById('searchInput');
-      const searchIcon = document.querySelector('.search-icon');
+      const searchInputMobile = document.getElementById('searchInputMobile');
+      const searchIcon = document.querySelectorAll('.search-icon');
       const productGrid = document.querySelector('.col-md-9 .row');
       const paginationContainer = document.querySelector('.pagination-container');
       const priceRange = document.getElementById('priceRange');
@@ -428,6 +582,8 @@
           if (currentFilters.search) {
               searchInput.value = currentFilters.search;
               searchInput.classList.add('active');
+              searchInputMobile.value = currentFilters.search;
+              searchInputMobile.classList.add('active');
           }
       }
 
@@ -492,42 +648,72 @@
           document.getElementById('sortIndicator').style.display = 'none';
           searchInput.value = '';
           searchInput.classList.remove('active');
+          searchInputMobile.value = '';
+          searchInputMobile.classList.remove('active');
           applyFilters();
       });
 
       
-      searchIcon.addEventListener('click', function(e) {
-          e.preventDefault();
-          searchInput.classList.toggle('active');
-          if (searchInput.classList.contains('active')) {
-              searchInput.focus();
-          } else {
-              searchInput.value = '';
-              currentFilters.search = '';
-              applyFilters();
-          }
-      });
-
-      let debounceTimer;
-      searchInput.addEventListener('input', function() {
-          clearTimeout(debounceTimer);
-          debounceTimer = setTimeout(() => {
-              currentFilters.search = this.value.trim();
-              currentFilters.page = 1;
-              if (currentFilters.search.length >= 2 || currentFilters.search.length === 0) {
+      // Handle search icons click for both desktop and mobile
+      searchIcon.forEach(icon => {
+          icon.addEventListener('click', function(e) {
+              e.preventDefault();
+              const container = this.closest('.search-container');
+              const input = container.querySelector('.search-input');
+              input.classList.toggle('active');
+              if (input.classList.contains('active')) {
+                  input.focus();
+              } else {
+                  input.value = '';
+                  currentFilters.search = '';
                   applyFilters();
               }
-          }, 300);
+          });
       });
 
+      // Function to handle search input with debounce
+      function setupSearchInput(input) {
+          let debounceTimer;
+          input.addEventListener('input', function() {
+              clearTimeout(debounceTimer);
+              debounceTimer = setTimeout(() => {
+                  const searchValue = this.value.trim();
+                  currentFilters.search = searchValue;
+                  currentFilters.page = 1;
+                  
+                  // Sync other search input
+                  if (this === searchInput) {
+                      searchInputMobile.value = searchValue;
+                  } else {
+                      searchInput.value = searchValue;
+                  }
+                  
+                  if (searchValue.length >= 2 || searchValue.length === 0) {
+                      applyFilters();
+                  }
+              }, 300);
+          });
+          
+          input.addEventListener('keypress', function(e) {
+              if (e.key === 'Enter') {
+                  currentFilters.search = this.value.trim();
+                  currentFilters.page = 1;
+                  
+                  // Sync other search input
+                  if (this === searchInput) {
+                      searchInputMobile.value = this.value.trim();
+                  } else {
+                      searchInput.value = this.value.trim();
+                  }
+                  
+                  applyFilters();
+              }
+          });
+      }
       
-      searchInput.addEventListener('keypress', function(e) {
-          if (e.key === 'Enter') {
-              currentFilters.search = this.value.trim();
-              currentFilters.page = 1;
-              applyFilters();
-          }
-      });
+      // Setup search for both inputs
+      setupSearchInput(searchInput);
+      setupSearchInput(searchInputMobile);
 
       
       async function applyFilters() {
@@ -793,12 +979,52 @@
       z-index: 2;
     }
     
-    @media (max-width: 768px) {
+    /* Mobile search styles */
+    @media (max-width: 991px) {
+      .search-container.d-flex {
+        margin-right: 15px;
+      }
+      
       .search-input.active {
         width: 150px;
       }
     }
   </style>
+
+  <!-- Hamburger Menu Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const hamburgerMenu = document.querySelector('.hamburger-menu');
+      const navbarContent = document.getElementById('navbarContent');
+      
+      hamburgerMenu.addEventListener('click', function() {
+        this.classList.toggle('open');
+        navbarContent.classList.toggle('show');
+        document.body.classList.toggle('menu-open');
+      });
+      
+      // Close menu when clicking on a nav link
+      const navLinks = document.querySelectorAll('.nav-link');
+      navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+          hamburgerMenu.classList.remove('open');
+          navbarContent.classList.remove('show');
+          document.body.classList.remove('menu-open');
+        });
+      });
+      
+      // Close menu when clicking outside
+      document.addEventListener('click', function(event) {
+        if (!event.target.closest('.navbar') && 
+            !event.target.closest('#navbarContent') && 
+            navbarContent.classList.contains('show')) {
+          hamburgerMenu.classList.remove('open');
+          navbarContent.classList.remove('show');
+          document.body.classList.remove('menu-open');
+        }
+      });
+    });
+  </script>
 </body>
 
 </html>
