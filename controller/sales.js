@@ -1,5 +1,6 @@
 const Order = require('../models/orderModel');
 const mongoose = require('mongoose');
+const { login } = require('./admin');
 
 const salesController = async (req, res) => {
     try {
@@ -123,11 +124,14 @@ const salesController = async (req, res) => {
             customerName: order.address?.fullName || 'Guest',
             productCount: order.products?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0,
             totalAmount: order.totalAmount,
+            paymentMethord:order.paymentMethod,
             status: order.products?.map(product => product.status).join(', ') || 'Pending'
         }));
+        
+        
 
         res.render('admin/sales', {
-            totalSales,
+            totalSales, 
             totalOrders,
             avgOrderValue,
             productsSold,
@@ -146,6 +150,8 @@ const salesController = async (req, res) => {
             searchQuery: searchQuery || ''
         });
 
+        
+        
     } catch (error) {
         console.log('Error in sales report:', error);
         res.status(500).send("Error generating sales report");

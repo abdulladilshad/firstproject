@@ -49,7 +49,13 @@ const getCheckout = async (req, res) => {
         }
 
         const selectedAddress = addresses.find(addr => addr.isDefault) || addresses[0];
-        const coupons = await couponModel.find({})
+        
+        // Get only valid coupons (not expired and not used by this user)
+        const coupons = await couponModel.find({
+            isActive: true,
+            expirationDate: { $gt: new Date() },
+            usedBy: { $ne: userId } // exclude coupons already used by this user
+        });
         
         const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
         const totalDiscount = cart.reduce((acc, item) => 
@@ -204,7 +210,53 @@ const applyCoupon = async (req, res) => {
         res.status(500).json({ message: 'Error applying coupon' });
     }
 };
+const addAddress = async (req, res) => {
+    try {
+        const { fullName, phone, street, city, state, zipCode } = req.body;
+        
+        if (!req.session.user || !req.session.user.id) {
+            return res.status(401).json({
+                success: false,
+                message: 'User not logged in'
+            });
+        }
+        
+        // Create new address
+        const address = new addressModel({
+            userId: req.session.user.id, // Fixed: using id instead of _id
+            fullName,
+            phone,
+            street,
+            city,
+            state,
+            zipCode,
+            isDefault: false
+        });
 
+        // Check if this is the user's first address
+        const addressCount = await addressModel.countDocuments({ userId: req.session.user.id });
+        if (addressCount === 0) {
+            address.isDefault = true;
+        }
+
+        // Save the address
+        await address.save();
+
+        res.status(201).json({
+            success: true,
+            message: 'Address added successfully',
+            address: address
+        });
+
+    } catch (error) {
+        console.error('Error adding address:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to add address',
+            error: error.message
+        });
+    }
+};
 
 
 
@@ -216,4 +268,5 @@ module.exports = {
     getCheckout,
     verifyRazorpayPayment,
     applyCoupon,
+    addAddress
 };

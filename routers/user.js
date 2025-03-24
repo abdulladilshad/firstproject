@@ -103,6 +103,7 @@ router.post('/profile/update', auth.isBan, auth.checkSession,uploadMiddleware, p
 
 router.get("/checkout",auth.isBan, auth.checkSession, checkoutController.getCheckout);
 router.post("/apply-coupon", auth.isBan, auth.checkSession, checkoutController.applyCoupon);
+router.post("/add-address", auth.isBan, auth.checkSession, checkoutController.addAddress);
 
 
 router.post("/order/place", auth.isBan, auth.checkSession,orderController.placeOrder);
@@ -128,7 +129,8 @@ router.post('/wallet/deposit/create', auth.isBan, auth.checkSession, walletContr
 router.post('/wallet/deposit/verify', auth.isBan, auth.checkSession, walletController.verifyWalletDeposit);
 router.post('/wallet/create', auth.isBan, auth.checkSession, walletController.createWallet);
 
-
+// Add route for getting wallet balance
+router.get('/wallet/balance', auth.isBan, auth.checkSession, walletController.getWalletBalance);
 
 router.post('/change-password',auth.isBan, auth.checkSession, changePassword.changePassword);
 router.post('/send-otp',auth.isBan, auth.checkSession, changePassword.sendOtpForGoogleUser);

@@ -672,6 +672,7 @@
                                     <th>Customer Name</th>
                                     <th>Products</th>
                                     <th>Amount</th>
+                                    <th>Payment methord</th>
                                 </tr>
                             </thead>
                             <tbody id="ordersTableBody">
@@ -683,6 +684,7 @@
                                             <td><%= order.customerName %></td>
                                             <td><span class="badge bg-info text-dark"><%= order.productCount %> items</span></td>
                                             <td><span class="fw-medium">$<%= order.totalAmount %></span></td>
+                                            <td><span class="fw-medium"><%=order.paymentMethord%></span></td>
                                         </tr>
                                     <% }); %>
                                 <% } else { %>

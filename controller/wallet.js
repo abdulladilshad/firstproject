@@ -256,10 +256,31 @@ const verifyWalletDeposit = async (req, res) => {
     }
 };
 
+// Add new controller function for getting wallet balance
+const getWalletBalance = async (req, res) => {
+    try {
+        const user = await User.findOne({ email: req.session.user.email });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const wallet = await Wallet.findOne({ user: user._id });
+        if (!wallet) {
+            return res.status(404).json({ message: 'Wallet not found', balance: 0 });
+        }
+
+        res.json({ balance: wallet.balance });
+    } catch (error) {
+        console.error('Error fetching wallet balance:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
 module.exports = {
     getWallet,
     deposit,
     createWallet,
     createWalletDeposit,
-    verifyWalletDeposit
+    verifyWalletDeposit,
+    getWalletBalance
 };
