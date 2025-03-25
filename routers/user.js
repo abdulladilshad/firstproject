@@ -103,6 +103,7 @@ router.post('/profile/update', auth.isBan, auth.checkSession,uploadMiddleware, p
 
 router.get("/checkout",auth.isBan, auth.checkSession, checkoutController.getCheckout);
 router.post("/apply-coupon", auth.isBan, auth.checkSession, checkoutController.applyCoupon);
+router.post("/remove-coupon", auth.isBan, auth.checkSession, checkoutController.removeCoupon);
 router.post("/add-address", auth.isBan, auth.checkSession, checkoutController.addAddress);
 
 

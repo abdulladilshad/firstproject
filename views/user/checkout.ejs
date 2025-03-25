@@ -1207,7 +1207,12 @@
                         </div>
                         <div class="price-row coupon-discount" style="display: none;">
                             <span>Coupon Discount (<span class="applied-coupon-code"></span>)</span>
-                            <span>-$0.00</span>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span class="discount-amount">-$0.00</span>
+                                <button onclick="removeCoupon()" class="remove-coupon-btn" style="background: none; border: none; color: #dc3545; cursor: pointer; padding: 0;">
+                                    <i class="fas fa-times-circle"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="price-row tax">
                             <span>Tax (10%)</span>
@@ -1745,6 +1750,7 @@
                     body: JSON.stringify({
                         couponCode,
                         subtotal: <%= subtotal %> 
+                        
             })
             });
 
@@ -1767,16 +1773,29 @@
 
         document.querySelectorAll('input[name="coupon"]').forEach(radio => {
             radio.addEventListener('change', async function () {
+                const messageDiv = document.getElementById('couponMessage');
+                
+                // If this radio was already checked and clicked again, uncheck it
+                if (this.dataset.wasChecked === 'true') {
+                    this.checked = false;
+                    this.dataset.wasChecked = 'false';
+                    resetCouponDisplay();
+                    messageDiv.textContent = '';
+                    messageDiv.className = 'coupon-message';
+                    return;
+                }
+
+                // Uncheck all other coupons
+                document.querySelectorAll('input[name="coupon"]').forEach(otherRadio => {
+                    if (otherRadio !== this) {
+                        otherRadio.checked = false;
+                        otherRadio.dataset.wasChecked = 'false';
+                    }
+                });
+
                 if (this.checked) {
-                    // Uncheck all other coupon radios first
-                    document.querySelectorAll('input[name="coupon"]').forEach(otherRadio => {
-                        if (otherRadio !== this) {
-                            otherRadio.checked = false;
-                        }
-                    });
-                    
+                    this.dataset.wasChecked = 'true';
                     const couponCode = this.value;
-                    const messageDiv = document.getElementById('couponMessage');
 
                     try {
                         const response = await fetch('/apply-coupon', {
@@ -1786,7 +1805,7 @@
                             },
                             body: JSON.stringify({
                                 couponCode,
-                                subtotal: <%= subtotal %> 
+                                subtotal: <%= subtotal %>
                             })
                         });
 
@@ -1795,30 +1814,27 @@
                         if (response.ok) {
                             // Show success message
                             messageDiv.className = 'coupon-message success';
-                            messageDiv.textContent = `Coupon applied! You saved $${data.discountAmount}`;
+                            messageDiv.textContent = `Coupon applied! You saved $${data.discountAmount.toFixed(2)}`;
 
                             // Update discount display
                             const couponDiscountRow = document.querySelector('.price-row.coupon-discount');
                             couponDiscountRow.style.display = 'flex';
                             couponDiscountRow.querySelector('span:first-child').innerHTML = 
                                 `Coupon Discount (<span class="applied-coupon-code">${couponCode}</span>)`;
-                            couponDiscountRow.querySelector('span:last-child').textContent = `-$${data.discountAmount.toFixed(2)}`;
-                            
-                            // Update product discount display (keep original)
-                            document.querySelector('.price-row.discount span:last-child').textContent = 
-                                `-$${<%= totalDiscount.toFixed(2) %>}`;
-                            
+                            couponDiscountRow.querySelector('span:last-child').textContent = 
+                                `-$${data.discountAmount.toFixed(2)}`;
+
                             // Update total
                             document.querySelector('.price-row.total span:last-child').textContent = 
                                 `$${data.newTotal.toFixed(2)}`;
-                            document.getElementById('cart-total').textContent = `$${data.newTotal.toFixed(2)}`;
+                            document.getElementById('cart-total').textContent = 
+                                `$${data.newTotal.toFixed(2)}`;
                         } else {
                             // Show error message
                             messageDiv.className = 'coupon-message error';
                             messageDiv.textContent = data.message;
                             this.checked = false;
-                            
-                            // Reset discount display
+                            this.dataset.wasChecked = 'false';
                             resetCouponDisplay();
                         }
                     } catch (error) {
@@ -1826,8 +1842,7 @@
                         messageDiv.className = 'coupon-message error';
                         messageDiv.textContent = 'Error applying coupon';
                         this.checked = false;
-                        
-                        // Reset discount display
+                        this.dataset.wasChecked = 'false';
                         resetCouponDisplay();
                     }
                 }
@@ -1839,6 +1854,7 @@
             // Hide coupon discount row
             const couponDiscountRow = document.querySelector('.price-row.coupon-discount');
             couponDiscountRow.style.display = 'none';
+            couponDiscountRow.querySelector('.discount-amount').textContent = '-$0.00';
             
             // Reset product discount to original
             document.querySelector('.price-row.discount span:last-child').textContent = 
@@ -1850,16 +1866,58 @@
             document.getElementById('cart-total').textContent = `$${<%= total.toFixed(2) %>}`;
         }
 
-        // Update removeCoupon function to use the helper
-        function removeCoupon() {
-            const couponInputs = document.querySelectorAll('input[name="coupon"]');
-            couponInputs.forEach(input => input.checked = false);
-            
-            resetCouponDisplay();
-            
-            const messageDiv = document.getElementById('couponMessage');
-            messageDiv.textContent = '';
-            messageDiv.className = 'coupon-message';
+        // Update removeCoupon function
+        async function removeCoupon() {
+            try {
+                const response = await fetch('/remove-coupon', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Uncheck all coupon radio buttons
+                    document.querySelectorAll('input[name="coupon"]').forEach(input => {
+                        input.checked = false;
+                        input.dataset.wasChecked = 'false';
+                    });
+                    
+                    // Reset the display
+                    const couponDiscountRow = document.querySelector('.price-row.coupon-discount');
+                    couponDiscountRow.style.display = 'none';
+                    couponDiscountRow.querySelector('.discount-amount').textContent = '-$0.00';
+                    
+                    // Reset product discount to original
+                    document.querySelector('.price-row.discount span:last-child').textContent = 
+                        `-$${<%= totalDiscount.toFixed(2) %>}`;
+                    
+                    // Reset total to original
+                    document.querySelector('.price-row.total span:last-child').textContent = 
+                        `$${<%= total.toFixed(2) %>}`;
+                    document.getElementById('cart-total').textContent = `$${<%= total.toFixed(2) %>}`;
+                    
+                    // Show success message
+                    const messageDiv = document.getElementById('couponMessage');
+                    messageDiv.textContent = 'Coupon removed successfully';
+                    messageDiv.className = 'coupon-message success';
+                    
+                    // Clear message after 3 seconds
+                    setTimeout(() => {
+                        messageDiv.textContent = '';
+                        messageDiv.className = 'coupon-message';
+                    }, 3000);
+                } else {
+                    throw new Error(data.message || 'Failed to remove coupon');
+                }
+            } catch (error) {
+                console.error('Error removing coupon:', error);
+                const messageDiv = document.getElementById('couponMessage');
+                messageDiv.textContent = error.message || 'Error removing coupon';
+                messageDiv.className = 'coupon-message error';
+            }
         }
 
         async function handlePaymentFailure(orderId) {

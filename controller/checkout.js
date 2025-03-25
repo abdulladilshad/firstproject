@@ -148,60 +148,74 @@ const applyCoupon = async (req, res) => {
             return res.status(401).json({ message: 'User not authenticated' });
         }
 
-      
         const coupon = await Coupon.findOne({
             code: couponCode.toUpperCase(),
             isActive: true,
             expirationDate: { $gt: new Date() }
         });
 
-      
         if (!coupon) {
             return res.status(400).json({ message: 'Invalid or expired coupon code' });
         }
 
-        
         if (coupon.usedBy.includes(userId)) {
             return res.status(400).json({ message: 'You have already used this coupon' });
         }
 
-        
-        if (subtotal < coupon.minPurchase) {
+        // Get cart items to calculate product discounts
+        const cart = await cartModel.findOne({ userId }).populate("items.productId");
+        let totalOfferDiscount = 0;
+
+        // Calculate product level discounts
+        await Promise.all(cart.items.map(async item => {
+            const product = item.productId;
+            if (!product) return;
+
+            const category = await categoryModel.findById(product.category);
+            const categoryOffer = category ? category.offer || 0 : 0;
+            const productOffer = product.offer || 0;
+
+            const applicableOffer = Math.max(categoryOffer, productOffer);
+            const discountedPrice = product.price - (product.price * applicableOffer) / 100;
+            const itemDiscount = (product.price - discountedPrice) * item.quantity;
+            totalOfferDiscount += itemDiscount;
+        }));
+
+        // Calculate total after product discounts
+        const totalAfterProductDiscount = subtotal - totalOfferDiscount;
+        const tax = totalAfterProductDiscount * 0.1;
+        const totalWithTax = totalAfterProductDiscount + tax;
+
+        if (totalWithTax < coupon.minPurchase) {
             return res.status(400).json({
-                message: `Minimum purchase amount of ₹${coupon.minPurchase} required`
+                message: `Minimum purchase amount of $${coupon.minPurchase} required`
             });
         }
 
-        
-        let discountAmount = (subtotal * coupon.discount) / 100;
+        // Calculate coupon discount on final total
+        let couponDiscount = (totalWithTax * coupon.discount) / 100;
 
-        if (coupon.maxDiscount) {
-            discountAmount = Math.min(discountAmount, coupon.maxDiscount);
+        // Apply maximum discount limit if set
+        if (coupon.maxDiscount && couponDiscount > coupon.maxDiscount) {
+            couponDiscount = coupon.maxDiscount;
         }
 
-        
-        const newSubtotal = subtotal - discountAmount;
-        const newTax = newSubtotal * 0.1; 
-        const newTotal = newSubtotal + newTax;
+        // Calculate final total after all discounts
+        const finalTotal = totalWithTax - couponDiscount;
 
-        
-        coupon.usedBy.push(userId);
-        coupon.usedCount += 1;
-
-        await coupon.save();
-
-  
+        // Store coupon info in session for order placement
         req.session.appliedCoupon = {
             code: coupon.code,
-            discountAmount: discountAmount
+            discountAmount: couponDiscount,
+            discount: coupon.discount,
+            maxDiscount: coupon.maxDiscount
         };
 
- 
         res.json({
             success: true,
-            discountAmount,
-            totalDiscount: discountAmount,
-            newTotal,
+            discountAmount: couponDiscount,
+            totalDiscount: totalOfferDiscount + couponDiscount,
+            newTotal: finalTotal,
             message: 'Coupon applied successfully'
         });
 
@@ -210,6 +224,22 @@ const applyCoupon = async (req, res) => {
         res.status(500).json({ message: 'Error applying coupon' });
     }
 };
+
+const removeCoupon = async (req, res) => {
+    try {
+        // Clear the applied coupon from session
+        if (req.session.appliedCoupon) {
+            delete req.session.appliedCoupon;
+            res.status(200).json({ message: 'Coupon removed successfully' });
+        } else {
+            res.status(404).json({ message: 'No coupon applied' });
+        }
+    } catch (error) {
+        console.error('Error removing coupon:', error);
+        res.status(500).json({ message: 'Error removing coupon' });
+    }
+};
+
 const addAddress = async (req, res) => {
     try {
         const { fullName, phone, street, city, state, zipCode } = req.body;
@@ -268,5 +298,6 @@ module.exports = {
     getCheckout,
     verifyRazorpayPayment,
     applyCoupon,
+    removeCoupon,
     addAddress
 };

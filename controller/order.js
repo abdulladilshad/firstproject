@@ -170,6 +170,7 @@ const placeOrder = async (req, res) => {
         let totalAmount = 0;
         let totalDiscount = 0;
 
+        // Calculate product level discounts first
         for (let item of cartData.items) {
             const product = await Product.findById(item.productId);
 
@@ -195,19 +196,16 @@ const placeOrder = async (req, res) => {
 
             await product.save();
 
-            
             const category = await categoryModel.findById(product.category);
             const categoryOffer = category ? category.offer || 0 : 0;
             const productOffer = product.offer || 0;
 
-            
             const applicableOffer = Math.max(categoryOffer, productOffer);
-            
             const productTotal = product.price * item.quantity;
             const discountAmount = (productTotal * applicableOffer) / 100;
 
-            totalAmount += productTotal;        
-            totalDiscount += discountAmount;    
+            totalAmount += productTotal;
+            totalDiscount += discountAmount;
 
             products.push({
                 productId: product._id,
@@ -217,32 +215,43 @@ const placeOrder = async (req, res) => {
             });
         }
 
-        
-        const tax = totalAmount * 0.10;
+        // Calculate total after product discounts and tax
+        const totalAfterDiscount = totalAmount - totalDiscount;
+        const tax = totalAfterDiscount * 0.1;
+        const totalWithTax = totalAfterDiscount + tax;
 
-        
+        // Apply coupon discount if present
         let couponDiscount = 0;
         if (couponCode) {
             const coupon = await Coupon.findOne({ code: couponCode });
             if (coupon) {
-                couponDiscount = (totalAmount * coupon.discount) / 100;
-                if (couponDiscount > coupon.maxDiscount) {
+                // Calculate coupon discount on total after product discounts and tax
+                couponDiscount = (totalWithTax * coupon.discount) / 100;
+                
+                // Apply maximum discount limit if set
+                if (coupon.maxDiscount && couponDiscount > coupon.maxDiscount) {
                     couponDiscount = coupon.maxDiscount;
                 }
+                
+                // Update coupon usage in database
+                coupon.usedBy.push(userId);
+                coupon.usedCount += 1;
+                await coupon.save();
             }
         }
 
-        
-        const finalTotal = totalAmount + tax - totalDiscount - couponDiscount;
+        // Calculate final total
+        const finalTotal = totalWithTax - couponDiscount;
 
         const newOrder = new OrderModel({
             userId,
             address: selectedAddress || newAddress,
             paymentMethod,
-            totalAmount: cartTotal,
+            totalAmount: totalAmount,
             tax,
             offer: totalDiscount,
             couponDiscount,
+            finalAmount: finalTotal,
             products,
             status: "Pending",
             paymentStatus: paymentMethod === 'razorpay' ? 'Completed' : 'Pending',
