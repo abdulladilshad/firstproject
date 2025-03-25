@@ -256,7 +256,7 @@ const verifyWalletDeposit = async (req, res) => {
     }
 };
 
-// Add new controller function for getting wallet balance
+
 const getWalletBalance = async (req, res) => {
     try {
         const user = await User.findOne({ email: req.session.user.email });

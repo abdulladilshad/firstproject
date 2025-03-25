@@ -16,7 +16,7 @@ const orderSchema = new mongoose.Schema({
     },
     couponCode: {
         type: String,
-        default:"0"
+        default: "0"
     },
     paymentMethod: String,
     totalAmount: Number,
@@ -31,7 +31,10 @@ const orderSchema = new mongoose.Schema({
             price: Number,
             status: { type: String, default: "Pending" },
             paymentStatus: { type: String, default: "Pending" },
-            color: { type: String }
+            color: { type: String },
+
+            productImg: { type: String },
+            productName: { type: String }
         }
     ]
 }, { timestamps: true });

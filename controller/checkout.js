@@ -50,11 +50,11 @@ const getCheckout = async (req, res) => {
 
         const selectedAddress = addresses.find(addr => addr.isDefault) || addresses[0];
         
-        // Get only valid coupons (not expired and not used by this user)
+        
         const coupons = await couponModel.find({
             isActive: true,
             expirationDate: { $gt: new Date() },
-            usedBy: { $ne: userId } // exclude coupons already used by this user
+            usedBy: { $ne: userId } 
         });
         
         const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
@@ -162,11 +162,11 @@ const applyCoupon = async (req, res) => {
             return res.status(400).json({ message: 'You have already used this coupon' });
         }
 
-        // Get cart items to calculate product discounts
+        
         const cart = await cartModel.findOne({ userId }).populate("items.productId");
         let totalOfferDiscount = 0;
 
-        // Calculate product level discounts
+        
         await Promise.all(cart.items.map(async item => {
             const product = item.productId;
             if (!product) return;
@@ -181,7 +181,7 @@ const applyCoupon = async (req, res) => {
             totalOfferDiscount += itemDiscount;
         }));
 
-        // Calculate total after product discounts
+        
         const totalAfterProductDiscount = subtotal - totalOfferDiscount;
         const tax = totalAfterProductDiscount * 0.1;
         const totalWithTax = totalAfterProductDiscount + tax;
@@ -192,18 +192,18 @@ const applyCoupon = async (req, res) => {
             });
         }
 
-        // Calculate coupon discount on final total
+        
         let couponDiscount = (totalWithTax * coupon.discount) / 100;
 
-        // Apply maximum discount limit if set
+        
         if (coupon.maxDiscount && couponDiscount > coupon.maxDiscount) {
             couponDiscount = coupon.maxDiscount;
         }
 
-        // Calculate final total after all discounts
+        
         const finalTotal = totalWithTax - couponDiscount;
 
-        // Store coupon info in session for order placement
+        
         req.session.appliedCoupon = {
             code: coupon.code,
             discountAmount: couponDiscount,
@@ -227,7 +227,7 @@ const applyCoupon = async (req, res) => {
 
 const removeCoupon = async (req, res) => {
     try {
-        // Clear the applied coupon from session
+        
         if (req.session.appliedCoupon) {
             delete req.session.appliedCoupon;
             res.status(200).json({ message: 'Coupon removed successfully' });
@@ -251,9 +251,9 @@ const addAddress = async (req, res) => {
             });
         }
         
-        // Create new address
+        
         const address = new addressModel({
-            userId: req.session.user.id, // Fixed: using id instead of _id
+            userId: req.session.user.id, 
             fullName,
             phone,
             street,
@@ -263,13 +263,13 @@ const addAddress = async (req, res) => {
             isDefault: false
         });
 
-        // Check if this is the user's first address
+        
         const addressCount = await addressModel.countDocuments({ userId: req.session.user.id });
         if (addressCount === 0) {
             address.isDefault = true;
         }
 
-        // Save the address
+        
         await address.save();
 
         res.status(201).json({

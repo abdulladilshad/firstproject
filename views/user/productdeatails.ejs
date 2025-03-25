@@ -393,10 +393,10 @@
                         <a class="nav-link active" href="/shop">SHOP</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/men">BLOG</a>
+                        <a class="nav-link" href="/blog">BLOG</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/women">CONTACT</a>
+                        <a class="nav-link" href="/contact">CONTACT</a>
                     </li>
                 </ul>
                 
@@ -598,16 +598,16 @@
         const mainImage = document.querySelector('.main-image img');
         const magnifyingGlass = document.querySelector('.magnifying-glass');
         const thumbnailWrappers = document.querySelectorAll('.thumbnail-wrapper');
-        let zoomEnabled = window.innerWidth > 768; // Disable zoom on mobile by default
+        let zoomEnabled = window.innerWidth > 768; 
 
         document.addEventListener('DOMContentLoaded', function () {
-            // Apply initial zoom state based on screen size
+            
             const productContainer = document.querySelector('.product-container');
             if (!zoomEnabled) {
                 productContainer.classList.add('zoom-disabled');
             }
             
-            // Handle window resize to toggle zoom functionality
+            
             window.addEventListener('resize', function() {
                 if (window.innerWidth <= 768 && zoomEnabled) {
                     zoomEnabled = false;
@@ -618,7 +618,7 @@
                 }
             });
             
-            // Add zoom toggle button to product container
+            
             const zoomToggle = document.createElement('button');
             zoomToggle.className = 'btn btn-sm btn-outline-secondary position-absolute top-0 end-0 m-2';
             zoomToggle.innerHTML = zoomEnabled ? '<i class="fas fa-search-minus"></i>' : '<i class="fas fa-search-plus"></i>';
@@ -638,7 +638,7 @@
                 });
             });
 
-            // Magnifying glass functionality - only works when zoom is enabled
+            
             mainImage.addEventListener('mousemove', function (e) {
                 if (!zoomEnabled) return;
                 
@@ -845,7 +845,7 @@ async function addToCart(productId) {
                 document.body.classList.toggle('menu-open');
             });
             
-            // Close menu when clicking on a nav link
+            
             const navLinks = document.querySelectorAll('.nav-link');
             navLinks.forEach(link => {
                 link.addEventListener('click', function() {
@@ -855,7 +855,7 @@ async function addToCart(productId) {
                 });
             });
             
-            // Close menu when clicking outside
+    
             document.addEventListener('click', function(event) {
                 if (!event.target.closest('.navbar') && 
                     !event.target.closest('#navbarContent') && 

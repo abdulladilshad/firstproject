@@ -90,6 +90,12 @@ router.post('/cart/update/:productId',auth.isBan, auth.checkSession, cartControl
 router.get("/check-cart-products", auth.checkSession, cartController.checkCartProducts);
 
 
+router.get('/blog', (req, res) => res.render('user/blog'));
+router.get('/contact',(req,res)=>res.render('user/contact'))
+
+
+
+
 
 router.get('/wishlist', wishlistController.getWishlist);
 router.post('/wishlist', wishlistController.addToWishlist);

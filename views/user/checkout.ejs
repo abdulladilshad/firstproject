@@ -1341,7 +1341,7 @@
                 const formData = new FormData(e.target);
                 const addressData = Object.fromEntries(formData.entries());
 
-                // Send address data to server
+                //
                 const response = await fetch('/add-address', {
                     method: 'POST',
                     headers: {
@@ -1353,12 +1353,12 @@
                 const result = await response.json();
 
                 if (response.ok) {
-                    // Update UI with the saved address
-                    selectedAddressId = result.address._id; // Store the new address ID
+                    
+                    selectedAddressId = result.address._id; 
                     updateSelectedAddressUI(result.address);
                     hideAddressForm();
 
-                    // Show success message
+                    
                     Swal.fire({
                         icon: 'success',
                         title: 'Success',
@@ -1367,7 +1367,7 @@
                         showConfirmButton: false
                     });
 
-                    // Reset the form
+                    
                     e.target.reset();
                 } else {
                     throw new Error(result.message || 'Failed to save address');
@@ -1510,7 +1510,7 @@
             const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
             console.log("Selected payment method:", paymentMethod);
             
-            // Check if wallet payment method is selected but has insufficient balance
+            
             if (paymentMethod === 'wallet') {
                 const walletBalance = parseFloat(document.getElementById('walletBalance').textContent);
                 if (walletBalance < cartTotal) {
@@ -1709,7 +1709,7 @@
             
             fetchWalletBalance();
             
-            // Check if wallet is already selected and show balance status
+            
             if (document.getElementById('wallet').checked) {
                 document.getElementById('walletInfo').style.display = 'block';
                 checkWalletBalance();
@@ -1775,7 +1775,7 @@
             radio.addEventListener('change', async function () {
                 const messageDiv = document.getElementById('couponMessage');
                 
-                // If this radio was already checked and clicked again, uncheck it
+                
                 if (this.dataset.wasChecked === 'true') {
                     this.checked = false;
                     this.dataset.wasChecked = 'false';
@@ -1785,7 +1785,7 @@
                     return;
                 }
 
-                // Uncheck all other coupons
+                
                 document.querySelectorAll('input[name="coupon"]').forEach(otherRadio => {
                     if (otherRadio !== this) {
                         otherRadio.checked = false;
@@ -1812,11 +1812,11 @@
                         const data = await response.json();
 
                         if (response.ok) {
-                            // Show success message
+                            
                             messageDiv.className = 'coupon-message success';
                             messageDiv.textContent = `Coupon applied! You saved $${data.discountAmount.toFixed(2)}`;
 
-                            // Update discount display
+                            
                             const couponDiscountRow = document.querySelector('.price-row.coupon-discount');
                             couponDiscountRow.style.display = 'flex';
                             couponDiscountRow.querySelector('span:first-child').innerHTML = 
@@ -1824,13 +1824,13 @@
                             couponDiscountRow.querySelector('span:last-child').textContent = 
                                 `-$${data.discountAmount.toFixed(2)}`;
 
-                            // Update total
+                            
                             document.querySelector('.price-row.total span:last-child').textContent = 
                                 `$${data.newTotal.toFixed(2)}`;
                             document.getElementById('cart-total').textContent = 
                                 `$${data.newTotal.toFixed(2)}`;
                         } else {
-                            // Show error message
+                            
                             messageDiv.className = 'coupon-message error';
                             messageDiv.textContent = data.message;
                             this.checked = false;
@@ -1838,7 +1838,7 @@
                             resetCouponDisplay();
                         }
                     } catch (error) {
-                        // Show error message on exception
+                        
                         messageDiv.className = 'coupon-message error';
                         messageDiv.textContent = 'Error applying coupon';
                         this.checked = false;
@@ -1849,24 +1849,24 @@
             });
         });
 
-        // Add this helper function to reset coupon displays
+        
         function resetCouponDisplay() {
-            // Hide coupon discount row
+            
             const couponDiscountRow = document.querySelector('.price-row.coupon-discount');
             couponDiscountRow.style.display = 'none';
             couponDiscountRow.querySelector('.discount-amount').textContent = '-$0.00';
             
-            // Reset product discount to original
+            
             document.querySelector('.price-row.discount span:last-child').textContent = 
                 `-$${<%= totalDiscount.toFixed(2) %>}`;
             
-            // Reset total to original
+            
             document.querySelector('.price-row.total span:last-child').textContent = 
                 `$${<%= total.toFixed(2) %>}`;
             document.getElementById('cart-total').textContent = `$${<%= total.toFixed(2) %>}`;
         }
 
-        // Update removeCoupon function
+        
         async function removeCoupon() {
             try {
                 const response = await fetch('/remove-coupon', {
@@ -1879,32 +1879,32 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    // Uncheck all coupon radio buttons
+                    
                     document.querySelectorAll('input[name="coupon"]').forEach(input => {
                         input.checked = false;
                         input.dataset.wasChecked = 'false';
                     });
                     
-                    // Reset the display
+                    
                     const couponDiscountRow = document.querySelector('.price-row.coupon-discount');
                     couponDiscountRow.style.display = 'none';
                     couponDiscountRow.querySelector('.discount-amount').textContent = '-$0.00';
                     
-                    // Reset product discount to original
+                    
                     document.querySelector('.price-row.discount span:last-child').textContent = 
                         `-$${<%= totalDiscount.toFixed(2) %>}`;
                     
-                    // Reset total to original
+                    
                     document.querySelector('.price-row.total span:last-child').textContent = 
                         `$${<%= total.toFixed(2) %>}`;
                     document.getElementById('cart-total').textContent = `$${<%= total.toFixed(2) %>}`;
                     
-                    // Show success message
+                    
                     const messageDiv = document.getElementById('couponMessage');
                     messageDiv.textContent = 'Coupon removed successfully';
                     messageDiv.className = 'coupon-message success';
                     
-                    // Clear message after 3 seconds
+                    
                     setTimeout(() => {
                         messageDiv.textContent = '';
                         messageDiv.className = 'coupon-message';

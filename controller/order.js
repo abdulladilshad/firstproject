@@ -170,7 +170,7 @@ const placeOrder = async (req, res) => {
         let totalAmount = 0;
         let totalDiscount = 0;
 
-        // Calculate product level discounts first
+        
         for (let item of cartData.items) {
             const product = await Product.findById(item.productId);
 
@@ -215,32 +215,32 @@ const placeOrder = async (req, res) => {
             });
         }
 
-        // Calculate total after product discounts and tax
+        
         const totalAfterDiscount = totalAmount - totalDiscount;
         const tax = totalAfterDiscount * 0.1;
         const totalWithTax = totalAfterDiscount + tax;
 
-        // Apply coupon discount if present
+        
         let couponDiscount = 0;
         if (couponCode) {
             const coupon = await Coupon.findOne({ code: couponCode });
             if (coupon) {
-                // Calculate coupon discount on total after product discounts and tax
+                
                 couponDiscount = (totalWithTax * coupon.discount) / 100;
                 
-                // Apply maximum discount limit if set
+                
                 if (coupon.maxDiscount && couponDiscount > coupon.maxDiscount) {
                     couponDiscount = coupon.maxDiscount;
                 }
                 
-                // Update coupon usage in database
+                
                 coupon.usedBy.push(userId);
                 coupon.usedCount += 1;
                 await coupon.save();
             }
         }
 
-        // Calculate final total
+        
         const finalTotal = totalWithTax - couponDiscount;
 
         const newOrder = new OrderModel({

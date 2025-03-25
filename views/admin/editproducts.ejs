@@ -492,19 +492,14 @@
                 colorEx.style.display = 'none';
 
                 // Check if color exists in existing variants
-                if (existingVariants.some(variant => variant.color.toLowerCase() === color.toLowerCase())) {
-                    colorEx.style.display = 'block';
-                    return;
+                const existingVariantIndex = existingVariants.findIndex(variant => variant.color.toLowerCase() === color.toLowerCase());
+                if (existingVariantIndex !== -1) {
+                    // Update existing variant's quantity
+                    existingVariants[existingVariantIndex].quantity = parseInt(stock);
+                } else {
+                    // Add new variant
+                    existingVariants.push({ color, quantity: parseInt(stock) });
                 }
-
-                if (!color || stock === '') {
-                    alert("Color and Stock are required!");
-                    return;
-                }
-
-
-                // Add new variant to existing variants
-                existingVariants.push({ color, quantity: parseInt(stock) });
                 
                 // Update variantsData with combined variants
                 variantsData.length = 0;
