@@ -1000,6 +1000,30 @@
             console.log('Download Excel function called');
             
             try {
+                // Get summary statistics
+                const statCards = document.querySelectorAll('.stat-card');
+                const summaryData = [];
+                
+                // Add summary section
+                summaryData.push(['Sales Report Summary']);
+                summaryData.push(['Generated Date:', new Date().toLocaleString()]);
+                summaryData.push([]); // Empty row for spacing
+                
+                // Add summary statistics
+                if (statCards && statCards.length >= 4) {
+                    const totalSalesEl = statCards[0].querySelector('.card-text');
+                    const totalOrdersEl = statCards[1].querySelector('.card-text');
+                    const avgOrderEl = statCards[2].querySelector('.card-text');
+                    const productsSoldEl = statCards[3].querySelector('.card-text');
+                    
+                    summaryData.push(['Metric', 'Value']);
+                    summaryData.push(['Total Sales', totalSalesEl ? totalSalesEl.textContent.trim() : 'N/A']);
+                    summaryData.push(['Total Orders', totalOrdersEl ? totalOrdersEl.textContent.trim() : 'N/A']);
+                    summaryData.push(['Average Order', avgOrderEl ? avgOrderEl.textContent.trim() : 'N/A']);
+                    summaryData.push(['Products Sold', productsSoldEl ? productsSoldEl.textContent.trim() : 'N/A']);
+                    summaryData.push([]); // Empty row for spacing
+                }
+
                 // Get the table element
                 const table = document.querySelector('.table');
                 if (!table) {
@@ -1020,12 +1044,26 @@
                     }
                 });
 
-                // Add headers
-                data.unshift(['Order ID', 'Date', 'Customer Name', 'Products', 'Amount']);
+                // Add headers for transactions
+                data.unshift(['Order ID', 'Date', 'Customer Name', 'Products', 'Amount', 'Payment Method']);
 
                 // Create workbook and worksheet
                 const wb = XLSX.utils.book_new();
-                const ws = XLSX.utils.aoa_to_sheet(data);
+                
+                // Combine summary and transaction data
+                const allData = [...summaryData, ...data];
+                const ws = XLSX.utils.aoa_to_sheet(allData);
+
+                // Set column widths
+                const colWidths = [
+                    { wch: 15 }, // Order ID
+                    { wch: 12 }, // Date
+                    { wch: 20 }, // Customer Name
+                    { wch: 12 }, // Products
+                    { wch: 12 }, // Amount
+                    { wch: 15 }  // Payment Method
+                ];
+                ws['!cols'] = colWidths;
 
                 // Add worksheet to workbook
                 XLSX.utils.book_append_sheet(wb, ws, "Sales Data");
